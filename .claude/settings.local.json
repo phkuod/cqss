@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(python:*)",
+      "Bash(start \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\final_test.html\")",
+      "Bash(start outputfinal_test.html)",
+      "WebFetch(domain:d3js.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:frappe.io)",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\gantt_chart_frappe.html\")",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": []
+  }
+}

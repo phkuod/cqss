@@ -1,0 +1,6 @@
+project_name,category,priority,preparing_start,preparing_end,execution_end,progress_percent,description,team_lead
+Project Alpha,Security,High,2024-01-15,2024-02-15,2024-05-15,75,Implement new authentication system,John Smith
+Project Beta,Infrastructure,Medium,2024-02-01,2024-03-01,2024-06-01,45,Database migration and optimization,Jane Doe
+Project Gamma,Development,High,2024-01-01,2024-01-15,2024-04-01,90,Frontend redesign and UX improvements,Mike Johnson
+Project Delta,Compliance,Critical,2024-03-01,2024-03-15,2024-07-01,30,GDPR compliance implementation,Sarah Wilson
+Project Epsilon,Research,Low,2024-02-15,2024-04-15,2024-08-15,10,AI integration feasibility study,David Brown

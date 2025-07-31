@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CQSS Project Gantt Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #343a40;
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            color: #6c757d;
+            margin: 10px 0 0 0;
+            font-size: 1.1em;
+        }
+        
+        .gantt-container {
+            overflow-x: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        
+        .gantt-chart {
+            min-width: 800px;
+        }
+        
+        .axis {
+            font-size: 12px;
+        }
+        
+        .axis-label {
+            font-size: 14px;
+            font-weight: bold;
+            fill: #495057;
+        }
+        
+        .project-row {
+            cursor: pointer;
+        }
+        
+        .project-label {
+            font-size: 13px;
+            font-weight: 500;
+            fill: #343a40;
+        }
+        
+        .preparing-bar {
+            fill: #6c757d;
+            stroke: #495057;
+            stroke-width: 1;
+        }
+        
+        .execution-bar {
+            stroke: #343a40;
+            stroke-width: 1;
+        }
+        
+        .progress-bar {
+            opacity: 0.8;
+        }
+        
+        .priority-critical { fill: #dc3545; }
+        .priority-high { fill: #fd7e14; }
+        .priority-medium { fill: #ffc107; }
+        .priority-low { fill: #28a745; }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+            max-width: 300px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+        
+        .tooltip-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        
+        .tooltip-item {
+            margin: 4px 0;
+        }
+        
+        .legend {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #495057;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 15px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CQSS Project Gantt Chart</h1>
+            <p>Cyber Query Security System - Project Timeline Overview</p>
+        </div>
+        
+        <div class="gantt-container">
+            <svg class="gantt-chart"></svg>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #6c757d;"></div>
+                <span>Preparing Stage</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color priority-critical"></div>
+                <span>Critical Priority</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color priority-high"></div>
+                <span>High Priority</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color priority-medium"></div>
+                <span>Medium Priority</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color priority-low"></div>
+                <span>Low Priority</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip" style="display: none;"></div>
+    
+    <script>
+        // Project data will be embedded here
+        const projectData = [
+  {
+    "id": "project_0",
+    "name": "Project Alpha",
+    "category": "Security",
+    "priority": "High",
+    "description": "Implement new authentication system",
+    "team_lead": "John Smith",
+    "preparing_stage": {
+      "start": "2024-01-15T00:00:00",
+      "end": "2024-02-15T00:00:00",
+      "duration_days": 31
+    },
+    "execution_stage": {
+      "start": "2024-02-15T00:00:00",
+      "end": "2024-05-15T00:00:00",
+      "duration_days": 90,
+      "progress_percent": 75
+    },
+    "total_duration_days": 121
+  },
+  {
+    "id": "project_1",
+    "name": "Project Beta",
+    "category": "Infrastructure",
+    "priority": "Medium",
+    "description": "Database migration and optimization",
+    "team_lead": "Jane Doe",
+    "preparing_stage": {
+      "start": "2024-02-01T00:00:00",
+      "end": "2024-03-01T00:00:00",
+      "duration_days": 29
+    },
+    "execution_stage": {
+      "start": "2024-03-01T00:00:00",
+      "end": "2024-06-01T00:00:00",
+      "duration_days": 92,
+      "progress_percent": 45
+    },
+    "total_duration_days": 121
+  },
+  {
+    "id": "project_2",
+    "name": "Project Gamma",
+    "category": "Development",
+    "priority": "High",
+    "description": "Frontend redesign and UX improvements",
+    "team_lead": "Mike Johnson",
+    "preparing_stage": {
+      "start": "2024-01-01T00:00:00",
+      "end": "2024-01-15T00:00:00",
+      "duration_days": 14
+    },
+    "execution_stage": {
+      "start": "2024-01-15T00:00:00",
+      "end": "2024-04-01T00:00:00",
+      "duration_days": 77,
+      "progress_percent": 90
+    },
+    "total_duration_days": 91
+  },
+  {
+    "id": "project_3",
+    "name": "Project Delta",
+    "category": "Compliance",
+    "priority": "Critical",
+    "description": "GDPR compliance implementation",
+    "team_lead": "Sarah Wilson",
+    "preparing_stage": {
+      "start": "2024-03-01T00:00:00",
+      "end": "2024-03-15T00:00:00",
+      "duration_days": 14
+    },
+    "execution_stage": {
+      "start": "2024-03-15T00:00:00",
+      "end": "2024-07-01T00:00:00",
+      "duration_days": 108,
+      "progress_percent": 30
+    },
+    "total_duration_days": 122
+  },
+  {
+    "id": "project_4",
+    "name": "Project Epsilon",
+    "category": "Research",
+    "priority": "Low",
+    "description": "AI integration feasibility study",
+    "team_lead": "David Brown",
+    "preparing_stage": {
+      "start": "2024-02-15T00:00:00",
+      "end": "2024-04-15T00:00:00",
+      "duration_days": 60
+    },
+    "execution_stage": {
+      "start": "2024-04-15T00:00:00",
+      "end": "2024-08-15T00:00:00",
+      "duration_days": 122,
+      "progress_percent": 10
+    },
+    "total_duration_days": 182
+  }
+];
+        const dateRange = {
+  "min_date": "2024-01-01T00:00:00",
+  "max_date": "2024-08-15T00:00:00"
+};
+        
+        // Chart configuration
+        const margin = { top: 50, right: 50, bottom: 100, left: 200 };
+        const width = 1200 - margin.left - margin.right;
+        const height = Math.max(400, projectData.length * 60) - margin.top - margin.bottom;
+        const barHeight = 20;
+        const rowHeight = 60;
+        
+        // Create SVG
+        const svg = d3.select('.gantt-chart')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom);
+        
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+        
+        // Parse dates
+        const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+        const minDate = parseTime(dateRange.min_date);
+        const maxDate = parseTime(dateRange.max_date);
+        
+        // Add some padding to date range
+        const timeRange = maxDate - minDate;
+        const paddedMinDate = new Date(minDate.getTime() - timeRange * 0.05);
+        const paddedMaxDate = new Date(maxDate.getTime() + timeRange * 0.05);
+        
+        // Scales
+        const xScale = d3.scaleTime()
+            .domain([paddedMinDate, paddedMaxDate])
+            .range([0, width]);
+        
+        const yScale = d3.scaleBand()
+            .domain(projectData.map(d => d.name))
+            .range([0, height])
+            .padding(0.1);
+        
+        // Priority color scale
+        const priorityColors = {
+            'Critical': '#dc3545',
+            'High': '#fd7e14',
+            'Medium': '#ffc107',
+            'Low': '#28a745'
+        };
+        
+        // Create tooltip
+        const tooltip = d3.select('#tooltip');
+        
+        // Add axes
+        const xAxis = d3.axisBottom(xScale)
+            .tickFormat(d3.timeFormat('%Y-%m-%d'))
+            .ticks(d3.timeWeek.every(1));
+        
+        g.append('g')
+            .attr('class', 'axis')
+            .attr('transform', `translate(0,${height})`)
+            .call(xAxis)
+            .selectAll('text')
+            .style('text-anchor', 'end')
+            .attr('dx', '-.8em')
+            .attr('dy', '.15em')
+            .attr('transform', 'rotate(-65)');
+        
+        const yAxis = d3.axisLeft(yScale);
+        
+        g.append('g')
+            .attr('class', 'axis')
+            .call(yAxis);
+        
+        // Add grid lines
+        g.append('g')
+            .attr('class', 'grid')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(xScale)
+                .tickSize(-height)
+                .tickFormat('')
+            )
+            .style('stroke-dasharray', '3,3')
+            .style('opacity', 0.3);
+        
+        // Create project groups
+        const projectGroups = g.selectAll('.project-group')
+            .data(projectData)
+            .enter()
+            .append('g')
+            .attr('class', 'project-group')
+            .attr('transform', d => `translate(0,${yScale(d.name)})`);
+        
+        // Add preparing stage bars
+        projectGroups.append('rect')
+            .attr('class', 'preparing-bar')
+            .attr('x', d => xScale(parseTime(d.preparing_stage.start)))
+            .attr('y', (yScale.bandwidth() - barHeight) / 2)
+            .attr('width', d => xScale(parseTime(d.preparing_stage.end)) - xScale(parseTime(d.preparing_stage.start)))
+            .attr('height', barHeight);
+        
+        // Add execution stage background bars
+        projectGroups.append('rect')
+            .attr('class', 'execution-bar')
+            .attr('x', d => xScale(parseTime(d.execution_stage.start)))
+            .attr('y', (yScale.bandwidth() - barHeight) / 2)
+            .attr('width', d => xScale(parseTime(d.execution_stage.end)) - xScale(parseTime(d.execution_stage.start)))
+            .attr('height', barHeight)
+            .attr('fill', d => priorityColors[d.priority] || '#6c757d')
+            .attr('opacity', 0.3);
+        
+        // Add execution stage progress bars
+        projectGroups.append('rect')
+            .attr('class', 'progress-bar execution-bar')
+            .attr('x', d => xScale(parseTime(d.execution_stage.start)))
+            .attr('y', (yScale.bandwidth() - barHeight) / 2)
+            .attr('width', d => {
+                const totalWidth = xScale(parseTime(d.execution_stage.end)) - xScale(parseTime(d.execution_stage.start));
+                return totalWidth * (d.execution_stage.progress_percent / 100);
+            })
+            .attr('height', barHeight)
+            .attr('fill', d => priorityColors[d.priority] || '#6c757d')
+            .style('cursor', 'pointer')
+            .on('mouseover', function(event, d) {
+                tooltip.style('display', 'block')
+                    .html(`
+                        <div class="tooltip-title">${d.name}</div>
+                        <div class="tooltip-item"><strong>Category:</strong> ${d.category}</div>
+                        <div class="tooltip-item"><strong>Priority:</strong> ${d.priority}</div>
+                        <div class="tooltip-item"><strong>Team Lead:</strong> ${d.team_lead}</div>
+                        <div class="tooltip-item"><strong>Progress:</strong> ${d.execution_stage.progress_percent}%</div>
+                        <div class="tooltip-item"><strong>Description:</strong> ${d.description}</div>
+                        <div class="tooltip-item"><strong>Preparing:</strong> ${d.preparing_stage.start.split('T')[0]} to ${d.preparing_stage.end.split('T')[0]}</div>
+                        <div class="tooltip-item"><strong>Execution:</strong> ${d.execution_stage.start.split('T')[0]} to ${d.execution_stage.end.split('T')[0]}</div>
+                    `);
+            })
+            .on('mousemove', function(event) {
+                tooltip.style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY - 10) + 'px');
+            })
+            .on('mouseout', function() {
+                tooltip.style('display', 'none');
+            })
+            .on('click', function(event, d) {
+                alert(`Project Details:\n\nName: ${d.name}\nCategory: ${d.category}\nPriority: ${d.priority}\nTeam Lead: ${d.team_lead}\nProgress: ${d.execution_stage.progress_percent}%\nDescription: ${d.description}`);
+            });
+        
+        // Add progress percentage labels
+        projectGroups.append('text')
+            .attr('x', d => {
+                const startX = xScale(parseTime(d.execution_stage.start));
+                const totalWidth = xScale(parseTime(d.execution_stage.end)) - startX;
+                const progressWidth = totalWidth * (d.execution_stage.progress_percent / 100);
+                return startX + progressWidth / 2;
+            })
+            .attr('y', yScale.bandwidth() / 2)
+            .attr('dy', '0.35em')
+            .attr('text-anchor', 'middle')
+            .style('font-size', '11px')
+            .style('font-weight', 'bold')
+            .style('fill', 'white')
+            .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.7)')
+            .text(d => d.execution_stage.progress_percent > 15 ? `${d.execution_stage.progress_percent}%` : '');
+        
+        // Add chart title
+        svg.append('text')
+            .attr('x', (width + margin.left + margin.right) / 2)
+            .attr('y', 30)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '16px')
+            .style('font-weight', 'bold')
+            .style('fill', '#343a40')
+            .text('Project Timeline and Progress Overview');
+    </script>
+</body>
+</html>

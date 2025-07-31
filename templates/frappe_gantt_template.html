@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CQSS Frappe-Style Gantt Chart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .gantt-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 10px;
+            overflow: hidden;
+            height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gantt-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gantt-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .gantt-info {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .gantt-wrapper {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .gantt-sidebar {
+            width: 280px;
+            background: #fafbfc;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .gantt-main {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .gantt-timeline-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            height: 80px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+        }
+
+        .gantt-timeline-content {
+            position: relative;
+            background: white;
+        }
+
+        .gantt-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .gantt-row {
+            height: 50px;
+            border-bottom: 1px solid #f1f3f4;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .gantt-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .gantt-row-content {
+            height: 50px;
+            position: relative;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .gantt-task-bar {
+            position: absolute;
+            height: 24px;
+            top: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .gantt-task-bar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .gantt-task-preparing {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: 1px solid #0056b3;
+        }
+
+        .gantt-task-execution {
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .gantt-task-critical {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .gantt-task-high {
+            background: linear-gradient(135deg, #fd7e14 0%, #e8690b 100%);
+        }
+
+        .gantt-task-medium {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        }
+
+        .gantt-task-low {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+
+        .gantt-task-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .gantt-task-label {
+            padding: 0 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 2;
+            position: relative;
+        }
+
+        .gantt-task-progress-text {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 3;
+        }
+
+        .gantt-date-header {
+            display: flex;
+            height: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .gantt-date-column {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #e9ecef;
+            min-width: 60px;
+        }
+
+        .gantt-week-header {
+            display: flex;
+            height: 80px;
+            background: #e9ecef;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .gantt-week-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #dee2e6;
+            min-width: 200px;
+            padding: 8px 4px;
+            text-align: center;
+        }
+
+        .gantt-vertical-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: #e9ecef;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .gantt-today-line {
+            background: #dc3545 !important;
+            width: 2px !important;
+            z-index: 15 !important;
+        }
+        
+        .gantt-today-marker {
+            position: absolute;
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            top: -30px;
+            transform: translateX(-50%);
+            z-index: 20;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .gantt-today-marker::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #dc3545;
+        }
+
+        .gantt-weekend {
+            background: rgba(0,0,0,0.02);
+        }
+
+        .project-name {
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .project-meta {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+            pointer-events: none;
+            max-width: 250px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 11px;
+            color: #6c757d;
+            background: rgba(255,255,255,0.9);
+            padding: 4px 8px;
+            border-radius: 4px;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+    <div class="gantt-container">
+        <div class="gantt-header">
+            <div class="gantt-title">CQSS Project Gantt Chart</div>
+            <div class="gantt-info">
+                <span id="project-info">Loading projects...</span>
+                <span id="date-range" style="margin-left: 20px; font-weight: 500;"></span>
+            </div>
+        </div>
+        
+        <div class="gantt-wrapper">
+            <div class="gantt-sidebar" id="gantt-sidebar">
+                <!-- Project list will be populated here -->
+            </div>
+            
+            <div class="gantt-main" id="gantt-main">
+                <div class="scroll-hint">← → Scroll horizontally</div>
+                <div class="gantt-timeline-header" id="timeline-header">
+                    <!-- Timeline header will be populated here -->
+                </div>
+                <div class="gantt-timeline-content" id="timeline-content">
+                    <!-- Timeline content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip" style="display: none;"></div>
+
+    <script>
+        function initFrappeGantt() {
+            // Project data will be embedded here
+            const projectData = {{ project_data }};
+            const dateRange = {{ date_range }};
+            
+            document.getElementById('project-info').textContent = `${projectData.length} projects`;
+            
+            // Calculate timeline (full project range)
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            const minDate = parseTime(dateRange.min_date);
+            const maxDate = parseTime(dateRange.max_date);
+            
+            // Start from beginning of the week containing the first project
+            const startDate = new Date(minDate);
+            startDate.setDate(startDate.getDate() - startDate.getDay()); // Go to Sunday
+            
+            // End at the end of the week containing the last project
+            const endDate = new Date(maxDate);
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // Go to Saturday
+            
+            // Display date range
+            const formatDate = d3.timeFormat('%b %d, %Y');
+            document.getElementById('date-range').textContent = 
+                `${formatDate(startDate)} - ${formatDate(endDate)}`;
+            
+            // Generate week columns (weekly)
+            const weeks = [];
+            const currentWeek = new Date(startDate);
+            while (currentWeek <= endDate) {
+                weeks.push(new Date(currentWeek));
+                currentWeek.setDate(currentWeek.getDate() + 7);
+            }
+            
+            // Calculate scale
+            const weekWidth = 200;
+            const totalWidth = weeks.length * weekWidth;
+            
+            // Create timeline header
+            createTimelineHeader(weeks, weekWidth);
+            
+            // Create project sidebar
+            createProjectSidebar(projectData);
+            
+            // Create timeline content
+            createTimelineContent(projectData, weeks, weekWidth, parseTime);
+            
+            // Setup interactions
+            setupInteractions();
+            
+            // Auto-scroll to today's date
+            scrollToToday(weeks, weekWidth);
+        }
+        
+        function createTimelineHeader(weeks, weekWidth) {
+            const header = document.getElementById('timeline-header');
+            const totalWidth = weeks.length * weekWidth;
+            header.style.width = totalWidth + 'px';
+            
+            // Week headers
+            const weekHeader = document.createElement('div');
+            weekHeader.className = 'gantt-week-header';
+            
+            weeks.forEach(week => {
+                const weekCol = document.createElement('div');
+                weekCol.className = 'gantt-week-column';
+                weekCol.style.minWidth = weekWidth + 'px';
+                weekCol.style.maxWidth = weekWidth + 'px';
+                
+                const endWeek = new Date(week);
+                endWeek.setDate(week.getDate() + 6);
+                
+                const formatWeek = d3.timeFormat('%b %d');
+                const formatYear = d3.timeFormat('%Y');
+                const startYear = formatYear(week);
+                const endYear = formatYear(endWeek);
+                
+                // Show year if it changes or if it's the first/last week
+                let yearDisplay = '';
+                if (startYear !== endYear) {
+                    yearDisplay = ` '${startYear.slice(2)}-'${endYear.slice(2)}`;
+                } else if (week === weeks[0] || week === weeks[weeks.length - 1]) {
+                    yearDisplay = ` '${startYear.slice(2)}`;
+                }
+                
+                weekCol.innerHTML = `
+                    <div style="font-weight: 600;">${formatWeek(week)} - ${formatWeek(endWeek)}</div>
+                    <div style="font-size: 11px; color: #6c757d;">${yearDisplay}</div>
+                `;
+                weekHeader.appendChild(weekCol);
+            });
+            
+            header.appendChild(weekHeader);
+        }
+        
+        function createProjectSidebar(projectData) {
+            const sidebar = document.getElementById('gantt-sidebar');
+            
+            projectData.forEach(project => {
+                const row = document.createElement('div');
+                row.className = 'gantt-row';
+                row.innerHTML = `
+                    <div>
+                        <div class="project-name">${project.name}</div>
+                        <div class="project-meta">${project.category} • ${project.team_lead}</div>
+                    </div>
+                `;
+                sidebar.appendChild(row);
+            });
+        }
+        
+        function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
+            const content = document.getElementById('timeline-content');
+            const totalWidth = weeks.length * weekWidth;
+            content.style.width = totalWidth + 'px';
+            content.style.height = (projectData.length * 50) + 'px';
+            
+            // Create vertical grid lines
+            weeks.forEach((week, index) => {
+                const line = document.createElement('div');
+                line.className = 'gantt-vertical-line';
+                line.style.left = (index * weekWidth) + 'px';
+                content.appendChild(line);
+            });
+            
+            // Add today's line and marker
+            const today = new Date();
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth;
+            
+            if (todayX >= 0 && todayX <= totalWidth) {
+                // Today's vertical line
+                const todayLine = document.createElement('div');
+                todayLine.className = 'gantt-vertical-line gantt-today-line';
+                todayLine.style.left = todayX + 'px';
+                content.appendChild(todayLine);
+                
+                // Today's date marker
+                const todayMarker = document.createElement('div');
+                todayMarker.className = 'gantt-today-marker';
+                todayMarker.style.left = todayX + 'px';
+                
+                const formatToday = d3.timeFormat('%Y/%m/%d');
+                todayMarker.textContent = `Today ${formatToday(today)}`;
+                content.appendChild(todayMarker);
+            }
+            
+            // Create task bars
+            projectData.forEach((project, projectIndex) => {
+                const rowContent = document.createElement('div');
+                rowContent.className = 'gantt-row-content';
+                rowContent.style.top = (projectIndex * 50) + 'px';
+                rowContent.style.position = 'absolute';
+                rowContent.style.width = '100%';
+                
+                // Preparing phase
+                const prepStart = parseTime(project.preparing_stage.start);
+                const prepEnd = parseTime(project.preparing_stage.end);
+                const prepStartX = Math.max(0, (prepStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                const prepWidth = Math.max(weekWidth / 7, (prepEnd - prepStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                
+                const prepBar = document.createElement('div');
+                prepBar.className = 'gantt-task-bar gantt-task-preparing';
+                prepBar.style.left = prepStartX + 'px';
+                prepBar.style.width = prepWidth + 'px';
+                prepBar.innerHTML = `<div class="gantt-task-label">Preparing</div>`;
+                
+                // Execution phase
+                const execStart = parseTime(project.execution_stage.start);
+                const execEnd = parseTime(project.execution_stage.end);
+                const execStartX = Math.max(0, (execStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                const execWidth = Math.max(weekWidth / 7, (execEnd - execStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                
+                const execBar = document.createElement('div');
+                execBar.className = `gantt-task-bar gantt-task-execution gantt-task-${project.priority.toLowerCase()}`;
+                execBar.style.left = execStartX + 'px';
+                execBar.style.width = execWidth + 'px';
+                
+                // Progress bar
+                const progressBar = document.createElement('div');
+                progressBar.className = 'gantt-task-progress';
+                progressBar.style.width = project.execution_stage.progress_percent + '%';
+                
+                execBar.innerHTML = `
+                    <div class="gantt-task-label">${project.name}</div>
+                    <div class="gantt-task-progress-text">${project.execution_stage.progress_percent}%</div>
+                `;
+                execBar.appendChild(progressBar);
+                
+                // Add tooltips
+                [prepBar, execBar].forEach(bar => {
+                    bar.addEventListener('mouseenter', (e) => showTooltip(e, project));
+                    bar.addEventListener('mouseleave', hideTooltip);
+                    bar.addEventListener('mousemove', moveTooltip);
+                });
+                
+                rowContent.appendChild(prepBar);
+                rowContent.appendChild(execBar);
+                content.appendChild(rowContent);
+            });
+        }
+        
+        function setupInteractions() {
+            const mainArea = document.getElementById('gantt-main');
+            const sidebar = document.getElementById('gantt-sidebar');
+            
+            // Sync vertical scrolling
+            mainArea.addEventListener('scroll', () => {
+                sidebar.scrollTop = mainArea.scrollTop;
+            });
+            
+            sidebar.addEventListener('scroll', () => {
+                mainArea.scrollTop = sidebar.scrollTop;
+            });
+        }
+        
+        function showTooltip(event, project) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `
+                <div class="tooltip-title">${project.name}</div>
+                <div><strong>Category:</strong> ${project.category}</div>
+                <div><strong>Priority:</strong> ${project.priority}</div>
+                <div><strong>Team Lead:</strong> ${project.team_lead}</div>
+                <div><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</div>
+                <div><strong>Description:</strong> ${project.description}</div>
+            `;
+            moveTooltip(event);
+        }
+        
+        function moveTooltip(event) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        }
+        
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+        
+        function scrollToToday(weeks, weekWidth) {
+            const today = new Date();
+            const mainArea = document.getElementById('gantt-main');
+            
+            // Calculate today's exact position
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth;
+            
+            if (todayX >= 0) {
+                // Scroll to center today's line
+                const scrollPosition = Math.max(0, todayX - (mainArea.clientWidth / 2));
+                mainArea.scrollLeft = scrollPosition;
+            }
+        }
+        
+        // Load D3.js and initialize
+        (function(){
+            var script = document.createElement('script');
+            script.src = 'https://d3js.org/d3.v7.min.js';
+            script.onload = initFrappeGantt;
+            script.onerror = function() {
+                alert('Cannot load D3.js from CDN. This chart requires an internet connection.');
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+</body>
+</html>

@@ -70,3 +70,9 @@ Required columns: project_name, category, priority, preparing_start, preparing_e
 Date format: YYYY-MM-DD
 Progress: 0-100 integer
 Priority: Critical, High, Medium, Low
+
+### After Any Enhancement
+1. **Create Feature Branch**: Create feature branch from master (e.g., `feature/add-filtering`, `feature/export-pdf`)
+2. **Commit Changes**: Create descriptive commit messages
+3. **Push Feature Branch**: Push changes to remote feature branch
+4. **Create PR**: Create pull request from feature branch to master

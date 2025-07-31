@@ -11,7 +11,12 @@
       "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\gantt_chart_frappe.html\")",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)"
     ],
     "deny": []
   }

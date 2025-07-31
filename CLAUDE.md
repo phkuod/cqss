@@ -70,3 +70,8 @@ Required columns: project_name, category, priority, preparing_start, preparing_e
 Date format: YYYY-MM-DD
 Progress: 0-100 integer
 Priority: Critical, High, Medium, Low
+
+### After Any Enhancement
+1. **Commit Changes**: Create descriptive commit messages
+2. **Push to Dev**: Push changes to remote dev branch
+3. **Create PR**: Create pull request from dev to master

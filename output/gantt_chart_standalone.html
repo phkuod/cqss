@@ -298,34 +298,85 @@
     
     <div class="tooltip" id="tooltip" style="display: none;"></div>
     
+    <!-- D3.js Loading with Error Handling -->
     <script>
-        // D3.js library is too large to embed here (over 1000 lines)
-        // Using CDN fallback with local fallback capability
-        (function(){
-            // Check if d3 is loaded
-            if (typeof d3 === 'undefined') {
-                // Fallback: load from CDN
-                var script = document.createElement('script');
-                script.src = 'https://d3js.org/d3.v7.min.js';
-                script.onload = initChart;
-                document.head.appendChild(script);
-            } else {
-                initChart();
+        // Load D3.js with proper error handling
+        (function() {
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'color: #dc3545; background: #f8d7da; border: 1px solid #f5c6cb; padding: 20px; margin: 20px; border-radius: 8px; text-align: center; font-size: 16px;';
+                errorDiv.innerHTML = `<strong>Error:</strong> ${message}<br><small>This standalone version requires an internet connection for the D3.js library.</small>`;
+                document.querySelector('.container').appendChild(errorDiv);
             }
+            
+            const script = document.createElement('script');
+            script.src = 'https://d3js.org/d3.v7.min.js';
+            script.async = false;
+            
+            script.onload = function() {
+                console.log('D3.js loaded successfully');
+                if (typeof initChart === 'function') {
+                    initChart();
+                } else {
+                    showError('Chart initialization function not found');
+                }
+            };
+            
+            script.onerror = function() {
+                console.error('Failed to load D3.js from CDN');
+                showError('Could not load D3.js library. Please check your internet connection.');
+            };
+            
+            // Set timeout as fallback
+            setTimeout(function() {
+                if (typeof d3 === 'undefined') {
+                    showError('D3.js failed to load within timeout period');
+                }
+            }, 10000);
+            
+            document.head.appendChild(script);
         })();
 
         let currentZoom = 1;
         let svg, g, projectGroups;
+
+        // Zoom functions - must be global for onclick handlers
+        function zoomIn() {
+            if (currentZoom < 3) {
+                currentZoom *= 1.2;
+                applyZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (currentZoom > 0.5) {
+                currentZoom /= 1.2;
+                applyZoom();
+            }
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            if (svg && g) {
+                g.attr('transform', `translate(${280},${50}) scale(${currentZoom})`);
+                // Adjust text size inversely to zoom
+                g.selectAll('text').style('font-size', `${Math.max(8, 12/currentZoom)}px`);
+            }
+        }
 
         function initChart() {
             // Project data will be embedded here
             const projectData = [
   {
     "id": "project_0",
-    "name": "Project Alpha Security Enhancement",
+    "name": "Project Alpha",
     "category": "Security",
-    "priority": "Critical",
-    "description": "Implement new multi-factor authentication system",
+    "priority": "High",
+    "description": "Implement new authentication system",
     "team_lead": "John Smith",
     "preparing_stage": {
       "start": "2024-01-15T00:00:00",
@@ -342,10 +393,10 @@
   },
   {
     "id": "project_1",
-    "name": "Project Beta Database Migration",
+    "name": "Project Beta",
     "category": "Infrastructure",
-    "priority": "High",
-    "description": "Database migration and performance optimization",
+    "priority": "Medium",
+    "description": "Database migration and optimization",
     "team_lead": "Jane Doe",
     "preparing_stage": {
       "start": "2024-02-01T00:00:00",
@@ -362,10 +413,10 @@
   },
   {
     "id": "project_2",
-    "name": "Project Gamma Frontend Redesign",
+    "name": "Project Gamma",
     "category": "Development",
     "priority": "High",
-    "description": "Complete frontend redesign and UX improvements",
+    "description": "Frontend redesign and UX improvements",
     "team_lead": "Mike Johnson",
     "preparing_stage": {
       "start": "2024-01-01T00:00:00",
@@ -382,10 +433,10 @@
   },
   {
     "id": "project_3",
-    "name": "Project Delta GDPR Compliance",
+    "name": "Project Delta",
     "category": "Compliance",
     "priority": "Critical",
-    "description": "GDPR compliance implementation and audit",
+    "description": "GDPR compliance implementation",
     "team_lead": "Sarah Wilson",
     "preparing_stage": {
       "start": "2024-03-01T00:00:00",
@@ -402,10 +453,10 @@
   },
   {
     "id": "project_4",
-    "name": "Project Epsilon AI Research",
+    "name": "Project Epsilon",
     "category": "Research",
-    "priority": "Medium",
-    "description": "AI integration feasibility study and prototyping",
+    "priority": "Low",
+    "description": "AI integration feasibility study",
     "team_lead": "David Brown",
     "preparing_stage": {
       "start": "2024-02-15T00:00:00",
@@ -419,306 +470,6 @@
       "progress_percent": 10
     },
     "total_duration_days": 182
-  },
-  {
-    "id": "project_5",
-    "name": "Project Zeta Cloud Migration",
-    "category": "Infrastructure",
-    "priority": "High",
-    "description": "Complete cloud infrastructure migration",
-    "team_lead": "Lisa Chen",
-    "preparing_stage": {
-      "start": "2024-01-20T00:00:00",
-      "end": "2024-02-20T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-02-20T00:00:00",
-      "end": "2024-05-20T00:00:00",
-      "duration_days": 90,
-      "progress_percent": 65
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_6",
-    "name": "Project Eta Mobile App Development",
-    "category": "Development",
-    "priority": "Medium",
-    "description": "Native mobile application development",
-    "team_lead": "Robert Taylor",
-    "preparing_stage": {
-      "start": "2024-02-10T00:00:00",
-      "end": "2024-03-10T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-03-10T00:00:00",
-      "end": "2024-06-10T00:00:00",
-      "duration_days": 92,
-      "progress_percent": 55
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_7",
-    "name": "Project Theta API Gateway Implementation",
-    "category": "Development",
-    "priority": "High",
-    "description": "Implement unified API gateway architecture",
-    "team_lead": "Emma Davis",
-    "preparing_stage": {
-      "start": "2024-01-05T00:00:00",
-      "end": "2024-01-25T00:00:00",
-      "duration_days": 20
-    },
-    "execution_stage": {
-      "start": "2024-01-25T00:00:00",
-      "end": "2024-04-25T00:00:00",
-      "duration_days": 91,
-      "progress_percent": 80
-    },
-    "total_duration_days": 111
-  },
-  {
-    "id": "project_8",
-    "name": "Project Iota Data Analytics Platform",
-    "category": "Analytics",
-    "priority": "Medium",
-    "description": "Build comprehensive data analytics platform",
-    "team_lead": "Alex Martinez",
-    "preparing_stage": {
-      "start": "2024-02-25T00:00:00",
-      "end": "2024-03-25T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-03-25T00:00:00",
-      "end": "2024-07-25T00:00:00",
-      "duration_days": 122,
-      "progress_percent": 25
-    },
-    "total_duration_days": 151
-  },
-  {
-    "id": "project_9",
-    "name": "Project Kappa Cybersecurity Audit",
-    "category": "Security",
-    "priority": "Critical",
-    "description": "Complete cybersecurity audit and remediation",
-    "team_lead": "Jennifer Lee",
-    "preparing_stage": {
-      "start": "2024-01-30T00:00:00",
-      "end": "2024-02-28T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-02-28T00:00:00",
-      "end": "2024-05-28T00:00:00",
-      "duration_days": 90,
-      "progress_percent": 40
-    },
-    "total_duration_days": 119
-  },
-  {
-    "id": "project_10",
-    "name": "Project Lambda Performance Optimization",
-    "category": "Infrastructure",
-    "priority": "High",
-    "description": "System performance optimization and tuning",
-    "team_lead": "Mark Anderson",
-    "preparing_stage": {
-      "start": "2024-02-05T00:00:00",
-      "end": "2024-03-05T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-03-05T00:00:00",
-      "end": "2024-06-05T00:00:00",
-      "duration_days": 92,
-      "progress_percent": 70
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_11",
-    "name": "Project Mu User Training Program",
-    "category": "Training",
-    "priority": "Low",
-    "description": "Comprehensive user training program development",
-    "team_lead": "Carol White",
-    "preparing_stage": {
-      "start": "2024-03-10T00:00:00",
-      "end": "2024-04-10T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-04-10T00:00:00",
-      "end": "2024-07-10T00:00:00",
-      "duration_days": 91,
-      "progress_percent": 15
-    },
-    "total_duration_days": 122
-  },
-  {
-    "id": "project_12",
-    "name": "Project Nu Backup System Upgrade",
-    "category": "Infrastructure",
-    "priority": "Medium",
-    "description": "Backup and disaster recovery system upgrade",
-    "team_lead": "Kevin Rodriguez",
-    "preparing_stage": {
-      "start": "2024-01-25T00:00:00",
-      "end": "2024-02-25T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-02-25T00:00:00",
-      "end": "2024-05-25T00:00:00",
-      "duration_days": 90,
-      "progress_percent": 85
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_13",
-    "name": "Project Xi Integration Testing",
-    "category": "Testing",
-    "priority": "High",
-    "description": "Comprehensive integration testing framework",
-    "team_lead": "Michelle Brown",
-    "preparing_stage": {
-      "start": "2024-02-20T00:00:00",
-      "end": "2024-03-20T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-03-20T00:00:00",
-      "end": "2024-06-20T00:00:00",
-      "duration_days": 92,
-      "progress_percent": 60
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_14",
-    "name": "Project Omicron Documentation Update",
-    "category": "Documentation",
-    "priority": "Low",
-    "description": "Update all technical documentation and guides",
-    "team_lead": "Thomas Garcia",
-    "preparing_stage": {
-      "start": "2024-03-05T00:00:00",
-      "end": "2024-04-05T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-04-05T00:00:00",
-      "end": "2024-07-05T00:00:00",
-      "duration_days": 91,
-      "progress_percent": 20
-    },
-    "total_duration_days": 122
-  },
-  {
-    "id": "project_15",
-    "name": "Project Pi Quality Assurance",
-    "category": "Testing",
-    "priority": "Medium",
-    "description": "Complete quality assurance testing suite",
-    "team_lead": "Rachel Kim",
-    "preparing_stage": {
-      "start": "2024-01-10T00:00:00",
-      "end": "2024-02-10T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-02-10T00:00:00",
-      "end": "2024-05-10T00:00:00",
-      "duration_days": 90,
-      "progress_percent": 95
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_16",
-    "name": "Project Rho Vendor Management",
-    "category": "Operations",
-    "priority": "Low",
-    "description": "Vendor management system implementation",
-    "team_lead": "Steven Thompson",
-    "preparing_stage": {
-      "start": "2024-02-28T00:00:00",
-      "end": "2024-03-28T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-03-28T00:00:00",
-      "end": "2024-06-28T00:00:00",
-      "duration_days": 92,
-      "progress_percent": 35
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_17",
-    "name": "Project Sigma Monitoring System",
-    "category": "Infrastructure",
-    "priority": "High",
-    "description": "Advanced monitoring and alerting system",
-    "team_lead": "Amanda Jackson",
-    "preparing_stage": {
-      "start": "2024-01-15T00:00:00",
-      "end": "2024-02-15T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-02-15T00:00:00",
-      "end": "2024-05-15T00:00:00",
-      "duration_days": 90,
-      "progress_percent": 50
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_18",
-    "name": "Project Tau DevOps Pipeline",
-    "category": "Development",
-    "priority": "High",
-    "description": "CI/CD pipeline implementation and automation",
-    "team_lead": "Ryan Wilson",
-    "preparing_stage": {
-      "start": "2024-02-12T00:00:00",
-      "end": "2024-03-12T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-03-12T00:00:00",
-      "end": "2024-06-12T00:00:00",
-      "duration_days": 92,
-      "progress_percent": 75
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_19",
-    "name": "Project Upsilon Load Testing",
-    "category": "Testing",
-    "priority": "Medium",
-    "description": "Comprehensive load testing and optimization",
-    "team_lead": "Nicole Harris",
-    "preparing_stage": {
-      "start": "2024-03-01T00:00:00",
-      "end": "2024-04-01T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-04-01T00:00:00",
-      "end": "2024-07-01T00:00:00",
-      "duration_days": 91,
-      "progress_percent": 30
-    },
-    "total_duration_days": 122
   }
 ];
             const dateRange = {
@@ -966,33 +717,6 @@
                 .style('font-weight', 'bold')
                 .style('fill', '#343a40')
                 .text('Project Timeline and Progress Overview');
-        }
-
-        function zoomIn() {
-            if (currentZoom < 3) {
-                currentZoom *= 1.2;
-                applyZoom();
-            }
-        }
-
-        function zoomOut() {
-            if (currentZoom > 0.5) {
-                currentZoom /= 1.2;
-                applyZoom();
-            }
-        }
-
-        function resetZoom() {
-            currentZoom = 1;
-            applyZoom();
-        }
-
-        function applyZoom() {
-            if (svg && g) {
-                g.attr('transform', `translate(${280},${50}) scale(${currentZoom})`);
-                // Adjust text size inversely to zoom
-                g.selectAll('text').style('font-size', `${Math.max(8, 12/currentZoom)}px`);
-            }
         }
     </script>
 </body>

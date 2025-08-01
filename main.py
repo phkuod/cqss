@@ -76,7 +76,7 @@ Examples:
     
     try:
         # Generate Gantt chart
-        generator = GanttChartGenerator(args.template, args.standalone, args.style)
+        generator = GanttChartGenerator(template_path=args.template, standalone=args.standalone, style=args.style)
         generator.generate_chart(str(csv_path), str(output_path))
         
         print(f"\nSuccess! Open {output_path} in your web browser to view the Gantt chart.")

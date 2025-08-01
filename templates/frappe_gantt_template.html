@@ -56,20 +56,38 @@
             display: flex;
             flex: 1;
             min-height: 0;
+            min-width: 0;
         }
 
         .gantt-sidebar {
             width: 280px;
             background: #fafbfc;
             border-right: 1px solid #e9ecef;
-            overflow-y: auto;
             flex-shrink: 0;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gantt-sidebar-header {
+            height: 80px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e9ecef;
+            flex-shrink: 0;
+        }
+
+        .gantt-sidebar-content {
+            flex: 1;
+            overflow: auto;
         }
 
         .gantt-main {
             flex: 1;
-            overflow: auto;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
         }
 
         .gantt-timeline-header {
@@ -79,13 +97,24 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            display: flex;
-            align-items: center;
+            display: block;
+            flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .gantt-timeline-content-wrapper {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+            min-width: 0;
         }
 
         .gantt-timeline-content {
             position: relative;
             background: white;
+            padding: 0;
+            margin: 0;
         }
 
         .gantt-grid {
@@ -105,6 +134,8 @@
             padding: 0 15px;
             cursor: pointer;
             transition: background-color 0.2s;
+            box-sizing: border-box;
+            margin: 0;
         }
 
         .gantt-row:hover {
@@ -115,6 +146,8 @@
             height: 50px;
             position: relative;
             border-bottom: 1px solid #f1f3f4;
+            box-sizing: border-box;
+            margin: 0;
         }
 
         .gantt-task-bar {
@@ -281,12 +314,16 @@
             font-weight: 500;
             color: #495057;
             font-size: 14px;
+            line-height: 1.2;
+            margin: 0;
         }
 
         .project-meta {
             font-size: 12px;
             color: #6c757d;
             margin-top: 2px;
+            line-height: 1.2;
+            margin-bottom: 0;
         }
 
         .tooltip {
@@ -317,6 +354,7 @@
             padding: 4px 8px;
             border-radius: 4px;
             z-index: 20;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -332,16 +370,21 @@
         
         <div class="gantt-wrapper">
             <div class="gantt-sidebar" id="gantt-sidebar">
-                <!-- Project list will be populated here -->
+                <div class="gantt-sidebar-header"></div>
+                <div class="gantt-sidebar-content">
+                    <!-- Project list will be populated here -->
+                </div>
             </div>
             
             <div class="gantt-main" id="gantt-main">
-                <div class="scroll-hint">← → Scroll horizontally</div>
                 <div class="gantt-timeline-header" id="timeline-header">
+                    <div class="scroll-hint">← → Scroll horizontally</div>
                     <!-- Timeline header will be populated here -->
                 </div>
-                <div class="gantt-timeline-content" id="timeline-content">
-                    <!-- Timeline content will be populated here -->
+                <div class="gantt-timeline-content-wrapper">
+                    <div class="gantt-timeline-content" id="timeline-content">
+                        <!-- Timeline content will be populated here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -406,7 +449,9 @@
         function createTimelineHeader(weeks, weekWidth) {
             const header = document.getElementById('timeline-header');
             const totalWidth = weeks.length * weekWidth;
+            console.log('Timeline Header - Total Width:', totalWidth + 'px', 'Weeks:', weeks.length);
             header.style.width = totalWidth + 'px';
+            header.style.minWidth = totalWidth + 'px';
             
             // Week headers
             const weekHeader = document.createElement('div');
@@ -445,7 +490,7 @@
         }
         
         function createProjectSidebar(projectData) {
-            const sidebar = document.getElementById('gantt-sidebar');
+            const sidebarContent = document.querySelector('.gantt-sidebar-content');
             
             projectData.forEach(project => {
                 const row = document.createElement('div');
@@ -456,14 +501,16 @@
                         <div class="project-meta">${project.category} • ${project.team_lead}</div>
                     </div>
                 `;
-                sidebar.appendChild(row);
+                sidebarContent.appendChild(row);
             });
         }
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
             const totalWidth = weeks.length * weekWidth;
+            console.log('Timeline Content - Total Width:', totalWidth + 'px', 'Projects:', projectData.length);
             content.style.width = totalWidth + 'px';
+            content.style.minWidth = totalWidth + 'px';
             content.style.height = (projectData.length * 50) + 'px';
             
             // Create vertical grid lines
@@ -551,17 +598,31 @@
         }
         
         function setupInteractions() {
-            const mainArea = document.getElementById('gantt-main');
-            const sidebar = document.getElementById('gantt-sidebar');
+            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
+            const sidebarContent = document.querySelector('.gantt-sidebar-content');
+            const timelineHeader = document.getElementById('timeline-header');
             
-            // Sync vertical scrolling
-            mainArea.addEventListener('scroll', () => {
-                sidebar.scrollTop = mainArea.scrollTop;
-            });
-            
-            sidebar.addEventListener('scroll', () => {
-                mainArea.scrollTop = sidebar.scrollTop;
-            });
+            // Sync vertical scrolling between sidebar content and timeline content wrapper
+            if (contentWrapper && sidebarContent) {
+                contentWrapper.addEventListener('scroll', () => {
+                    sidebarContent.scrollTop = contentWrapper.scrollTop;
+                    // Sync horizontal scroll with header
+                    if (timelineHeader) {
+                        timelineHeader.scrollLeft = contentWrapper.scrollLeft;
+                    }
+                });
+                
+                sidebarContent.addEventListener('scroll', () => {
+                    contentWrapper.scrollTop = sidebarContent.scrollTop;
+                });
+                
+                // Sync header horizontal scroll with content
+                if (timelineHeader) {
+                    timelineHeader.addEventListener('scroll', () => {
+                        contentWrapper.scrollLeft = timelineHeader.scrollLeft;
+                    });
+                }
+            }
         }
         
         function showTooltip(event, project) {
@@ -590,15 +651,15 @@
         
         function scrollToToday(weeks, weekWidth) {
             const today = new Date();
-            const mainArea = document.getElementById('gantt-main');
+            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
             
             // Calculate today's exact position
             const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth;
             
-            if (todayX >= 0) {
+            if (todayX >= 0 && contentWrapper) {
                 // Scroll to center today's line
-                const scrollPosition = Math.max(0, todayX - (mainArea.clientWidth / 2));
-                mainArea.scrollLeft = scrollPosition;
+                const scrollPosition = Math.max(0, todayX - (contentWrapper.clientWidth / 2));
+                contentWrapper.scrollLeft = scrollPosition;
             }
         }
         

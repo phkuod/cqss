@@ -18,6 +18,16 @@ Examples:
   python main.py data/sample_projects.csv
   python main.py data/sample_projects.csv output/my_gantt.html
   python main.py data/sample_projects.csv --standalone
+  python main.py data/sample_projects.csv --style minimal
+  python main.py data/sample_projects.csv --style dark
+  python main.py data/sample_projects.csv --style colorful
+
+Available Styles:
+  default   - Classic Gantt chart design
+  frappe    - Clean, modern Frappe-inspired design
+  minimal   - Ultra-clean minimal design (Notion/Linear style)
+  dark      - Professional dark theme (GitHub/Figma style)
+  colorful  - Vibrant, friendly design (Monday.com/Asana style)
         """
     )
     
@@ -47,8 +57,8 @@ Examples:
     
     parser.add_argument(
         '--style',
-        help='Gantt chart style (default, frappe)',
-        choices=['default', 'frappe'],
+        help='Gantt chart style (default, frappe, minimal, dark, colorful)',
+        choices=['default', 'frappe', 'minimal', 'dark', 'colorful'],
         default='default'
     )
     
@@ -64,6 +74,12 @@ Examples:
     if args.output_file is None:
         if args.style == 'frappe':
             default_output = 'output/gantt_chart_frappe.html'
+        elif args.style == 'minimal':
+            default_output = 'output/gantt_chart_minimal.html'
+        elif args.style == 'dark':
+            default_output = 'output/gantt_chart_dark.html'
+        elif args.style == 'colorful':
+            default_output = 'output/gantt_chart_colorful.html'
         elif args.standalone:
             default_output = 'output/gantt_chart_standalone.html'
         else:

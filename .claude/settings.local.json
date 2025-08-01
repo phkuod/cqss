@@ -17,7 +17,10 @@
       "Bash(git pull:*)",
       "Bash(git checkout:*)",
       "Bash(git branch:*)",
-      "Bash(gh pr create:*)"
+      "Bash(gh pr create:*)",
+      "WebFetch(domain:dribbble.com)",
+      "WebFetch(domain:pageflows.com)",
+      "WebFetch(domain:blog.netronic.com)"
     ],
     "deny": []
   }

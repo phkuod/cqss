@@ -12,6 +12,12 @@ class GanttChartGenerator:
         if template_path is None:
             if style == "frappe":
                 template_name = 'frappe_gantt_template.html'
+            elif style == "minimal":
+                template_name = 'modern_minimal_template.html'
+            elif style == "dark":
+                template_name = 'dark_professional_template.html'
+            elif style == "colorful":
+                template_name = 'colorful_friendly_template.html'
             elif standalone:
                 template_name = 'standalone_gantt_template.html'
             else:

@@ -76,3 +76,7 @@ Priority: Critical, High, Medium, Low
 2. **Commit Changes**: Create descriptive commit messages
 3. **Push Feature Branch**: Push changes to remote feature branch
 4. **Create PR**: Create pull request from feature branch to master
+
+## Memory Logs
+
+- Memorized the commit code flow to understand project enhancement and versioning process

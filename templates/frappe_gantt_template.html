@@ -301,25 +301,14 @@
             position: absolute;
             background: #2684ff;
             color: white;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            top: -32px;
             transform: translateX(-50%);
-            z-index: 20;
+            z-index: 30;
             white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(38, 132, 255, 0.3);
-        }
-        
-        .gantt-today-marker::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: #2684ff;
+            box-shadow: 0 2px 8px rgba(38, 132, 255, 0.3);
         }
 
         .gantt-weekend {
@@ -545,6 +534,7 @@
             // Week headers
             const weekHeader = document.createElement('div');
             weekHeader.className = 'gantt-week-header';
+            weekHeader.style.position = 'relative';
             
             weeks.forEach(week => {
                 const weekCol = document.createElement('div');
@@ -575,7 +565,27 @@
                 weekHeader.appendChild(weekCol);
             });
             
+            // Add today marker to the week header (scrollable area)
+            addTodayMarkerToHeader(weekHeader, weeks, weekWidth);
+            
             header.appendChild(weekHeader);
+        }
+        
+        function addTodayMarkerToHeader(weekHeader, weeks, weekWidth) {
+            const today = new Date();
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
+            const totalWidth = weeks.length * weekWidth;
+            
+            if (todayX >= 0 && todayX <= totalWidth) {
+                const todayMarker = document.createElement('div');
+                todayMarker.className = 'gantt-today-marker';
+                todayMarker.style.left = todayX + 'px';
+                todayMarker.style.bottom = '3px';
+                
+                const formatToday = d3.timeFormat('%Y/%m/%d');
+                todayMarker.textContent = `Today ${formatToday(today)}`;
+                weekHeader.appendChild(todayMarker);
+            }
         }
         
         function createProjectSidebar(projectData) {
@@ -610,25 +620,15 @@
                 content.appendChild(line);
             });
             
-            // Add today's line and marker
+            // Add today's vertical line
             const today = new Date();
-            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth;
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
             
             if (todayX >= 0 && todayX <= totalWidth) {
-                // Today's vertical line
                 const todayLine = document.createElement('div');
                 todayLine.className = 'gantt-vertical-line gantt-today-line';
                 todayLine.style.left = todayX + 'px';
                 content.appendChild(todayLine);
-                
-                // Today's date marker
-                const todayMarker = document.createElement('div');
-                todayMarker.className = 'gantt-today-marker';
-                todayMarker.style.left = todayX + 'px';
-                
-                const formatToday = d3.timeFormat('%Y/%m/%d');
-                todayMarker.textContent = `Today ${formatToday(today)}`;
-                content.appendChild(todayMarker);
             }
             
             // Create task bars
@@ -743,7 +743,7 @@
             const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
             
             // Calculate today's exact position
-            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth;
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
             
             if (todayX >= 0 && contentWrapper) {
                 // Scroll to center today's line
@@ -752,16 +752,18 @@
             }
         }
         
-        // Load D3.js and initialize
-        (function(){
-            var script = document.createElement('script');
-            script.src = 'https://d3js.org/d3.v7.min.js';
-            script.onload = initFrappeGantt;
-            script.onerror = function() {
-                alert('Cannot load D3.js from CDN. This chart requires an internet connection.');
-            };
-            document.head.appendChild(script);
-        })();
+    </script>
+    
+    <!-- Load local D3.js -->
+    <script src="../static/js/d3.v7.min.js"></script>
+    
+    <script>
+        // Initialize when D3.js is loaded
+        if (typeof d3 !== 'undefined') {
+            initFrappeGantt();
+        } else {
+            console.error('D3.js not loaded');
+        }
     </script>
 </body>
 </html>

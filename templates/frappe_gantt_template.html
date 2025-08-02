@@ -295,6 +295,7 @@
             background: #2684ff !important;
             width: 2px !important;
             z-index: 15 !important;
+            position: fixed !important;
         }
         
         .gantt-today-marker {
@@ -620,15 +621,29 @@
                 content.appendChild(line);
             });
             
-            // Add today's vertical line
+            // Add today's vertical line (fixed position)
             const today = new Date();
             const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
             
             if (todayX >= 0 && todayX <= totalWidth) {
                 const todayLine = document.createElement('div');
                 todayLine.className = 'gantt-vertical-line gantt-today-line';
-                todayLine.style.left = todayX + 'px';
-                content.appendChild(todayLine);
+                
+                // Calculate fixed position relative to the content wrapper
+                const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
+                const contentRect = contentWrapper.getBoundingClientRect();
+                const fixedX = contentRect.left + Math.min(todayX - contentWrapper.scrollLeft, contentWrapper.clientWidth);
+                
+                todayLine.style.left = fixedX + 'px';
+                todayLine.style.top = contentRect.top + 'px';
+                todayLine.style.height = contentRect.height + 'px';
+                
+                // Add to body so it's not affected by container scrolling
+                document.body.appendChild(todayLine);
+                
+                // Store reference for scroll updates
+                window.todayLineElement = todayLine;
+                window.todayLineOriginalX = todayX;
             }
             
             // Create task bars
@@ -686,6 +701,29 @@
             });
         }
         
+        function updateTodayLinePosition() {
+            if (!window.todayLineElement || !window.todayLineOriginalX) return;
+            
+            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
+            const contentRect = contentWrapper.getBoundingClientRect();
+            const scrollLeft = contentWrapper.scrollLeft;
+            
+            // Calculate if today line is visible in current viewport
+            const todayX = window.todayLineOriginalX;
+            const relativeX = todayX - scrollLeft;
+            
+            if (relativeX >= 0 && relativeX <= contentWrapper.clientWidth) {
+                // Today line is in viewport - show it
+                window.todayLineElement.style.display = 'block';
+                window.todayLineElement.style.left = (contentRect.left + relativeX) + 'px';
+                window.todayLineElement.style.top = contentRect.top + 'px';
+                window.todayLineElement.style.height = contentRect.height + 'px';
+            } else {
+                // Today line is outside viewport - hide it
+                window.todayLineElement.style.display = 'none';
+            }
+        }
+        
         function setupInteractions() {
             const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
@@ -699,6 +737,8 @@
                     if (timelineHeader) {
                         timelineHeader.scrollLeft = contentWrapper.scrollLeft;
                     }
+                    // Update today line position
+                    updateTodayLinePosition();
                 });
                 
                 sidebarContent.addEventListener('scroll', () => {
@@ -709,6 +749,8 @@
                 if (timelineHeader) {
                     timelineHeader.addEventListener('scroll', () => {
                         contentWrapper.scrollLeft = timelineHeader.scrollLeft;
+                        // Update today line position
+                        updateTodayLinePosition();
                     });
                 }
             }

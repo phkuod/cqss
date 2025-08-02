@@ -18,16 +18,18 @@ Examples:
   python main.py data/sample_projects.csv
   python main.py data/sample_projects.csv output/my_gantt.html
   python main.py data/sample_projects.csv --standalone
-  python main.py data/sample_projects.csv --style minimal
-  python main.py data/sample_projects.csv --style dark
-  python main.py data/sample_projects.csv --style colorful
+  python main.py data/sample_projects.csv --style minimal --open
+  python main.py data/sample_projects.csv --style dark --open
+  python main.py data/sample_projects.csv --style colorful --open
+  python main.py data/sample_projects.csv --style interactive --open
 
 Available Styles:
-  default   - Classic Gantt chart design
-  frappe    - Clean, modern Frappe-inspired design
-  minimal   - Ultra-clean minimal design (Notion/Linear style)
-  dark      - Professional dark theme (GitHub/Figma style)
-  colorful  - Vibrant, friendly design (Monday.com/Asana style)
+  default     - Classic Gantt chart design
+  frappe      - Clean, modern Frappe-inspired design
+  minimal     - Ultra-clean minimal design (Notion/Linear style)
+  dark        - Professional dark theme (GitHub/Figma style)
+  colorful    - Vibrant, friendly design (Monday.com/Asana style)
+  interactive - Modern interactive design with filters & click features
         """
     )
     
@@ -57,9 +59,15 @@ Available Styles:
     
     parser.add_argument(
         '--style',
-        help='Gantt chart style (default, frappe, minimal, dark, colorful)',
-        choices=['default', 'frappe', 'minimal', 'dark', 'colorful'],
+        help='Gantt chart style (default, frappe, minimal, dark, colorful, interactive)',
+        choices=['default', 'frappe', 'minimal', 'dark', 'colorful', 'interactive'],
         default='default'
+    )
+    
+    parser.add_argument(
+        '--open',
+        help='Automatically open the generated chart in default browser',
+        action='store_true'
     )
     
     args = parser.parse_args()
@@ -80,6 +88,8 @@ Available Styles:
             default_output = 'output/gantt_chart_dark.html'
         elif args.style == 'colorful':
             default_output = 'output/gantt_chart_colorful.html'
+        elif args.style == 'interactive':
+            default_output = 'output/gantt_chart_interactive.html'
         elif args.standalone:
             default_output = 'output/gantt_chart_standalone.html'
         else:
@@ -96,6 +106,17 @@ Available Styles:
         generator.generate_chart(str(csv_path), str(output_path))
         
         print(f"\nSuccess! Open {output_path} in your web browser to view the Gantt chart.")
+        
+        # Auto-open in browser if requested
+        if args.open:
+            try:
+                import webbrowser
+                import os
+                file_url = f"file:///{os.path.abspath(output_path).replace(os.sep, '/')}"
+                webbrowser.open(file_url)
+                print(f"Opening in default browser...")
+            except Exception as browser_error:
+                print(f"Could not open browser automatically: {browser_error}")
         
     except Exception as e:
         print(f"Error: {str(e)}")

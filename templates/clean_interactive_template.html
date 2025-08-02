@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CQSS Modern Minimal Gantt Chart</title>
+    <title>CQSS Interactive Modern Gantt Chart</title>
     <style>
         /* Import Inter font for modern typography */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -40,7 +40,7 @@
         .gantt-header {
             background: #ffffff;
             border-bottom: 1px solid #e5e5e5;
-            padding: 32px 40px;
+            padding: 24px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -57,6 +57,63 @@
             font-size: 15px;
             color: #737373;
             font-weight: 500;
+        }
+
+        /* Filter Controls */
+        .filter-section {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 16px 32px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            min-width: fit-content;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #374151;
+            min-width: 140px;
+            transition: border-color 0.15s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .clear-filters-btn {
+            padding: 8px 16px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .clear-filters-btn:hover {
+            background: #5856eb;
         }
 
         .gantt-wrapper {
@@ -166,7 +223,7 @@
 
         .gantt-task-bar:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
         }
 
         .gantt-task-preparing {
@@ -266,46 +323,24 @@
             background: #6366f1 !important;
             width: 2px !important;
             z-index: 15 !important;
+            position: fixed !important;
         }
         
         .gantt-today-marker {
             position: absolute;
             background: #6366f1;
             color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
             font-weight: 600;
-            top: -36px;
             transform: translateX(-50%);
-            z-index: 20;
+            z-index: 30;
             white-space: nowrap;
-            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
         }
         
-        .gantt-today-marker::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: #6366f1;
-        }
-
-        .gantt-weekend {
-            background: rgba(0,0,0,0.01);
-        }
-
-        /* Enhanced micro-interactions */
-        .gantt-task-bar:active {
-            transform: translateY(0px) scale(0.99);
-        }
-
-        .gantt-week-column:hover {
-            background-color: rgba(99, 102, 241, 0.02);
-            transition: background-color 0.12s ease;
-        }
+        /* Remove arrow pointer since marker is now in header */
 
         /* Modern scrollbar styling */
         .gantt-timeline-content-wrapper::-webkit-scrollbar,
@@ -329,12 +364,6 @@
         .gantt-timeline-content-wrapper::-webkit-scrollbar-thumb:hover,
         .gantt-timeline-header::-webkit-scrollbar-thumb:hover {
             background: #a3a3a3;
-        }
-
-        /* Focus states for accessibility */
-        .gantt-task-bar:focus {
-            outline: 2px solid #6366f1;
-            outline-offset: 2px;
         }
 
         .project-name {
@@ -389,16 +418,77 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             backdrop-filter: blur(8px);
         }
+
+        /* Filter badges */
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #6366f1;
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-left: 8px;
+        }
+
+        .filter-badge .remove {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="gantt-container">
         <div class="gantt-header">
-            <div class="gantt-title">CQSS Project Gantt Chart</div>
+            <div class="gantt-title">CQSS Interactive Gantt Chart</div>
             <div class="gantt-info">
                 <span id="project-info">Loading projects...</span>
                 <span id="date-range" style="margin-left: 24px; font-weight: 500;"></span>
             </div>
+        </div>
+        
+        <!-- Filter Controls -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label class="filter-label">Priority:</label>
+                <select id="priority-filter" class="filter-select">
+                    <option value="" selected>All Priorities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Category:</label>
+                <select id="category-filter" class="filter-select">
+                    <option value="" selected>All Categories</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Team Lead:</label>
+                <select id="team-filter" class="filter-select">
+                    <option value="" selected>All Teams</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Progress:</label>
+                <select id="progress-filter" class="filter-select">
+                    <option value="" selected>All Progress</option>
+                    <option value="0-25">0-25%</option>
+                    <option value="26-50">26-50%</option>
+                    <option value="51-75">51-75%</option>
+                    <option value="76-100">76-100%</option>
+                </select>
+            </div>
+            
+            <button id="clear-filters" class="clear-filters-btn">Clear All</button>
+            
+            <div id="active-filters"></div>
         </div>
         
         <div class="gantt-wrapper">
@@ -425,617 +515,27 @@
     
     <div class="tooltip" id="tooltip" style="display: none;"></div>
 
+    <!-- Load local D3.js -->
+    <script src="../static/js/d3.v7.min.js"></script>
+    
     <script>
-        function initFrappeGantt() {
+        // Global variables
+        let allProjectData = [];
+        let filteredProjectData = [];
+        let currentFilters = {};
+
+        function initInteractiveGantt() {
             // Project data will be embedded here
-            const projectData = [
-  {
-    "id": "project_0",
-    "name": "Cloud Infrastructure Migration",
-    "category": "Infrastructure",
-    "priority": "Critical",
-    "description": "Migrate legacy systems to AWS cloud infrastructure with zero downtime",
-    "team_lead": "Sarah Chen",
-    "preparing_stage": {
-      "start": "2024-01-01T00:00:00",
-      "end": "2024-01-21T00:00:00",
-      "duration_days": 20
-    },
-    "execution_stage": {
-      "start": "2024-01-21T00:00:00",
-      "end": "2024-04-30T00:00:00",
-      "duration_days": 100,
-      "progress_percent": 85
-    },
-    "total_duration_days": 120
-  },
-  {
-    "id": "project_1",
-    "name": "AI-Powered Fraud Detection",
-    "category": "Security",
-    "priority": "High",
-    "description": "Implement machine learning algorithms for real-time fraud detection",
-    "team_lead": "Michael Rodriguez",
-    "preparing_stage": {
-      "start": "2024-01-15T00:00:00",
-      "end": "2024-02-15T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-02-15T00:00:00",
-      "end": "2024-07-15T00:00:00",
-      "duration_days": 151,
-      "progress_percent": 72
-    },
-    "total_duration_days": 182
-  },
-  {
-    "id": "project_2",
-    "name": "Customer Portal Redesign",
-    "category": "Development",
-    "priority": "Medium",
-    "description": "Complete overhaul of customer-facing web portal with modern UI/UX",
-    "team_lead": "Jennifer Kim",
-    "preparing_stage": {
-      "start": "2024-02-01T00:00:00",
-      "end": "2024-02-21T00:00:00",
-      "duration_days": 20
-    },
-    "execution_stage": {
-      "start": "2024-02-21T00:00:00",
-      "end": "2024-06-15T00:00:00",
-      "duration_days": 115,
-      "progress_percent": 90
-    },
-    "total_duration_days": 135
-  },
-  {
-    "id": "project_3",
-    "name": "GDPR Compliance Audit",
-    "category": "Compliance",
-    "priority": "Critical",
-    "description": "Comprehensive audit and remediation for GDPR compliance requirements",
-    "team_lead": "David Thompson",
-    "preparing_stage": {
-      "start": "2024-01-08T00:00:00",
-      "end": "2024-01-22T00:00:00",
-      "duration_days": 14
-    },
-    "execution_stage": {
-      "start": "2024-01-22T00:00:00",
-      "end": "2024-05-08T00:00:00",
-      "duration_days": 107,
-      "progress_percent": 65
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_4",
-    "name": "Mobile App Development",
-    "category": "Development",
-    "priority": "High",
-    "description": "Native iOS and Android app development for customer engagement",
-    "team_lead": "Lisa Wang",
-    "preparing_stage": {
-      "start": "2024-02-15T00:00:00",
-      "end": "2024-03-15T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-03-15T00:00:00",
-      "end": "2024-08-30T00:00:00",
-      "duration_days": 168,
-      "progress_percent": 45
-    },
-    "total_duration_days": 197
-  },
-  {
-    "id": "project_5",
-    "name": "Data Warehouse Optimization",
-    "category": "Infrastructure",
-    "priority": "Medium",
-    "description": "Optimize data warehouse performance and reduce query response times",
-    "team_lead": "Robert Johnson",
-    "preparing_stage": {
-      "start": "2024-03-01T00:00:00",
-      "end": "2024-03-21T00:00:00",
-      "duration_days": 20
-    },
-    "execution_stage": {
-      "start": "2024-03-21T00:00:00",
-      "end": "2024-07-01T00:00:00",
-      "duration_days": 102,
-      "progress_percent": 78
-    },
-    "total_duration_days": 122
-  },
-  {
-    "id": "project_6",
-    "name": "Cybersecurity Assessment",
-    "category": "Security",
-    "priority": "Critical",
-    "description": "Comprehensive penetration testing and vulnerability assessment",
-    "team_lead": "Amanda Foster",
-    "preparing_stage": {
-      "start": "2024-01-22T00:00:00",
-      "end": "2024-02-05T00:00:00",
-      "duration_days": 14
-    },
-    "execution_stage": {
-      "start": "2024-02-05T00:00:00",
-      "end": "2024-04-22T00:00:00",
-      "duration_days": 77,
-      "progress_percent": 88
-    },
-    "total_duration_days": 91
-  },
-  {
-    "id": "project_7",
-    "name": "ERP System Integration",
-    "category": "Infrastructure",
-    "priority": "High",
-    "description": "Integration of new ERP system with existing business processes",
-    "team_lead": "Carlos Martinez",
-    "preparing_stage": {
-      "start": "2024-02-05T00:00:00",
-      "end": "2024-03-05T00:00:00",
-      "duration_days": 29
-    },
-    "execution_stage": {
-      "start": "2024-03-05T00:00:00",
-      "end": "2024-09-05T00:00:00",
-      "duration_days": 184,
-      "progress_percent": 35
-    },
-    "total_duration_days": 213
-  },
-  {
-    "id": "project_8",
-    "name": "API Gateway Implementation",
-    "category": "Development",
-    "priority": "Medium",
-    "description": "Implement centralized API gateway for microservices architecture",
-    "team_lead": "Kevin Liu",
-    "preparing_stage": {
-      "start": "2024-03-15T00:00:00",
-      "end": "2024-04-05T00:00:00",
-      "duration_days": 21
-    },
-    "execution_stage": {
-      "start": "2024-04-05T00:00:00",
-      "end": "2024-07-30T00:00:00",
-      "duration_days": 116,
-      "progress_percent": 62
-    },
-    "total_duration_days": 137
-  },
-  {
-    "id": "project_9",
-    "name": "SOC 2 Certification",
-    "category": "Compliance",
-    "priority": "High",
-    "description": "Achieve SOC 2 Type II certification for security and availability controls",
-    "team_lead": "Rachel Green",
-    "preparing_stage": {
-      "start": "2024-01-30T00:00:00",
-      "end": "2024-02-20T00:00:00",
-      "duration_days": 21
-    },
-    "execution_stage": {
-      "start": "2024-02-20T00:00:00",
-      "end": "2024-08-15T00:00:00",
-      "duration_days": 177,
-      "progress_percent": 58
-    },
-    "total_duration_days": 198
-  },
-  {
-    "id": "project_10",
-    "name": "Blockchain Payment System",
-    "category": "Development",
-    "priority": "High",
-    "description": "Develop blockchain-based payment processing system for B2B transactions",
-    "team_lead": "Thomas Anderson",
-    "preparing_stage": {
-      "start": "2024-04-01T00:00:00",
-      "end": "2024-04-28T00:00:00",
-      "duration_days": 27
-    },
-    "execution_stage": {
-      "start": "2024-04-28T00:00:00",
-      "end": "2024-10-15T00:00:00",
-      "duration_days": 170,
-      "progress_percent": 25
-    },
-    "total_duration_days": 197
-  },
-  {
-    "id": "project_11",
-    "name": "Network Security Upgrade",
-    "category": "Security",
-    "priority": "Critical",
-    "description": "Upgrade firewall systems and implement next-generation security protocols",
-    "team_lead": "Maria Gonzalez",
-    "preparing_stage": {
-      "start": "2024-02-20T00:00:00",
-      "end": "2024-03-10T00:00:00",
-      "duration_days": 19
-    },
-    "execution_stage": {
-      "start": "2024-03-10T00:00:00",
-      "end": "2024-06-20T00:00:00",
-      "duration_days": 102,
-      "progress_percent": 93
-    },
-    "total_duration_days": 121
-  },
-  {
-    "id": "project_12",
-    "name": "Customer Analytics Platform",
-    "category": "Analytics",
-    "priority": "Medium",
-    "description": "Build comprehensive customer analytics and reporting platform",
-    "team_lead": "James Wilson",
-    "preparing_stage": {
-      "start": "2024-03-10T00:00:00",
-      "end": "2024-04-10T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-04-10T00:00:00",
-      "end": "2024-08-25T00:00:00",
-      "duration_days": 137,
-      "progress_percent": 55
-    },
-    "total_duration_days": 168
-  },
-  {
-    "id": "project_13",
-    "name": "Legacy System Modernization",
-    "category": "Infrastructure",
-    "priority": "High",
-    "description": "Modernize COBOL-based legacy systems to modern Java architecture",
-    "team_lead": "Patricia Davis",
-    "preparing_stage": {
-      "start": "2024-01-05T00:00:00",
-      "end": "2024-02-05T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-02-05T00:00:00",
-      "end": "2024-09-30T00:00:00",
-      "duration_days": 238,
-      "progress_percent": 40
-    },
-    "total_duration_days": 269
-  },
-  {
-    "id": "project_14",
-    "name": "DevOps Pipeline Automation",
-    "category": "Development",
-    "priority": "Medium",
-    "description": "Implement CI/CD pipeline automation for faster deployment cycles",
-    "team_lead": "Steven Lee",
-    "preparing_stage": {
-      "start": "2024-04-15T00:00:00",
-      "end": "2024-05-05T00:00:00",
-      "duration_days": 20
-    },
-    "execution_stage": {
-      "start": "2024-05-05T00:00:00",
-      "end": "2024-08-15T00:00:00",
-      "duration_days": 102,
-      "progress_percent": 70
-    },
-    "total_duration_days": 122
-  },
-  {
-    "id": "project_15",
-    "name": "ISO 27001 Implementation",
-    "category": "Compliance",
-    "priority": "High",
-    "description": "Implement ISO 27001 information security management system",
-    "team_lead": "Nicole Brown",
-    "preparing_stage": {
-      "start": "2024-02-10T00:00:00",
-      "end": "2024-03-15T00:00:00",
-      "duration_days": 34
-    },
-    "execution_stage": {
-      "start": "2024-03-15T00:00:00",
-      "end": "2024-10-10T00:00:00",
-      "duration_days": 209,
-      "progress_percent": 48
-    },
-    "total_duration_days": 243
-  },
-  {
-    "id": "project_16",
-    "name": "Real-time Monitoring System",
-    "category": "Infrastructure",
-    "priority": "Medium",
-    "description": "Deploy comprehensive real-time system monitoring and alerting platform",
-    "team_lead": "Christopher Taylor",
-    "preparing_stage": {
-      "start": "2024-03-25T00:00:00",
-      "end": "2024-04-15T00:00:00",
-      "duration_days": 21
-    },
-    "execution_stage": {
-      "start": "2024-04-15T00:00:00",
-      "end": "2024-07-25T00:00:00",
-      "duration_days": 101,
-      "progress_percent": 82
-    },
-    "total_duration_days": 122
-  },
-  {
-    "id": "project_17",
-    "name": "Digital Identity Management",
-    "category": "Security",
-    "priority": "High",
-    "description": "Implement single sign-on and multi-factor authentication across all systems",
-    "team_lead": "Angela White",
-    "preparing_stage": {
-      "start": "2024-04-05T00:00:00",
-      "end": "2024-05-05T00:00:00",
-      "duration_days": 30
-    },
-    "execution_stage": {
-      "start": "2024-05-05T00:00:00",
-      "end": "2024-09-20T00:00:00",
-      "duration_days": 138,
-      "progress_percent": 38
-    },
-    "total_duration_days": 168
-  },
-  {
-    "id": "project_18",
-    "name": "Supply Chain Transparency",
-    "category": "Analytics",
-    "priority": "Low",
-    "description": "Develop supply chain visibility and tracking analytics platform",
-    "team_lead": "Mark Thompson",
-    "preparing_stage": {
-      "start": "2024-05-01T00:00:00",
-      "end": "2024-06-01T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-06-01T00:00:00",
-      "end": "2024-11-15T00:00:00",
-      "duration_days": 167,
-      "progress_percent": 15
-    },
-    "total_duration_days": 198
-  },
-  {
-    "id": "project_19",
-    "name": "Disaster Recovery Planning",
-    "category": "Infrastructure",
-    "priority": "Critical",
-    "description": "Comprehensive disaster recovery and business continuity planning",
-    "team_lead": "Sandra Miller",
-    "preparing_stage": {
-      "start": "2024-03-20T00:00:00",
-      "end": "2024-04-20T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-04-20T00:00:00",
-      "end": "2024-08-05T00:00:00",
-      "duration_days": 107,
-      "progress_percent": 75
-    },
-    "total_duration_days": 138
-  },
-  {
-    "id": "project_20",
-    "name": "Machine Learning Pipeline",
-    "category": "Development",
-    "priority": "Medium",
-    "description": "Build automated ML pipeline for predictive analytics and model deployment",
-    "team_lead": "Daniel Garcia",
-    "preparing_stage": {
-      "start": "2024-05-15T00:00:00",
-      "end": "2024-06-15T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-06-15T00:00:00",
-      "end": "2024-10-30T00:00:00",
-      "duration_days": 137,
-      "progress_percent": 28
-    },
-    "total_duration_days": 168
-  },
-  {
-    "id": "project_21",
-    "name": "PCI DSS Compliance",
-    "category": "Compliance",
-    "priority": "Critical",
-    "description": "Achieve PCI DSS Level 1 compliance for payment card processing",
-    "team_lead": "Laura Wilson",
-    "preparing_stage": {
-      "start": "2024-04-10T00:00:00",
-      "end": "2024-05-01T00:00:00",
-      "duration_days": 21
-    },
-    "execution_stage": {
-      "start": "2024-05-01T00:00:00",
-      "end": "2024-08-10T00:00:00",
-      "duration_days": 101,
-      "progress_percent": 67
-    },
-    "total_duration_days": 122
-  },
-  {
-    "id": "project_22",
-    "name": "Microservices Architecture",
-    "category": "Development",
-    "priority": "High",
-    "description": "Decompose monolithic application into scalable microservices architecture",
-    "team_lead": "Ryan Clark",
-    "preparing_stage": {
-      "start": "2024-06-01T00:00:00",
-      "end": "2024-06-28T00:00:00",
-      "duration_days": 27
-    },
-    "execution_stage": {
-      "start": "2024-06-28T00:00:00",
-      "end": "2024-11-30T00:00:00",
-      "duration_days": 155,
-      "progress_percent": 12
-    },
-    "total_duration_days": 182
-  },
-  {
-    "id": "project_23",
-    "name": "Security Information Management",
-    "category": "Security",
-    "priority": "Medium",
-    "description": "Implement SIEM solution for centralized security event monitoring",
-    "team_lead": "Melissa Jones",
-    "preparing_stage": {
-      "start": "2024-05-20T00:00:00",
-      "end": "2024-06-20T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-06-20T00:00:00",
-      "end": "2024-09-30T00:00:00",
-      "duration_days": 102,
-      "progress_percent": 45
-    },
-    "total_duration_days": 133
-  },
-  {
-    "id": "project_24",
-    "name": "Edge Computing Infrastructure",
-    "category": "Infrastructure",
-    "priority": "Low",
-    "description": "Deploy edge computing nodes for reduced latency and improved performance",
-    "team_lead": "Jonathan Miller",
-    "preparing_stage": {
-      "start": "2024-06-15T00:00:00",
-      "end": "2024-07-15T00:00:00",
-      "duration_days": 30
-    },
-    "execution_stage": {
-      "start": "2024-07-15T00:00:00",
-      "end": "2024-12-15T00:00:00",
-      "duration_days": 153,
-      "progress_percent": 8
-    },
-    "total_duration_days": 183
-  },
-  {
-    "id": "project_25",
-    "name": "Quantum Encryption Research",
-    "category": "Research",
-    "priority": "Low",
-    "description": "Research and prototype quantum-resistant encryption algorithms",
-    "team_lead": "Dr. Emily Chen",
-    "preparing_stage": {
-      "start": "2024-07-01T00:00:00",
-      "end": "2024-08-15T00:00:00",
-      "duration_days": 45
-    },
-    "execution_stage": {
-      "start": "2024-08-15T00:00:00",
-      "end": "2025-02-01T00:00:00",
-      "duration_days": 170,
-      "progress_percent": 5
-    },
-    "total_duration_days": 215
-  },
-  {
-    "id": "project_26",
-    "name": "Smart Contract Platform",
-    "category": "Development",
-    "priority": "Medium",
-    "description": "Develop smart contract platform for automated business agreements",
-    "team_lead": "Alex Rodriguez",
-    "preparing_stage": {
-      "start": "2024-07-15T00:00:00",
-      "end": "2024-08-15T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-08-15T00:00:00",
-      "end": "2024-12-30T00:00:00",
-      "duration_days": 137,
-      "progress_percent": 18
-    },
-    "total_duration_days": 168
-  },
-  {
-    "id": "project_27",
-    "name": "Zero Trust Architecture",
-    "category": "Security",
-    "priority": "High",
-    "description": "Implement zero trust security model across entire network infrastructure",
-    "team_lead": "Victoria Adams",
-    "preparing_stage": {
-      "start": "2024-06-10T00:00:00",
-      "end": "2024-07-10T00:00:00",
-      "duration_days": 30
-    },
-    "execution_stage": {
-      "start": "2024-07-10T00:00:00",
-      "end": "2024-12-10T00:00:00",
-      "duration_days": 153,
-      "progress_percent": 32
-    },
-    "total_duration_days": 183
-  },
-  {
-    "id": "project_28",
-    "name": "Customer Data Platform",
-    "category": "Analytics",
-    "priority": "Medium",
-    "description": "Unified customer data platform for 360-degree customer view and analytics",
-    "team_lead": "Nathan Lewis",
-    "preparing_stage": {
-      "start": "2024-08-01T00:00:00",
-      "end": "2024-09-01T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-09-01T00:00:00",
-      "end": "2025-01-15T00:00:00",
-      "duration_days": 136,
-      "progress_percent": 10
-    },
-    "total_duration_days": 167
-  },
-  {
-    "id": "project_29",
-    "name": "Automated Testing Framework",
-    "category": "Development",
-    "priority": "Low",
-    "description": "Develop comprehensive automated testing framework for quality assurance",
-    "team_lead": "Grace Kim",
-    "preparing_stage": {
-      "start": "2024-08-15T00:00:00",
-      "end": "2024-09-15T00:00:00",
-      "duration_days": 31
-    },
-    "execution_stage": {
-      "start": "2024-09-15T00:00:00",
-      "end": "2024-12-31T00:00:00",
-      "duration_days": 107,
-      "progress_percent": 6
-    },
-    "total_duration_days": 138
-  }
-];
-            const dateRange = {
-  "min_date": "2024-01-01T00:00:00",
-  "max_date": "2025-02-01T00:00:00"
-};
+            allProjectData = {{ project_data }};
+            filteredProjectData = [...allProjectData]; // Show all data by default
+            currentFilters = {}; // No filters applied initially
+            const dateRange = {{ date_range }};
             
-            document.getElementById('project-info').textContent = `${projectData.length} projects`;
+            // Initialize filter options
+            initializeFilterOptions();
+            
+            // Update project info
+            updateProjectInfo();
             
             // Calculate timeline (full project range)
             const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
@@ -1070,21 +570,194 @@
             // Create timeline header
             createTimelineHeader(weeks, weekWidth);
             
-            // Create project sidebar
-            createProjectSidebar(projectData);
-            
-            // Create timeline content
-            createTimelineContent(projectData, weeks, weekWidth, parseTime);
+            // Create project sidebar and timeline content
+            renderGanttChart(weeks, weekWidth, parseTime);
             
             // Setup interactions
             setupInteractions();
+            setupFilters();
             
             // Auto-scroll to today's date
             scrollToToday(weeks, weekWidth);
         }
+
+        function initializeFilterOptions() {
+            // Get unique categories
+            const categories = [...new Set(allProjectData.map(p => p.category))].sort();
+            const categorySelect = document.getElementById('category-filter');
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+
+            // Get unique team leads
+            const teamLeads = [...new Set(allProjectData.map(p => p.team_lead))].sort();
+            const teamSelect = document.getElementById('team-filter');
+            teamLeads.forEach(lead => {
+                const option = document.createElement('option');
+                option.value = lead;
+                option.textContent = lead;
+                teamSelect.appendChild(option);
+            });
+        }
+
+        function updateProjectInfo() {
+            const visibleCount = filteredProjectData.length;
+            const totalCount = allProjectData.length;
+            const infoText = visibleCount === totalCount 
+                ? `${totalCount} projects (showing all)` 
+                : `${visibleCount} of ${totalCount} projects (filtered)`;
+            document.getElementById('project-info').textContent = infoText;
+        }
+
+        function applyFilters() {
+            filteredProjectData = allProjectData.filter(project => {
+                // Priority filter
+                if (currentFilters.priority && project.priority !== currentFilters.priority) {
+                    return false;
+                }
+
+                // Category filter
+                if (currentFilters.category && project.category !== currentFilters.category) {
+                    return false;
+                }
+
+                // Team lead filter
+                if (currentFilters.team && project.team_lead !== currentFilters.team) {
+                    return false;
+                }
+
+                // Progress filter
+                if (currentFilters.progress) {
+                    const progress = project.execution_stage.progress_percent;
+                    const [min, max] = currentFilters.progress.split('-').map(Number);
+                    if (progress < min || progress > max) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            updateProjectInfo();
+            updateActiveFilters();
+            
+            // Re-render the chart with filtered data
+            const weeks = getWeeksFromCurrentChart();
+            const weekWidth = 200;
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            renderGanttChart(weeks, weekWidth, parseTime);
+        }
+
+        function getWeeksFromCurrentChart() {
+            // Extract weeks from current timeline (simplified)
+            const dateRange = {{ date_range }};
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            const minDate = parseTime(dateRange.min_date);
+            const maxDate = parseTime(dateRange.max_date);
+            
+            const startDate = new Date(minDate);
+            startDate.setDate(startDate.getDate() - startDate.getDay());
+            
+            const endDate = new Date(maxDate);
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+            
+            const weeks = [];
+            const currentWeek = new Date(startDate);
+            while (currentWeek <= endDate) {
+                weeks.push(new Date(currentWeek));
+                currentWeek.setDate(currentWeek.getDate() + 7);
+            }
+            return weeks;
+        }
+
+        function updateActiveFilters() {
+            const activeFiltersDiv = document.getElementById('active-filters');
+            activeFiltersDiv.innerHTML = '';
+
+            Object.entries(currentFilters).forEach(([key, value]) => {
+                if (value) {
+                    const badge = document.createElement('span');
+                    badge.className = 'filter-badge';
+                    badge.innerHTML = `${key}: ${value} <span class="remove" data-filter="${key}">×</span>`;
+                    activeFiltersDiv.appendChild(badge);
+                }
+            });
+
+            // Add click handlers for filter removal
+            activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const filterKey = e.target.dataset.filter;
+                    delete currentFilters[filterKey];
+                    document.getElementById(`${filterKey}-filter`).value = '';
+                    applyFilters();
+                });
+            });
+        }
+
+        function setupFilters() {
+            // Priority filter
+            document.getElementById('priority-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.priority = e.target.value;
+                } else {
+                    delete currentFilters.priority;
+                }
+                applyFilters();
+            });
+
+            // Category filter
+            document.getElementById('category-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.category = e.target.value;
+                } else {
+                    delete currentFilters.category;
+                }
+                applyFilters();
+            });
+
+            // Team filter
+            document.getElementById('team-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.team = e.target.value;
+                } else {
+                    delete currentFilters.team;
+                }
+                applyFilters();
+            });
+
+            // Progress filter
+            document.getElementById('progress-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.progress = e.target.value;
+                } else {
+                    delete currentFilters.progress;
+                }
+                applyFilters();
+            });
+
+            // Clear all filters
+            document.getElementById('clear-filters').addEventListener('click', () => {
+                currentFilters = {};
+                document.querySelectorAll('.filter-select').forEach(select => {
+                    select.value = '';
+                });
+                applyFilters();
+            });
+        }
         
         function createTimelineHeader(weeks, weekWidth) {
             const header = document.getElementById('timeline-header');
+            
+            // Clear existing content except scroll hint
+            const scrollHint = header.querySelector('.scroll-hint');
+            header.innerHTML = '';
+            if (scrollHint) {
+                header.appendChild(scrollHint);
+            }
+            
             const totalWidth = weeks.length * weekWidth;
             header.style.width = totalWidth + 'px';
             header.style.minWidth = totalWidth + 'px';
@@ -1092,6 +765,7 @@
             // Week headers
             const weekHeader = document.createElement('div');
             weekHeader.className = 'gantt-week-header';
+            weekHeader.style.position = 'relative'; // Add relative positioning for today marker
             
             weeks.forEach(week => {
                 const weekCol = document.createElement('div');
@@ -1122,11 +796,40 @@
                 weekHeader.appendChild(weekCol);
             });
             
+            // Add today marker to the week header (scrollable area)
+            addTodayMarkerToHeader(weekHeader, weeks, weekWidth);
+            
             header.appendChild(weekHeader);
         }
         
+        function addTodayMarkerToHeader(weekHeader, weeks, weekWidth) {
+            const today = new Date();
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
+            const totalWidth = weeks.length * weekWidth;
+            
+            if (todayX >= 0 && todayX <= totalWidth) {
+                const todayMarker = document.createElement('div');
+                todayMarker.className = 'gantt-today-marker';
+                todayMarker.style.left = todayX + 'px';
+                todayMarker.style.bottom = '3px';
+                
+                const formatToday = d3.timeFormat('%Y/%m/%d');
+                todayMarker.textContent = `Today ${formatToday(today)}`;
+                weekHeader.appendChild(todayMarker);
+            }
+        }
+        
+        function renderGanttChart(weeks, weekWidth, parseTime) {
+            // Clear and recreate sidebar content
+            createProjectSidebar(filteredProjectData);
+            
+            // Clear and recreate timeline content
+            createTimelineContent(filteredProjectData, weeks, weekWidth, parseTime);
+        }
+
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
+            sidebarContent.innerHTML = '';
             
             projectData.forEach(project => {
                 const row = document.createElement('div');
@@ -1143,6 +846,8 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
+            content.innerHTML = '';
+            
             const totalWidth = weeks.length * weekWidth;
             content.style.width = totalWidth + 'px';
             content.style.minWidth = totalWidth + 'px';
@@ -1156,25 +861,21 @@
                 content.appendChild(line);
             });
             
-            // Add today's line and marker
+            // Add today's vertical line (fixed position) - simplified approach
             const today = new Date();
-            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth;
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
             
             if (todayX >= 0 && todayX <= totalWidth) {
-                // Today's vertical line
-                const todayLine = document.createElement('div');
-                todayLine.className = 'gantt-vertical-line gantt-today-line';
-                todayLine.style.left = todayX + 'px';
-                content.appendChild(todayLine);
+                // Store today line info for later creation after DOM is ready
+                window.todayLineInfo = {
+                    todayX: todayX,
+                    totalWidth: totalWidth,
+                    weeks: weeks,
+                    weekWidth: weekWidth
+                };
                 
-                // Today's date marker
-                const todayMarker = document.createElement('div');
-                todayMarker.className = 'gantt-today-marker';
-                todayMarker.style.left = todayX + 'px';
-                
-                const formatToday = d3.timeFormat('%m/%d');
-                todayMarker.textContent = `Today ${formatToday(today)}`;
-                content.appendChild(todayMarker);
+                // Create the line after a short delay to ensure DOM is ready
+                setTimeout(createFixedTodayLine, 100);
             }
             
             // Create task bars
@@ -1245,6 +946,8 @@
                     if (timelineHeader) {
                         timelineHeader.scrollLeft = contentWrapper.scrollLeft;
                     }
+                    // Update today line position
+                    updateTodayLinePosition();
                 });
                 
                 sidebarContent.addEventListener('scroll', () => {
@@ -1255,8 +958,58 @@
                 if (timelineHeader) {
                     timelineHeader.addEventListener('scroll', () => {
                         contentWrapper.scrollLeft = timelineHeader.scrollLeft;
+                        // Update today line position
+                        updateTodayLinePosition();
                     });
                 }
+            }
+        }
+        
+        function createFixedTodayLine() {
+            if (!window.todayLineInfo) return;
+            
+            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
+            if (!contentWrapper) return;
+            
+            const contentRect = contentWrapper.getBoundingClientRect();
+            const todayX = window.todayLineInfo.todayX;
+            const scrollLeft = contentWrapper.scrollLeft;
+            
+            // Create the fixed today line
+            const todayLine = document.createElement('div');
+            todayLine.className = 'gantt-vertical-line gantt-today-line';
+            todayLine.style.left = (contentRect.left + (todayX - scrollLeft)) + 'px';
+            todayLine.style.top = contentRect.top + 'px';
+            todayLine.style.height = contentRect.height + 'px';
+            todayLine.style.display = 'block';
+            
+            document.body.appendChild(todayLine);
+            
+            // Store reference for updates
+            window.todayLineElement = todayLine;
+            window.todayLineOriginalX = todayX;
+        }
+        
+        function updateTodayLinePosition() {
+            if (!window.todayLineElement || !window.todayLineOriginalX) return;
+            
+            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
+            if (!contentWrapper) return;
+            
+            const contentRect = contentWrapper.getBoundingClientRect();
+            const scrollLeft = contentWrapper.scrollLeft;
+            const todayX = window.todayLineOriginalX;
+            const relativeX = todayX - scrollLeft;
+            
+            if (relativeX >= 0 && relativeX <= contentWrapper.clientWidth) {
+                // Today line is in viewport - show it
+                window.todayLineElement.style.display = 'block';
+                window.todayLineElement.style.left = (contentRect.left + relativeX) + 'px';
+                window.todayLineElement.style.top = contentRect.top + 'px';
+                window.todayLineElement.style.height = contentRect.height + 'px';
+            } else {
+                // Today line is outside viewport - hide it
+                window.todayLineElement.style.display = 'none';
             }
         }
         
@@ -1289,7 +1042,7 @@
             const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
             
             // Calculate today's exact position
-            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth;
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
             
             if (todayX >= 0 && contentWrapper) {
                 // Scroll to center today's line
@@ -1298,16 +1051,12 @@
             }
         }
         
-        // Load D3.js and initialize
-        (function(){
-            var script = document.createElement('script');
-            script.src = 'https://d3js.org/d3.v7.min.js';
-            script.onload = initFrappeGantt;
-            script.onerror = function() {
-                alert('Cannot load D3.js from CDN. This chart requires an internet connection.');
-            };
-            document.head.appendChild(script);
-        })();
+        // Initialize when D3.js is loaded
+        if (typeof d3 !== 'undefined') {
+            initInteractiveGantt();
+        } else {
+            console.error('D3.js not loaded');
+        }
     </script>
 </body>
 </html>

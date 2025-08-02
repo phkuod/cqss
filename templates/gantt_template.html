@@ -209,6 +209,37 @@
             color: #6c757d;
             margin-top: 5px;
         }
+        
+        .gantt-today-line {
+            background: #2684ff !important;
+            width: 2px !important;
+            z-index: 15 !important;
+        }
+        
+        .gantt-today-marker {
+            position: absolute;
+            background: #2684ff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            top: -45px;
+            transform: translateX(-50%);
+            z-index: 25;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(38, 132, 255, 0.3);
+        }
+        
+        .gantt-today-marker::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #2684ff;
+        }
     </style>
 </head>
 <body>
@@ -390,6 +421,52 @@
             .attr('height', height)
             .style('fill', '#f8f9fa')
             .style('opacity', 0.5);
+        
+        // Add today's line and marker
+        const today = new Date();
+        const todayX = xScale(today);
+        
+        if (todayX >= 0 && todayX <= width) {
+            // Today's vertical line
+            g.append('line')
+                .attr('class', 'gantt-today-line')
+                .attr('x1', todayX)
+                .attr('x2', todayX)
+                .attr('y1', 0)
+                .attr('y2', height)
+                .style('stroke', '#2684ff')
+                .style('stroke-width', 2)
+                .style('z-index', 15);
+            
+            // Today's date marker
+            const todayMarker = g.append('g')
+                .attr('class', 'gantt-today-marker-group')
+                .attr('transform', `translate(${todayX}, -32)`);
+            
+            todayMarker.append('rect')
+                .attr('x', -35)
+                .attr('y', 0)
+                .attr('width', 70)
+                .attr('height', 24)
+                .attr('rx', 6)
+                .style('fill', '#2684ff')
+                .style('filter', 'drop-shadow(0 4px 12px rgba(38, 132, 255, 0.3))');
+            
+            todayMarker.append('text')
+                .attr('x', 0)
+                .attr('y', 12)
+                .attr('dy', '0.35em')
+                .attr('text-anchor', 'middle')
+                .style('fill', 'white')
+                .style('font-size', '12px')
+                .style('font-weight', '600')
+                .text(`Today ${d3.timeFormat('%Y/%m/%d')(today)}`);
+            
+            // Arrow pointing down
+            todayMarker.append('polygon')
+                .attr('points', '0,24 -5,29 5,29')
+                .style('fill', '#2684ff');
+        }
         
         // Create project groups
         const projectGroups = g.selectAll('.project-group')

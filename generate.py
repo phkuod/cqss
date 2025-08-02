@@ -9,8 +9,12 @@ from pathlib import Path
 from src.gantt_generator import GanttChartGenerator
 
 def main():
-    # Default settings
-    csv_file = "data/extended_projects.csv"  # Use extended data by default
+    # Default settings - try mock data first, fallback to extended data
+    if Path("data/mock_three_months.csv").exists():
+        csv_file = "data/mock_three_months.csv"  # Use fresh mock data by default
+    else:
+        csv_file = "data/extended_projects.csv"  # Fallback to extended data
+    
     output_file = "output/gantt_chart.html"
     standalone = False
     style = "default"
@@ -55,10 +59,12 @@ def main():
         # Try to open automatically
         try:
             import webbrowser
-            webbrowser.open(f"file://{output_path.absolute()}")
+            import os
+            file_url = f"file:///{os.path.abspath(output_path).replace(os.sep, '/')}"
+            webbrowser.open(file_url)
             print(f"  Opening in default browser...")
-        except:
-            pass
+        except Exception as browser_error:
+            print(f"  Could not open browser automatically: {browser_error}")
             
     except Exception as e:
         print(f"Error: {str(e)}")

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(mkdir:*)",
@@ -20,7 +21,17 @@
       "Bash(gh pr create:*)",
       "WebFetch(domain:dribbble.com)",
       "WebFetch(domain:pageflows.com)",
-      "WebFetch(domain:blog.netronic.com)"
+      "WebFetch(domain:blog.netronic.com)",
+      "Bash(ls:*)",
+      "Bash(start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\gantt_chart_interactive.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\gantt_chart_interactive.html\")",
+      "Bash(start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\test_scroll_improved.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\test_scroll_improved.html\")",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\gantt_chart.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\gantt_chart.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\today_horizontal_text.html\")"
     ],
     "deny": []
   }

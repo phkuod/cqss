@@ -562,8 +562,512 @@
     <script>
         function initFrappeGantt() {
             // Project data will be embedded here
-            const projectData = {{ project_data }};
-            const dateRange = {{ date_range }};
+            const projectData = [
+  {
+    "id": "project_0",
+    "name": "Cloud Migration Security",
+    "category": "Infrastructure",
+    "priority": "Medium",
+    "description": "Strategic infrastructure initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "SRE Team",
+    "preparing_stage": {
+      "start": "2025-07-03T00:00:00",
+      "end": "2025-07-16T00:00:00",
+      "duration_days": 13
+    },
+    "execution_stage": {
+      "start": "2025-07-16T00:00:00",
+      "end": "2025-07-25T00:00:00",
+      "duration_days": 9,
+      "progress_percent": 100
+    },
+    "total_duration_days": 22
+  },
+  {
+    "id": "project_1",
+    "name": "Email Marketing B2C",
+    "category": "Marketing Campaign",
+    "priority": "Medium",
+    "description": "Cross-functional marketing campaign project aimed at enhancing system capabilities and performance.",
+    "team_lead": "Content Team",
+    "preparing_stage": {
+      "start": "2025-07-06T00:00:00",
+      "end": "2025-07-19T00:00:00",
+      "duration_days": 13
+    },
+    "execution_stage": {
+      "start": "2025-07-19T00:00:00",
+      "end": "2025-08-27T00:00:00",
+      "duration_days": 39,
+      "progress_percent": 28
+    },
+    "total_duration_days": 52
+  },
+  {
+    "id": "project_2",
+    "name": "Performance Analytics Report",
+    "category": "Research & Analysis",
+    "priority": "Low",
+    "description": "Cross-functional research & analysis project aimed at enhancing system capabilities and performance.",
+    "team_lead": "Analytics Team",
+    "preparing_stage": {
+      "start": "2025-07-08T00:00:00",
+      "end": "2025-07-18T00:00:00",
+      "duration_days": 10
+    },
+    "execution_stage": {
+      "start": "2025-07-18T00:00:00",
+      "end": "2025-09-23T00:00:00",
+      "duration_days": 67,
+      "progress_percent": 14
+    },
+    "total_duration_days": 77
+  },
+  {
+    "id": "project_3",
+    "name": "QQ1 Starter Campaign",
+    "category": "Marketing Campaign",
+    "priority": "High",
+    "description": "Comprehensive marketing campaign project targeting scalability and reliability improvements.",
+    "team_lead": "Content Team",
+    "preparing_stage": {
+      "start": "2025-07-08T00:00:00",
+      "end": "2025-07-14T00:00:00",
+      "duration_days": 6
+    },
+    "execution_stage": {
+      "start": "2025-07-14T00:00:00",
+      "end": "2025-08-25T00:00:00",
+      "duration_days": 42,
+      "progress_percent": 39
+    },
+    "total_duration_days": 48
+  },
+  {
+    "id": "project_4",
+    "name": "Product Demo Package",
+    "category": "Marketing Campaign",
+    "priority": "High",
+    "description": "Critical marketing campaign effort to modernize infrastructure and streamline processes.",
+    "team_lead": "Design Team",
+    "preparing_stage": {
+      "start": "2025-07-09T00:00:00",
+      "end": "2025-07-16T00:00:00",
+      "duration_days": 7
+    },
+    "execution_stage": {
+      "start": "2025-07-16T00:00:00",
+      "end": "2025-08-11T00:00:00",
+      "duration_days": 26,
+      "progress_percent": 62
+    },
+    "total_duration_days": 33
+  },
+  {
+    "id": "project_5",
+    "name": "Go-to-Market Aggressive",
+    "category": "Product Launch",
+    "priority": "High",
+    "description": "Innovative product launch solution designed to address key business requirements.",
+    "team_lead": "Engineering Team",
+    "preparing_stage": {
+      "start": "2025-07-11T00:00:00",
+      "end": "2025-08-01T00:00:00",
+      "duration_days": 21
+    },
+    "execution_stage": {
+      "start": "2025-08-01T00:00:00",
+      "end": "2025-09-07T00:00:00",
+      "duration_days": 37,
+      "progress_percent": 14
+    },
+    "total_duration_days": 58
+  },
+  {
+    "id": "project_6",
+    "name": "Social Media Azure Strategy",
+    "category": "Marketing Campaign",
+    "priority": "High",
+    "description": "Critical marketing campaign effort to modernize infrastructure and streamline processes.",
+    "team_lead": "Design Team",
+    "preparing_stage": {
+      "start": "2025-07-13T00:00:00",
+      "end": "2025-07-23T00:00:00",
+      "duration_days": 10
+    },
+    "execution_stage": {
+      "start": "2025-07-23T00:00:00",
+      "end": "2025-08-05T00:00:00",
+      "duration_days": 13,
+      "progress_percent": 73
+    },
+    "total_duration_days": 23
+  },
+  {
+    "id": "project_7",
+    "name": "New Feature Enhanced Release",
+    "category": "Product Launch",
+    "priority": "Critical",
+    "description": "Innovative product launch solution designed to address key business requirements.",
+    "team_lead": "Sales Team",
+    "preparing_stage": {
+      "start": "2025-07-14T00:00:00",
+      "end": "2025-08-03T00:00:00",
+      "duration_days": 20
+    },
+    "execution_stage": {
+      "start": "2025-08-03T00:00:00",
+      "end": "2025-11-24T00:00:00",
+      "duration_days": 113,
+      "progress_percent": 0
+    },
+    "total_duration_days": 133
+  },
+  {
+    "id": "project_8",
+    "name": "Partnership Technology Integration",
+    "category": "Product Launch",
+    "priority": "High",
+    "description": "Cross-functional product launch project aimed at enhancing system capabilities and performance.",
+    "team_lead": "Engineering Team",
+    "preparing_stage": {
+      "start": "2025-07-17T00:00:00",
+      "end": "2025-08-04T00:00:00",
+      "duration_days": 18
+    },
+    "execution_stage": {
+      "start": "2025-08-04T00:00:00",
+      "end": "2025-09-27T00:00:00",
+      "duration_days": 54,
+      "progress_percent": 0
+    },
+    "total_duration_days": 72
+  },
+  {
+    "id": "project_9",
+    "name": "Security Framework Update",
+    "category": "Software Development",
+    "priority": "Medium",
+    "description": "Cross-functional software development project aimed at enhancing system capabilities and performance.",
+    "team_lead": "Backend Team",
+    "preparing_stage": {
+      "start": "2025-07-18T00:00:00",
+      "end": "2025-08-01T00:00:00",
+      "duration_days": 14
+    },
+    "execution_stage": {
+      "start": "2025-08-01T00:00:00",
+      "end": "2025-10-03T00:00:00",
+      "duration_days": 63,
+      "progress_percent": 5
+    },
+    "total_duration_days": 77
+  },
+  {
+    "id": "project_10",
+    "name": "Server Upgrade Staging",
+    "category": "Infrastructure",
+    "priority": "Critical",
+    "description": "Innovative infrastructure solution designed to address key business requirements.",
+    "team_lead": "DevOps Team",
+    "preparing_stage": {
+      "start": "2025-07-18T00:00:00",
+      "end": "2025-07-28T00:00:00",
+      "duration_days": 10
+    },
+    "execution_stage": {
+      "start": "2025-07-28T00:00:00",
+      "end": "2025-08-31T00:00:00",
+      "duration_days": 34,
+      "progress_percent": 16
+    },
+    "total_duration_days": 44
+  },
+  {
+    "id": "project_11",
+    "name": "Winter Product Launch",
+    "category": "Marketing Campaign",
+    "priority": "High",
+    "description": "Innovative marketing campaign solution designed to address key business requirements.",
+    "team_lead": "Marketing Team",
+    "preparing_stage": {
+      "start": "2025-07-19T00:00:00",
+      "end": "2025-07-27T00:00:00",
+      "duration_days": 8
+    },
+    "execution_stage": {
+      "start": "2025-07-27T00:00:00",
+      "end": "2025-08-24T00:00:00",
+      "duration_days": 28,
+      "progress_percent": 35
+    },
+    "total_duration_days": 36
+  },
+  {
+    "id": "project_12",
+    "name": "Microservice Compute Development",
+    "category": "Software Development",
+    "priority": "Medium",
+    "description": "Comprehensive software development project targeting scalability and reliability improvements.",
+    "team_lead": "DevOps Team",
+    "preparing_stage": {
+      "start": "2025-07-19T00:00:00",
+      "end": "2025-08-05T00:00:00",
+      "duration_days": 17
+    },
+    "execution_stage": {
+      "start": "2025-08-05T00:00:00",
+      "end": "2025-09-04T00:00:00",
+      "duration_days": 30,
+      "progress_percent": 0
+    },
+    "total_duration_days": 47
+  },
+  {
+    "id": "project_13",
+    "name": "Performance Analytics Dashboard",
+    "category": "Research & Analysis",
+    "priority": "Low",
+    "description": "Comprehensive research & analysis project targeting scalability and reliability improvements.",
+    "team_lead": "Strategy Team",
+    "preparing_stage": {
+      "start": "2025-07-24T00:00:00",
+      "end": "2025-08-13T00:00:00",
+      "duration_days": 20
+    },
+    "execution_stage": {
+      "start": "2025-08-13T00:00:00",
+      "end": "2025-10-29T00:00:00",
+      "duration_days": 77,
+      "progress_percent": 0
+    },
+    "total_duration_days": 97
+  },
+  {
+    "id": "project_14",
+    "name": "User Behavior Investigation",
+    "category": "Research & Analysis",
+    "priority": "Low",
+    "description": "Comprehensive research & analysis project targeting scalability and reliability improvements.",
+    "team_lead": "Strategy Team",
+    "preparing_stage": {
+      "start": "2025-07-25T00:00:00",
+      "end": "2025-08-14T00:00:00",
+      "duration_days": 20
+    },
+    "execution_stage": {
+      "start": "2025-08-14T00:00:00",
+      "end": "2025-11-01T00:00:00",
+      "duration_days": 79,
+      "progress_percent": 0
+    },
+    "total_duration_days": 99
+  },
+  {
+    "id": "project_15",
+    "name": "Customer Onboarding Streamlined",
+    "category": "Product Launch",
+    "priority": "High",
+    "description": "Strategic product launch initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Marketing Team",
+    "preparing_stage": {
+      "start": "2025-07-30T00:00:00",
+      "end": "2025-08-24T00:00:00",
+      "duration_days": 25
+    },
+    "execution_stage": {
+      "start": "2025-08-24T00:00:00",
+      "end": "2025-12-08T00:00:00",
+      "duration_days": 106,
+      "progress_percent": 0
+    },
+    "total_duration_days": 131
+  },
+  {
+    "id": "project_16",
+    "name": "API Analytics Implementation",
+    "category": "Software Development",
+    "priority": "High",
+    "description": "Cross-functional software development project aimed at enhancing system capabilities and performance.",
+    "team_lead": "Frontend Team",
+    "preparing_stage": {
+      "start": "2025-07-31T00:00:00",
+      "end": "2025-08-21T00:00:00",
+      "duration_days": 21
+    },
+    "execution_stage": {
+      "start": "2025-08-21T00:00:00",
+      "end": "2025-09-17T00:00:00",
+      "duration_days": 27,
+      "progress_percent": 0
+    },
+    "total_duration_days": 48
+  },
+  {
+    "id": "project_17",
+    "name": "Network Security Annual",
+    "category": "Infrastructure",
+    "priority": "Critical",
+    "description": "Strategic infrastructure initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Security Team",
+    "preparing_stage": {
+      "start": "2025-08-02T00:00:00",
+      "end": "2025-08-10T00:00:00",
+      "duration_days": 8
+    },
+    "execution_stage": {
+      "start": "2025-08-10T00:00:00",
+      "end": "2025-09-20T00:00:00",
+      "duration_days": 41,
+      "progress_percent": 0
+    },
+    "total_duration_days": 49
+  },
+  {
+    "id": "project_18",
+    "name": "Customer Feedback Review",
+    "category": "Research & Analysis",
+    "priority": "Medium",
+    "description": "Innovative research & analysis solution designed to address key business requirements.",
+    "team_lead": "Research Team",
+    "preparing_stage": {
+      "start": "2025-08-08T00:00:00",
+      "end": "2025-08-23T00:00:00",
+      "duration_days": 15
+    },
+    "execution_stage": {
+      "start": "2025-08-23T00:00:00",
+      "end": "2025-09-21T00:00:00",
+      "duration_days": 29,
+      "progress_percent": 0
+    },
+    "total_duration_days": 44
+  },
+  {
+    "id": "project_19",
+    "name": "Performance Optimization Frontend",
+    "category": "Software Development",
+    "priority": "Critical",
+    "description": "Critical software development effort to modernize infrastructure and streamline processes.",
+    "team_lead": "Frontend Team",
+    "preparing_stage": {
+      "start": "2025-08-12T00:00:00",
+      "end": "2025-08-30T00:00:00",
+      "duration_days": 18
+    },
+    "execution_stage": {
+      "start": "2025-08-30T00:00:00",
+      "end": "2025-09-27T00:00:00",
+      "duration_days": 28,
+      "progress_percent": 0
+    },
+    "total_duration_days": 46
+  },
+  {
+    "id": "project_20",
+    "name": "Product Roadmap Q2",
+    "category": "Product Launch",
+    "priority": "Critical",
+    "description": "Critical product launch effort to modernize infrastructure and streamline processes.",
+    "team_lead": "Engineering Team",
+    "preparing_stage": {
+      "start": "2025-08-12T00:00:00",
+      "end": "2025-09-01T00:00:00",
+      "duration_days": 20
+    },
+    "execution_stage": {
+      "start": "2025-09-01T00:00:00",
+      "end": "2025-11-13T00:00:00",
+      "duration_days": 73,
+      "progress_percent": 0
+    },
+    "total_duration_days": 93
+  },
+  {
+    "id": "project_21",
+    "name": "Performance Optimization Backend",
+    "category": "Software Development",
+    "priority": "High",
+    "description": "Innovative software development solution designed to address key business requirements.",
+    "team_lead": "DevOps Team",
+    "preparing_stage": {
+      "start": "2025-08-13T00:00:00",
+      "end": "2025-09-02T00:00:00",
+      "duration_days": 20
+    },
+    "execution_stage": {
+      "start": "2025-09-02T00:00:00",
+      "end": "2025-11-14T00:00:00",
+      "duration_days": 73,
+      "progress_percent": 0
+    },
+    "total_duration_days": 93
+  },
+  {
+    "id": "project_22",
+    "name": "Market Research B2B",
+    "category": "Research & Analysis",
+    "priority": "Low",
+    "description": "Innovative research & analysis solution designed to address key business requirements.",
+    "team_lead": "Research Team",
+    "preparing_stage": {
+      "start": "2025-08-13T00:00:00",
+      "end": "2025-08-22T00:00:00",
+      "duration_days": 9
+    },
+    "execution_stage": {
+      "start": "2025-08-22T00:00:00",
+      "end": "2025-10-25T00:00:00",
+      "duration_days": 64,
+      "progress_percent": 0
+    },
+    "total_duration_days": 73
+  },
+  {
+    "id": "project_23",
+    "name": "Trend Analysis Finance",
+    "category": "Research & Analysis",
+    "priority": "Low",
+    "description": "Strategic research & analysis initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Data Team",
+    "preparing_stage": {
+      "start": "2025-08-23T00:00:00",
+      "end": "2025-09-03T00:00:00",
+      "duration_days": 11
+    },
+    "execution_stage": {
+      "start": "2025-09-03T00:00:00",
+      "end": "2025-11-01T00:00:00",
+      "duration_days": 59,
+      "progress_percent": 0
+    },
+    "total_duration_days": 70
+  },
+  {
+    "id": "project_24",
+    "name": "ROI Assessment Project",
+    "category": "Research & Analysis",
+    "priority": "Low",
+    "description": "Strategic research & analysis initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Data Team",
+    "preparing_stage": {
+      "start": "2025-08-23T00:00:00",
+      "end": "2025-09-07T00:00:00",
+      "duration_days": 15
+    },
+    "execution_stage": {
+      "start": "2025-09-07T00:00:00",
+      "end": "2025-10-25T00:00:00",
+      "duration_days": 48,
+      "progress_percent": 0
+    },
+    "total_duration_days": 63
+  }
+];
+            const dateRange = {
+  "min_date": "2025-07-03T00:00:00",
+  "max_date": "2025-12-08T00:00:00"
+};
             
             document.getElementById('project-info').textContent = `${projectData.length} projects`;
             

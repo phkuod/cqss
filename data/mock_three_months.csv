@@ -1,0 +1,26 @@
+project_name,category,priority,preparing_start,preparing_end,execution_end,progress_percent,description,team_lead
+Cloud Migration Security,Infrastructure,Medium,2025-07-03,2025-07-16,2025-07-25,100,Strategic infrastructure initiative focused on improving operational efficiency and user experience.,SRE Team
+Email Marketing B2C,Marketing Campaign,Medium,2025-07-06,2025-07-19,2025-08-27,28,Cross-functional marketing campaign project aimed at enhancing system capabilities and performance.,Content Team
+Performance Analytics Report,Research & Analysis,Low,2025-07-08,2025-07-18,2025-09-23,14,Cross-functional research & analysis project aimed at enhancing system capabilities and performance.,Analytics Team
+QQ1 Starter Campaign,Marketing Campaign,High,2025-07-08,2025-07-14,2025-08-25,39,Comprehensive marketing campaign project targeting scalability and reliability improvements.,Content Team
+Product Demo Package,Marketing Campaign,High,2025-07-09,2025-07-16,2025-08-11,62,Critical marketing campaign effort to modernize infrastructure and streamline processes.,Design Team
+Go-to-Market Aggressive,Product Launch,High,2025-07-11,2025-08-01,2025-09-07,14,Innovative product launch solution designed to address key business requirements.,Engineering Team
+Social Media Azure Strategy,Marketing Campaign,High,2025-07-13,2025-07-23,2025-08-05,73,Critical marketing campaign effort to modernize infrastructure and streamline processes.,Design Team
+New Feature Enhanced Release,Product Launch,Critical,2025-07-14,2025-08-03,2025-11-24,0,Innovative product launch solution designed to address key business requirements.,Sales Team
+Partnership Technology Integration,Product Launch,High,2025-07-17,2025-08-04,2025-09-27,0,Cross-functional product launch project aimed at enhancing system capabilities and performance.,Engineering Team
+Security Framework Update,Software Development,Medium,2025-07-18,2025-08-01,2025-10-03,5,Cross-functional software development project aimed at enhancing system capabilities and performance.,Backend Team
+Server Upgrade Staging,Infrastructure,Critical,2025-07-18,2025-07-28,2025-08-31,16,Innovative infrastructure solution designed to address key business requirements.,DevOps Team
+Winter Product Launch,Marketing Campaign,High,2025-07-19,2025-07-27,2025-08-24,35,Innovative marketing campaign solution designed to address key business requirements.,Marketing Team
+Microservice Compute Development,Software Development,Medium,2025-07-19,2025-08-05,2025-09-04,0,Comprehensive software development project targeting scalability and reliability improvements.,DevOps Team
+Performance Analytics Dashboard,Research & Analysis,Low,2025-07-24,2025-08-13,2025-10-29,0,Comprehensive research & analysis project targeting scalability and reliability improvements.,Strategy Team
+User Behavior Investigation,Research & Analysis,Low,2025-07-25,2025-08-14,2025-11-01,0,Comprehensive research & analysis project targeting scalability and reliability improvements.,Strategy Team
+Customer Onboarding Streamlined,Product Launch,High,2025-07-30,2025-08-24,2025-12-08,0,Strategic product launch initiative focused on improving operational efficiency and user experience.,Marketing Team
+API Analytics Implementation,Software Development,High,2025-07-31,2025-08-21,2025-09-17,0,Cross-functional software development project aimed at enhancing system capabilities and performance.,Frontend Team
+Network Security Annual,Infrastructure,Critical,2025-08-02,2025-08-10,2025-09-20,0,Strategic infrastructure initiative focused on improving operational efficiency and user experience.,Security Team
+Customer Feedback Review,Research & Analysis,Medium,2025-08-08,2025-08-23,2025-09-21,0,Innovative research & analysis solution designed to address key business requirements.,Research Team
+Performance Optimization Frontend,Software Development,Critical,2025-08-12,2025-08-30,2025-09-27,0,Critical software development effort to modernize infrastructure and streamline processes.,Frontend Team
+Product Roadmap Q2,Product Launch,Critical,2025-08-12,2025-09-01,2025-11-13,0,Critical product launch effort to modernize infrastructure and streamline processes.,Engineering Team
+Performance Optimization Backend,Software Development,High,2025-08-13,2025-09-02,2025-11-14,0,Innovative software development solution designed to address key business requirements.,DevOps Team
+Market Research B2B,Research & Analysis,Low,2025-08-13,2025-08-22,2025-10-25,0,Innovative research & analysis solution designed to address key business requirements.,Research Team
+Trend Analysis Finance,Research & Analysis,Low,2025-08-23,2025-09-03,2025-11-01,0,Strategic research & analysis initiative focused on improving operational efficiency and user experience.,Data Team
+ROI Assessment Project,Research & Analysis,Low,2025-08-23,2025-09-07,2025-10-25,0,Strategic research & analysis initiative focused on improving operational efficiency and user experience.,Data Team

@@ -18,6 +18,8 @@ class GanttChartGenerator:
                 template_name = 'dark_professional_template.html'
             elif style == "colorful":
                 template_name = 'colorful_friendly_template.html'
+            elif style == "interactive":
+                template_name = 'interactive_modern_template.html'
             elif standalone:
                 template_name = 'standalone_gantt_template.html'
             else:

@@ -112,11 +112,49 @@ Interactive filter controls for:
 - **Touch-friendly**: Optimized for mobile and tablet scrolling
 - **Smart Hints**: Scroll hints that fade after first user interaction
 
-### After Any Enhancement
-1. **Create Feature Branch**: Create feature branch from master (e.g., `feature/add-filtering`, `feature/export-pdf`)
-2. **Commit Changes**: Create descriptive commit messages
-3. **Push Feature Branch**: Push changes to remote feature branch
-4. **Create PR**: Create pull request from feature branch to master
+## Development Workflow
+
+### Claude Code Development Process
+1. **Create Feature Branch**: Always create a new feature branch from master for any new feature development
+   ```bash
+   git checkout master
+   git pull origin master
+   git checkout -b feature/descriptive-feature-name
+   ```
+
+2. **Implement & Test**: Develop the feature with proper self-testing
+   - Implement the requested functionality
+   - Test all scenarios and edge cases
+   - Ensure code quality and follows project conventions
+   - Verify compatibility across all templates/styles
+
+3. **Commit to Feature Branch**: Commit completed and tested code to the feature branch
+   ```bash
+   git add .
+   git commit -m "feat: descriptive commit message with implementation details"
+   git push -u origin feature/descriptive-feature-name
+   ```
+
+4. **User Verification**: Wait for user to verify and approve the feature
+
+5. **Create PR**: Only create pull request after user requests it
+   ```bash
+   gh pr create --title "feat: Feature Title" --body "Detailed description"
+   ```
+
+### Important Notes
+- **NEVER** commit directly to master branch
+- **ALWAYS** create a new feature branch for each enhancement
+- **ONLY** create PR when explicitly requested by user after verification
+- Self-test thoroughly before committing
+- Use descriptive branch names (e.g., `feature/export-pdf`, `feature/mobile-responsive`)
+- **MAINTAIN** existing output file names when implementing new features:
+  - `1_default_design.html` - Classic Gantt chart design
+  - `2_minimal_design.html` - Ultra-clean minimal design  
+  - `3_dark_design.html` - Professional dark theme
+  - `4_colorful_design.html` - Vibrant, friendly design
+  - `5_interactive_design.html` - Modern interactive design
+  - `6_frappe_design.html` - Clean, modern Frappe-inspired design
 
 ## Memory Logs
 

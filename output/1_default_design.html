@@ -214,32 +214,31 @@
             background: #2684ff !important;
             width: 2px !important;
             z-index: 15 !important;
-        }
-        
-        .gantt-today-marker {
-            position: absolute;
-            background: #2684ff;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
+            position: fixed !important;
+            color: #1e40af;
             font-size: 12px;
-            font-weight: 600;
-            top: -45px;
-            transform: translateX(-50%);
-            z-index: 25;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(38, 132, 255, 0.3);
+            font-weight: 700;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
         
-        .gantt-today-marker::after {
-            content: '';
+        .gantt-today-line::before {
+            content: attr(data-today-text);
             position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: #2684ff;
+            top: 0;
+            left: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2684ff;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+        
     </style>
 </head>
 <body>
@@ -926,50 +925,46 @@
             .style('fill', '#f8f9fa')
             .style('opacity', 0.5);
         
-        // Add today's line and marker
+        // Add enhanced today's line with horizontal text
         const today = new Date();
         const todayX = xScale(today);
         
         if (todayX >= 0 && todayX <= width) {
-            // Today's vertical line
-            g.append('line')
-                .attr('class', 'gantt-today-line')
-                .attr('x1', todayX)
-                .attr('x2', todayX)
-                .attr('y1', 0)
-                .attr('y2', height)
-                .style('stroke', '#2684ff')
-                .style('stroke-width', 2)
-                .style('z-index', 15);
+            // Create enhanced today line div
+            const todayLine = document.createElement('div');
+            todayLine.className = 'gantt-vertical-line gantt-today-line';
             
-            // Today's date marker
-            const todayMarker = g.append('g')
-                .attr('class', 'gantt-today-marker-group')
-                .attr('transform', `translate(${todayX}, -32)`);
+            // Add today text as data attribute for CSS ::before pseudo-element
+            const formatToday = d3.timeFormat('%Y/%m/%d');
+            todayLine.setAttribute('data-today-text', `Today ${formatToday(today)}`);
             
-            todayMarker.append('rect')
-                .attr('x', -35)
-                .attr('y', 0)
-                .attr('width', 70)
-                .attr('height', 24)
-                .attr('rx', 6)
-                .style('fill', '#2684ff')
-                .style('filter', 'drop-shadow(0 4px 12px rgba(38, 132, 255, 0.3))');
+            // Calculate fixed position relative to the content wrapper
+            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
+            const contentRect = contentWrapper.getBoundingClientRect();
+            const fixedX = contentRect.left + Math.min(todayX - contentWrapper.scrollLeft, contentWrapper.clientWidth);
             
-            todayMarker.append('text')
-                .attr('x', 0)
-                .attr('y', 12)
-                .attr('dy', '0.35em')
-                .attr('text-anchor', 'middle')
-                .style('fill', 'white')
-                .style('font-size', '12px')
-                .style('font-weight', '600')
-                .text(`Today ${d3.timeFormat('%Y/%m/%d')(today)}`);
+            todayLine.style.left = fixedX + 'px';
+            todayLine.style.top = contentRect.top + 'px';
+            todayLine.style.height = contentRect.height + 'px';
+            todayLine.style.display = 'block';
             
-            // Arrow pointing down
-            todayMarker.append('polygon')
-                .attr('points', '0,24 -5,29 5,29')
-                .style('fill', '#2684ff');
+            document.body.appendChild(todayLine);
+            
+            // Update position on scroll
+            contentWrapper.addEventListener('scroll', function() {
+                const newContentRect = contentWrapper.getBoundingClientRect();
+                const newFixedX = newContentRect.left + Math.min(todayX - contentWrapper.scrollLeft, contentWrapper.clientWidth);
+                todayLine.style.left = newFixedX + 'px';
+                todayLine.style.top = newContentRect.top + 'px';
+                todayLine.style.height = newContentRect.height + 'px';
+                
+                // Hide/show based on visibility
+                if (todayX - contentWrapper.scrollLeft < 0 || todayX - contentWrapper.scrollLeft > contentWrapper.clientWidth) {
+                    todayLine.style.display = 'none';
+                } else {
+                    todayLine.style.display = 'block';
+                }
+            });
         }
         
         // Create project groups

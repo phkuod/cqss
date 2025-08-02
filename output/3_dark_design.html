@@ -277,22 +277,31 @@
             z-index: 15 !important;
             position: fixed !important;
             box-shadow: 0 0 8px rgba(248, 81, 73, 0.5);
+            color: #f85149;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
-        .gantt-today-marker {
+        .gantt-today-line::before {
+            content: attr(data-today-text);
             position: absolute;
-            background: linear-gradient(135deg, #da3633 0%, #f85149 100%);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
+            top: 0;
+            left: 5px;
+            background: rgba(33, 38, 45, 0.95);
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 11px;
-            font-weight: 700;
-            transform: translateX(-50%);
-            z-index: 30;
+            font-weight: 600;
+            color: #f85149;
             white-space: nowrap;
-            box-shadow: 0 8px 24px rgba(248, 81, 73, 0.4);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(248, 81, 73, 0.3);
         }
+        
 
         .gantt-weekend {
             background: rgba(139, 148, 158, 0.03);
@@ -1058,16 +1067,6 @@
             const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
             const totalWidth = weeks.length * weekWidth;
             
-            if (todayX >= 0 && todayX <= totalWidth) {
-                const todayMarker = document.createElement('div');
-                todayMarker.className = 'gantt-today-marker';
-                todayMarker.style.left = todayX + 'px';
-                todayMarker.style.bottom = '3px';
-                
-                const formatToday = d3.timeFormat('%Y/%m/%d');
-                todayMarker.textContent = `Today ${formatToday(today)}`;
-                weekHeader.appendChild(todayMarker);
-            }
         }
         
         function createProjectSidebar(projectData) {
@@ -1108,6 +1107,10 @@
             if (todayX >= 0 && todayX <= totalWidth) {
                 const todayLine = document.createElement('div');
                 todayLine.className = 'gantt-vertical-line gantt-today-line';
+                
+                // Add today text as data attribute for CSS ::before pseudo-element
+                const formatToday = d3.timeFormat('%Y/%m/%d');
+                todayLine.setAttribute('data-today-text', `Today ${formatToday(today)}`);
                 
                 // Calculate fixed position relative to the content wrapper
                 const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');

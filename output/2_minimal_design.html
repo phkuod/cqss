@@ -59,6 +59,63 @@
             font-weight: 500;
         }
 
+        /* Filter Controls */
+        .filter-section {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 16px 32px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            min-width: fit-content;
+        }
+
+        .filter-select, .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #374151;
+            min-width: 140px;
+            transition: border-color 0.15s ease;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .clear-filters-btn {
+            padding: 8px 16px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .clear-filters-btn:hover {
+            background: #5856eb;
+        }
+
         .gantt-wrapper {
             display: flex;
             flex: 1;
@@ -169,6 +226,13 @@
         .gantt-task-bar:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        .gantt-task-bar.selected {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
         }
 
         .gantt-task-preparing {
@@ -414,6 +478,117 @@
             background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
         }
 
+        /* Task Detail Modal */
+        .task-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .task-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .task-modal-header {
+            margin-bottom: 24px;
+        }
+
+        .task-modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #171717;
+            margin-bottom: 8px;
+        }
+
+        .task-modal-subtitle {
+            font-size: 16px;
+            color: #737373;
+        }
+
+        .task-modal-section {
+            margin-bottom: 20px;
+        }
+
+        .task-modal-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .task-modal-section p {
+            font-size: 15px;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .task-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #737373;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background-color 0.15s ease;
+        }
+
+        .task-modal-close:hover {
+            background: #f5f5f5;
+        }
+
+        /* Filter badges */
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #6366f1;
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-left: 8px;
+        }
+
+        .filter-badge .remove {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Hidden rows for filtering */
+        .gantt-row.filtered-out,
+        .gantt-row-content.filtered-out {
+            display: none;
+        }
+
     </style>
 </head>
 <body>
@@ -426,6 +601,48 @@
             </div>
         </div>
         
+        <!-- Filter Controls -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label class="filter-label">Priority:</label>
+                <select id="priority-filter" class="filter-select">
+                    <option value="" selected>All Priorities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Category:</label>
+                <select id="category-filter" class="filter-select">
+                    <option value="" selected>All Categories</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Team Lead:</label>
+                <select id="team-filter" class="filter-select">
+                    <option value="" selected>All Teams</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Progress:</label>
+                <select id="progress-filter" class="filter-select">
+                    <option value="" selected>All Progress</option>
+                    <option value="0-25">0-25%</option>
+                    <option value="26-50">26-50%</option>
+                    <option value="51-75">51-75%</option>
+                    <option value="76-100">76-100%</option>
+                </select>
+            </div>
+            
+            <button id="clear-filters" class="clear-filters-btn">Clear All</button>
+            
+            <div id="active-filters"></div>
+        </div>
         
         <div class="gantt-wrapper">
             <div class="gantt-sidebar" id="gantt-sidebar">
@@ -452,8 +669,37 @@
     </div>
     
     <div class="tooltip" id="tooltip" style="display: none;"></div>
+    
+    <!-- Task Detail Modal -->
+    <div class="task-modal" id="task-modal">
+        <div class="task-modal-content">
+            <button class="task-modal-close" id="modal-close">&times;</button>
+            <div class="task-modal-header">
+                <div class="task-modal-title" id="modal-title"></div>
+                <div class="task-modal-subtitle" id="modal-subtitle"></div>
+            </div>
+            <div class="task-modal-section">
+                <h4>Details</h4>
+                <div id="modal-details"></div>
+            </div>
+            <div class="task-modal-section">
+                <h4>Timeline</h4>
+                <div id="modal-timeline"></div>
+            </div>
+            <div class="task-modal-section">
+                <h4>Description</h4>
+                <div id="modal-description"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
+        // Global variables for filter functionality
+        let allProjectData;
+        let filteredProjectData;
+        let currentFilters = {};
+        let selectedTaskBar = null;
+
         function initFrappeGantt() {
             // Project data will be embedded here
             const projectData = [
@@ -963,6 +1209,13 @@
   "max_date": "2025-12-08T00:00:00"
 };
             
+            // Initialize filter variables
+            allProjectData = [...projectData];
+            filteredProjectData = [...projectData];
+            
+            // Initialize filter options after data is available
+            populateFilterOptions();
+            
             document.getElementById('project-info').textContent = `${projectData.length} projects`;
             
             // Calculate timeline (full project range)
@@ -1013,6 +1266,10 @@
             
             // Add scroll-to-today button
             addScrollToTodayButton();
+            
+            // Initialize filter system
+            setupFilters();
+            setupModal();
             
             // Auto-scroll to today's date on page load
             setTimeout(() => {
@@ -1067,6 +1324,7 @@
         
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
+            sidebarContent.innerHTML = '';
             
             projectData.forEach(project => {
                 const row = document.createElement('div');
@@ -1083,6 +1341,8 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
+            content.innerHTML = '';
+            
             const totalWidth = weeks.length * weekWidth;
             content.style.width = totalWidth + 'px';
             content.style.minWidth = totalWidth + 'px';
@@ -1095,6 +1355,11 @@
                 line.style.left = (index * weekWidth) + 'px';
                 content.appendChild(line);
             });
+            
+            // Remove existing today line if it exists
+            if (window.todayLineElement) {
+                window.todayLineElement.remove();
+            }
             
             // Add today's vertical line (fixed position)
             const today = new Date();
@@ -1120,7 +1385,7 @@
                 // Add to body so it's not affected by container scrolling
                 document.body.appendChild(todayLine);
                 
-                // Store reference for scroll updates
+                // Store reference to today line element for cleanup
                 window.todayLineElement = todayLine;
                 window.todayLineOriginalX = todayX;
             }
@@ -1145,6 +1410,23 @@
                 prepBar.style.width = prepWidth + 'px';
                 prepBar.innerHTML = `<div class="gantt-task-label">Preparing</div>`;
                 
+                // Add click handler for preparing bar
+                prepBar.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Remove previous selection
+                    if (selectedTaskBar) {
+                        selectedTaskBar.classList.remove('selected');
+                    }
+                    
+                    // Add selection to clicked bar
+                    prepBar.classList.add('selected');
+                    selectedTaskBar = prepBar;
+                    
+                    // Open modal
+                    openModal(project);
+                });
+                
                 // Execution phase
                 const execStart = parseTime(project.execution_stage.start);
                 const execEnd = parseTime(project.execution_stage.end);
@@ -1166,6 +1448,23 @@
                     <div class="gantt-task-progress-text">${project.execution_stage.progress_percent}%</div>
                 `;
                 execBar.appendChild(progressBar);
+                
+                // Add click handler for execution bar
+                execBar.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Remove previous selection
+                    if (selectedTaskBar) {
+                        selectedTaskBar.classList.remove('selected');
+                    }
+                    
+                    // Add selection to clicked bar
+                    execBar.classList.add('selected');
+                    selectedTaskBar = execBar;
+                    
+                    // Open modal
+                    openModal(project);
+                });
                 
                 // Add tooltips
                 [prepBar, execBar].forEach(bar => {
@@ -1292,6 +1591,16 @@
                             }, 1000);
                         }
                     });
+                }
+            });
+            
+            // Add click handler to deselect task bars when clicking elsewhere
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.gantt-task-bar') && !e.target.closest('.task-modal-content')) {
+                    if (selectedTaskBar) {
+                        selectedTaskBar.classList.remove('selected');
+                        selectedTaskBar = null;
+                    }
                 }
             });
         }
@@ -1452,6 +1761,222 @@
             
             // Add to body instead of timeline header to avoid positioning issues
             document.body.appendChild(button);
+        }
+        
+        function setupFilters() {
+            // Priority filter
+            document.getElementById('priority-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.priority = e.target.value;
+                } else {
+                    delete currentFilters.priority;
+                }
+                applyFilters();
+            });
+
+            // Category filter
+            document.getElementById('category-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.category = e.target.value;
+                } else {
+                    delete currentFilters.category;
+                }
+                applyFilters();
+            });
+
+            // Team filter
+            document.getElementById('team-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.team = e.target.value;
+                } else {
+                    delete currentFilters.team;
+                }
+                applyFilters();
+            });
+
+            // Progress filter
+            document.getElementById('progress-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.progress = e.target.value;
+                } else {
+                    delete currentFilters.progress;
+                }
+                applyFilters();
+            });
+
+            // Clear all filters
+            document.getElementById('clear-filters').addEventListener('click', () => {
+                currentFilters = {};
+                document.querySelectorAll('.filter-select').forEach(select => {
+                    select.value = '';
+                });
+                applyFilters();
+            });
+        }
+        
+        function populateFilterOptions() {
+            // Get unique categories and team leads
+            const categories = [...new Set(allProjectData.map(p => p.category))];
+            const teamLeads = [...new Set(allProjectData.map(p => p.team_lead))];
+            
+            // Populate category filter
+            const categorySelect = document.getElementById('category-filter');
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+            
+            // Populate team filter
+            const teamSelect = document.getElementById('team-filter');
+            teamLeads.forEach(teamLead => {
+                const option = document.createElement('option');
+                option.value = teamLead;
+                option.textContent = teamLead;
+                teamSelect.appendChild(option);
+            });
+        }
+        
+        function applyFilters() {
+            filteredProjectData = allProjectData.filter(project => {
+                // Priority filter
+                if (currentFilters.priority && project.priority !== currentFilters.priority) {
+                    return false;
+                }
+
+                // Category filter
+                if (currentFilters.category && project.category !== currentFilters.category) {
+                    return false;
+                }
+
+                // Team lead filter
+                if (currentFilters.team && project.team_lead !== currentFilters.team) {
+                    return false;
+                }
+
+                // Progress filter
+                if (currentFilters.progress) {
+                    const progress = project.execution_stage.progress_percent;
+                    const [min, max] = currentFilters.progress.split('-').map(Number);
+                    if (progress < min || progress > max) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            updateProjectInfo();
+            updateActiveFilters();
+            
+            // Re-render with filtered data
+            const weeks = window.ganttWeeks;
+            const weekWidth = window.ganttWeekWidth;
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            
+            createProjectSidebar(filteredProjectData);
+            createTimelineContent(filteredProjectData, weeks, weekWidth, parseTime);
+            setupInteractions();
+        }
+        
+        function updateProjectInfo() {
+            document.getElementById('project-info').textContent = `${filteredProjectData.length} of ${allProjectData.length} projects`;
+        }
+        
+        function updateActiveFilters() {
+            const activeFiltersDiv = document.getElementById('active-filters');
+            activeFiltersDiv.innerHTML = '';
+            
+            Object.keys(currentFilters).forEach(filterKey => {
+                const badge = document.createElement('span');
+                badge.className = 'filter-badge';
+                badge.innerHTML = `${filterKey}: ${currentFilters[filterKey]} <span class="remove" data-filter="${filterKey}">×</span>`;
+                activeFiltersDiv.appendChild(badge);
+            });
+            
+            // Add click handlers for remove buttons
+            activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const filterKey = e.target.dataset.filter;
+                    delete currentFilters[filterKey];
+                    document.getElementById(`${filterKey}-filter`).value = '';
+                    applyFilters();
+                });
+            });
+        }
+        
+        function setupModal() {
+            const modal = document.getElementById('task-modal');
+            const closeBtn = document.getElementById('modal-close');
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        }
+
+        function openModal(project) {
+            const modal = document.getElementById('task-modal');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
+            const details = document.getElementById('modal-details');
+            const timeline = document.getElementById('modal-timeline');
+            const description = document.getElementById('modal-description');
+
+            title.textContent = project.name;
+            subtitle.textContent = `${project.category} • Led by ${project.team_lead}`;
+
+            details.innerHTML = `
+                <p><strong>Priority:</strong> ${project.priority}</p>
+                <p><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</p>
+                <p><strong>Status:</strong> ${getProjectStatus(project)}</p>
+            `;
+
+            const prepStart = new Date(project.preparing_stage.start);
+            const prepEnd = new Date(project.preparing_stage.end);
+            const execStart = new Date(project.execution_stage.start);
+            const execEnd = new Date(project.execution_stage.end);
+
+            timeline.innerHTML = `
+                <p><strong>Preparation:</strong> ${prepStart.toLocaleDateString()} - ${prepEnd.toLocaleDateString()}</p>
+                <p><strong>Execution:</strong> ${execStart.toLocaleDateString()} - ${execEnd.toLocaleDateString()}</p>
+                <p><strong>Total Duration:</strong> ${Math.ceil((execEnd - prepStart) / (1000 * 60 * 60 * 24))} days</p>
+            `;
+
+            description.textContent = project.description;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('task-modal');
+            modal.classList.remove('active');
+            
+            // Remove selection from task bar
+            if (selectedTaskBar) {
+                selectedTaskBar.classList.remove('selected');
+                selectedTaskBar = null;
+            }
+        }
+
+        function getProjectStatus(project) {
+            const now = new Date();
+            const execEnd = new Date(project.execution_stage.end);
+            const progress = project.execution_stage.progress_percent;
+
+            if (progress === 100) return 'Completed';
+            if (now > execEnd) return 'Overdue';
+            if (progress > 0) return 'In Progress';
+            return 'Not Started';
         }
         
         

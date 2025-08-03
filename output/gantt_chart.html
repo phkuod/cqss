@@ -204,6 +204,64 @@
             color: #495057;
         }
 
+        /* Filter Controls */
+        .filter-section {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 16px 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+            min-width: fit-content;
+        }
+
+        .filter-select, .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            color: #495057;
+            min-width: 140px;
+            transition: border-color 0.15s ease;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .clear-filters-btn {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .clear-filters-btn:hover {
+            background: #0056b3;
+        }
+
         .scroll-hint {
             font-size: 12px;
             color: #6c757d;
@@ -238,6 +296,125 @@
             white-space: nowrap;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        /* Task Detail Modal */
+        .task-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .task-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-modal-content {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .task-modal-header {
+            margin-bottom: 24px;
+        }
+
+        .task-modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 8px;
+        }
+
+        .task-modal-subtitle {
+            font-size: 16px;
+            color: #6c757d;
+        }
+
+        .task-modal-section {
+            margin-bottom: 20px;
+        }
+
+        .task-modal-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .task-modal-section p {
+            font-size: 15px;
+            color: #495057;
+            line-height: 1.5;
+        }
+
+        .task-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.15s ease;
+        }
+
+        .task-modal-close:hover {
+            background: #f8f9fa;
+        }
+
+        /* Filter badges */
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #007bff;
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+
+        .filter-badge .remove {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Selected task styling */
+        .progress-bar.selected {
+            stroke: #007bff;
+            stroke-width: 3;
+            filter: drop-shadow(0 4px 8px rgba(0, 123, 255, 0.3));
+        }
+
+        .preparing-bar.selected {
+            stroke: #007bff;
+            stroke-width: 3;
+            filter: drop-shadow(0 4px 8px rgba(0, 123, 255, 0.3));
+        }
         
     </style>
 </head>
@@ -251,6 +428,49 @@
         <div class="info-bar">
             <span id="project-count">Loading projects...</span>
             <div class="scroll-hint">💡 Use scrollbars or Shift + mouse wheel for horizontal scroll, arrow keys for navigation</div>
+        </div>
+        
+        <!-- Filter Controls -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label class="filter-label">Priority:</label>
+                <select id="priority-filter" class="filter-select">
+                    <option value="" selected>All Priorities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Category:</label>
+                <select id="category-filter" class="filter-select">
+                    <option value="" selected>All Categories</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Team Lead:</label>
+                <select id="team-filter" class="filter-select">
+                    <option value="" selected>All Teams</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Progress:</label>
+                <select id="progress-filter" class="filter-select">
+                    <option value="" selected>All Progress</option>
+                    <option value="0-25">0-25%</option>
+                    <option value="26-50">26-50%</option>
+                    <option value="51-75">51-75%</option>
+                    <option value="76-100">76-100%</option>
+                </select>
+            </div>
+            
+            <button id="clear-filters" class="clear-filters-btn">Clear All</button>
+            
+            <div id="active-filters"></div>
         </div>
         
         <div class="gantt-container" id="gantt-container">
@@ -283,7 +503,36 @@
     
     <div class="tooltip" id="tooltip" style="display: none;"></div>
     
+    <!-- Task Detail Modal -->
+    <div class="task-modal" id="task-modal">
+        <div class="task-modal-content">
+            <button class="task-modal-close" id="modal-close">&times;</button>
+            <div class="task-modal-header">
+                <div class="task-modal-title" id="modal-title"></div>
+                <div class="task-modal-subtitle" id="modal-subtitle"></div>
+            </div>
+            <div class="task-modal-section">
+                <h4>Details</h4>
+                <div id="modal-details"></div>
+            </div>
+            <div class="task-modal-section">
+                <h4>Timeline</h4>
+                <div id="modal-timeline"></div>
+            </div>
+            <div class="task-modal-section">
+                <h4>Description</h4>
+                <div id="modal-description"></div>
+            </div>
+        </div>
+    </div>
+    
     <script>
+        // Global variables for filter functionality
+        let allProjectData;
+        let filteredProjectData;
+        let currentFilters = {};
+        let selectedTaskElement = null;
+
         function initChart() {
             // Project data will be embedded here
             const projectData = [
@@ -793,22 +1042,14 @@
   "max_date": "2025-12-08T00:00:00"
 };
             
+            // Initialize filter variables
+            allProjectData = [...projectData];
+            filteredProjectData = [...projectData];
+            
             document.getElementById('project-count').textContent = `${projectData.length} projects loaded`;
-        
-        // Chart configuration optimized for both horizontal and vertical scrolling
-        const margin = { top: 50, right: 50, bottom: 100, left: 320 };
-        const width = 3000 - margin.left - margin.right; // Wider for more horizontal scroll range
-        const height = projectData.length * 65 - margin.top - margin.bottom; // Responsive height
-        const barHeight = 30;
-        const rowHeight = 65;
-        
-        // Create SVG
-        const svg = d3.select('.gantt-chart')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom);
-        
-        const g = svg.append('g')
-            .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Render initial chart
+            renderGanttChart();
         
         // Parse dates
         const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
@@ -969,7 +1210,7 @@
         
         // Create project groups
         const projectGroups = g.selectAll('.project-group')
-            .data(projectData)
+            .data(filteredProjectData)
             .enter()
             .append('g')
             .attr('class', 'project-group')
@@ -1026,7 +1267,33 @@
                 tooltip.style('display', 'none');
             })
             .on('click', function(event, d) {
-                alert(`Project Details:\n\nName: ${d.name}\nCategory: ${d.category}\nPriority: ${d.priority}\nTeam Lead: ${d.team_lead}\nProgress: ${d.execution_stage.progress_percent}%\nDescription: ${d.description}`);
+                // Remove previous selection
+                if (selectedTaskElement) {
+                    selectedTaskElement.classed('selected', false);
+                }
+                
+                // Add selection to clicked element
+                d3.select(this).classed('selected', true);
+                selectedTaskElement = d3.select(this);
+                
+                // Open modal
+                openModal(d);
+            });
+            
+        // Add click handlers to preparing bars too
+        projectGroups.selectAll('.preparing-bar')
+            .on('click', function(event, d) {
+                // Remove previous selection
+                if (selectedTaskElement) {
+                    selectedTaskElement.classed('selected', false);
+                }
+                
+                // Add selection to clicked element
+                d3.select(this).classed('selected', true);
+                selectedTaskElement = d3.select(this);
+                
+                // Open modal
+                openModal(d);
             });
         
         // Add project names to execution bars
@@ -1121,12 +1388,473 @@
             container.setAttribute('tabindex', '0');
         }
         }
+        
+        // Add click handler to deselect when clicking elsewhere
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('rect') && !event.target.closest('.task-modal-content')) {
+                if (selectedTaskElement) {
+                    selectedTaskElement.classed('selected', false);
+                    selectedTaskElement = null;
+                }
+            }
+        });
+        }
+        
+        function renderGanttChart() {
+            // Parse dates
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            const minDate = parseTime(dateRange.min_date);
+            const maxDate = parseTime(dateRange.max_date);
+            
+            // Calculate 2-week range starting from Sunday
+            function getStartOfWeek(date) {
+                const d = new Date(date);
+                const day = d.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                const diff = d.getDate() - day;
+                return new Date(d.setDate(diff));
+            }
+            
+            function getEndOfWeek(date) {
+                const d = new Date(date);
+                const day = d.getDay();
+                const diff = d.getDate() + (6 - day);
+                return new Date(d.setDate(diff));
+            }
+            
+            // Extended timeline for better horizontal scrolling (4 weeks)
+            const startOfFirstWeek = getStartOfWeek(minDate);
+            const endOfExtendedPeriod = new Date(startOfFirstWeek);
+            endOfExtendedPeriod.setDate(startOfFirstWeek.getDate() + 27); // 28 days total (4 weeks)
+            
+            const paddedMinDate = startOfFirstWeek;
+            const paddedMaxDate = endOfExtendedPeriod;
+            
+            // Chart dimensions
+            const margin = { top: 20, right: 30, bottom: 40, left: 200 };
+            const width = 800 - margin.left - margin.right;
+            const height = filteredProjectData.length * 60 + 40; // Dynamic height based on filtered data
+            
+            // Scales
+            const xScale = d3.scaleTime()
+                .domain([paddedMinDate, paddedMaxDate])
+                .range([0, width]);
+            
+            const yScale = d3.scaleBand()
+                .domain(filteredProjectData.map(d => d.name))
+                .range([0, height])
+                .padding(0.1);
+            
+            // Priority color scale
+            const priorityColors = {
+                'Critical': '#dc3545',
+                'High': '#fd7e14',
+                'Medium': '#ffc107',
+                'Low': '#28a745'
+            };
+            
+            // Clear previous chart
+            d3.select('.gantt-chart').selectAll('*').remove();
+            
+            // Create SVG
+            const svg = d3.select('.gantt-chart')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom);
+            
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Create tooltip
+            const tooltip = d3.select('#tooltip');
+            
+            // Add axes with daily ticks
+            const xAxis = d3.axisBottom(xScale)
+                .tickFormat(d => {
+                    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    return dayNames[d.getDay()] + '\n' + d3.timeFormat('%m/%d')(d);
+                })
+                .ticks(d3.timeDay.every(1));
+            
+            g.append('g')
+                .attr('class', 'x-axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(xAxis);
+            
+            // Add Y axis
+            const yAxis = d3.axisLeft(yScale);
+            g.append('g')
+                .attr('class', 'y-axis')
+                .call(yAxis);
+            
+            // Add vertical lines for each day
+            g.selectAll('.vertical-line')
+                .data(d3.timeDay.range(paddedMinDate, paddedMaxDate, 1))
+                .enter()
+                .append('line')
+                .attr('class', 'vertical-line')
+                .attr('x1', d => xScale(d))
+                .attr('x2', d => xScale(d))
+                .attr('y1', 0)
+                .attr('y2', height)
+                .attr('stroke', '#e0e0e0')
+                .attr('stroke-width', 1);
+            
+            // Add today line
+            const today = new Date();
+            if (today >= paddedMinDate && today <= paddedMaxDate) {
+                g.append('line')
+                    .attr('class', 'today-line')
+                    .attr('x1', xScale(today))
+                    .attr('x2', xScale(today))
+                    .attr('y1', 0)
+                    .attr('y2', height)
+                    .attr('stroke', '#dc3545')
+                    .attr('stroke-width', 2)
+                    .attr('stroke-dasharray', '4,4');
+            }
+            
+            // Create project bars for filtered data
+            filteredProjectData.forEach(project => {
+                const y = yScale(project.name);
+                const barHeight = yScale.bandwidth();
+                
+                // Parse project dates
+                const preparingStart = parseTime(project.preparing_stage.start);
+                const preparingEnd = parseTime(project.preparing_stage.end);
+                const executionEnd = parseTime(project.execution_stage.end);
+                
+                // Preparing stage bar
+                const preparingWidth = xScale(preparingEnd) - xScale(preparingStart);
+                g.append('rect')
+                    .attr('class', 'preparing-bar')
+                    .attr('x', xScale(preparingStart))
+                    .attr('y', y)
+                    .attr('width', preparingWidth)
+                    .attr('height', barHeight)
+                    .attr('fill', '#e9ecef')
+                    .attr('stroke', '#6c757d')
+                    .attr('stroke-width', 1)
+                    .on('mouseover', function(event) {
+                        tooltip.transition().duration(200).style('opacity', .9);
+                        tooltip.html(`
+                            <strong>${project.name}</strong><br/>
+                            <strong>Category:</strong> ${project.category}<br/>
+                            <strong>Priority:</strong> ${project.priority}<br/>
+                            <strong>Team Lead:</strong> ${project.team_lead}<br/>
+                            <strong>Phase:</strong> Preparing<br/>
+                            <strong>Duration:</strong> ${project.preparing_stage.duration_days} days<br/>
+                            <strong>Description:</strong> ${project.description}
+                        `)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                    })
+                    .on('mouseout', function() {
+                        tooltip.transition().duration(500).style('opacity', 0);
+                    })
+                    .on('click', function() {
+                        // Remove selection from previous element
+                        if (selectedTaskElement) {
+                            selectedTaskElement.classed('selected', false);
+                        }
+                        // Select current element
+                        selectedTaskElement = d3.select(this);
+                        selectedTaskElement.classed('selected', true);
+                        
+                        // Show task modal
+                        document.getElementById('task-project-name').textContent = project.name;
+                        document.getElementById('task-category').textContent = project.category;
+                        document.getElementById('task-priority').textContent = project.priority;
+                        document.getElementById('task-team-lead').textContent = project.team_lead;
+                        document.getElementById('task-phase').textContent = 'Preparing';
+                        document.getElementById('task-duration').textContent = project.preparing_stage.duration_days + ' days';
+                        document.getElementById('task-progress').textContent = 'N/A';
+                        document.getElementById('task-description').textContent = project.description;
+                        document.getElementById('task-modal').style.display = 'block';
+                    });
+                
+                // Execution stage bar
+                const executionWidth = xScale(executionEnd) - xScale(preparingEnd);
+                const executionBar = g.append('rect')
+                    .attr('class', 'execution-bar')
+                    .attr('x', xScale(preparingEnd))
+                    .attr('y', y)
+                    .attr('width', executionWidth)
+                    .attr('height', barHeight)
+                    .attr('fill', priorityColors[project.priority])
+                    .attr('stroke', '#343a40')
+                    .attr('stroke-width', 1)
+                    .on('mouseover', function(event) {
+                        tooltip.transition().duration(200).style('opacity', .9);
+                        tooltip.html(`
+                            <strong>${project.name}</strong><br/>
+                            <strong>Category:</strong> ${project.category}<br/>
+                            <strong>Priority:</strong> ${project.priority}<br/>
+                            <strong>Team Lead:</strong> ${project.team_lead}<br/>
+                            <strong>Phase:</strong> Execution<br/>
+                            <strong>Duration:</strong> ${project.execution_stage.duration_days} days<br/>
+                            <strong>Progress:</strong> ${project.execution_stage.progress_percent}%<br/>
+                            <strong>Description:</strong> ${project.description}
+                        `)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                    })
+                    .on('mouseout', function() {
+                        tooltip.transition().duration(500).style('opacity', 0);
+                    })
+                    .on('click', function() {
+                        // Remove selection from previous element
+                        if (selectedTaskElement) {
+                            selectedTaskElement.classed('selected', false);
+                        }
+                        // Select current element
+                        selectedTaskElement = d3.select(this);
+                        selectedTaskElement.classed('selected', true);
+                        
+                        // Show task modal
+                        document.getElementById('task-project-name').textContent = project.name;
+                        document.getElementById('task-category').textContent = project.category;
+                        document.getElementById('task-priority').textContent = project.priority;
+                        document.getElementById('task-team-lead').textContent = project.team_lead;
+                        document.getElementById('task-phase').textContent = 'Execution';
+                        document.getElementById('task-duration').textContent = project.execution_stage.duration_days + ' days';
+                        document.getElementById('task-progress').textContent = project.execution_stage.progress_percent + '%';
+                        document.getElementById('task-description').textContent = project.description;
+                        document.getElementById('task-modal').style.display = 'block';
+                    });
+                
+                // Progress bar overlay
+                const progressWidth = executionWidth * (project.execution_stage.progress_percent / 100);
+                g.append('rect')
+                    .attr('class', 'progress-bar')
+                    .attr('x', xScale(preparingEnd))
+                    .attr('y', y + barHeight * 0.7)
+                    .attr('width', progressWidth)
+                    .attr('height', barHeight * 0.3)
+                    .attr('fill', '#198754')
+                    .attr('opacity', 0.8);
+            });
+        
+        function setupFilters() {
+            // Priority filter
+            document.getElementById('priority-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.priority = e.target.value;
+                } else {
+                    delete currentFilters.priority;
+                }
+                applyFilters();
+            });
+
+            // Category filter
+            document.getElementById('category-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.category = e.target.value;
+                } else {
+                    delete currentFilters.category;
+                }
+                applyFilters();
+            });
+
+            // Team filter
+            document.getElementById('team-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.team = e.target.value;
+                } else {
+                    delete currentFilters.team;
+                }
+                applyFilters();
+            });
+
+            // Progress filter
+            document.getElementById('progress-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.progress = e.target.value;
+                } else {
+                    delete currentFilters.progress;
+                }
+                applyFilters();
+            });
+
+            // Clear all filters
+            document.getElementById('clear-filters').addEventListener('click', () => {
+                currentFilters = {};
+                document.querySelectorAll('.filter-select').forEach(select => {
+                    select.value = '';
+                });
+                applyFilters();
+            });
+        }
+        
+        function populateFilterOptions() {
+            // Get unique categories and team leads
+            const categories = [...new Set(allProjectData.map(p => p.category))];
+            const teamLeads = [...new Set(allProjectData.map(p => p.team_lead))];
+            
+            // Populate category filter
+            const categorySelect = document.getElementById('category-filter');
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+            
+            // Populate team filter
+            const teamSelect = document.getElementById('team-filter');
+            teamLeads.forEach(teamLead => {
+                const option = document.createElement('option');
+                option.value = teamLead;
+                option.textContent = teamLead;
+                teamSelect.appendChild(option);
+            });
+        }
+        
+        function applyFilters() {
+            filteredProjectData = allProjectData.filter(project => {
+                // Priority filter
+                if (currentFilters.priority && project.priority !== currentFilters.priority) {
+                    return false;
+                }
+
+                // Category filter
+                if (currentFilters.category && project.category !== currentFilters.category) {
+                    return false;
+                }
+
+                // Team lead filter
+                if (currentFilters.team && project.team_lead !== currentFilters.team) {
+                    return false;
+                }
+
+                // Progress filter
+                if (currentFilters.progress) {
+                    const progress = project.execution_stage.progress_percent;
+                    const [min, max] = currentFilters.progress.split('-').map(Number);
+                    if (progress < min || progress > max) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            updateProjectInfo();
+            updateActiveFilters();
+            
+            // Re-render chart with filtered data
+            d3.select('.gantt-chart').selectAll('*').remove();
+            renderGanttChart();
+        }
+        
+        function updateProjectInfo() {
+            document.getElementById('project-count').textContent = `${filteredProjectData.length} of ${allProjectData.length} projects loaded`;
+        }
+        
+        function updateActiveFilters() {
+            const activeFiltersDiv = document.getElementById('active-filters');
+            activeFiltersDiv.innerHTML = '';
+            
+            Object.keys(currentFilters).forEach(filterKey => {
+                const badge = document.createElement('span');
+                badge.className = 'filter-badge';
+                badge.innerHTML = `${filterKey}: ${currentFilters[filterKey]} <span class="remove" data-filter="${filterKey}">×</span>`;
+                activeFiltersDiv.appendChild(badge);
+            });
+            
+            // Add click handlers for remove buttons
+            activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const filterKey = e.target.dataset.filter;
+                    delete currentFilters[filterKey];
+                    document.getElementById(`${filterKey}-filter`).value = '';
+                    applyFilters();
+                });
+            });
+        }
+        
+        function setupModal() {
+            const modal = document.getElementById('task-modal');
+            const closeBtn = document.getElementById('modal-close');
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        }
+
+        function openModal(project) {
+            const modal = document.getElementById('task-modal');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
+            const details = document.getElementById('modal-details');
+            const timeline = document.getElementById('modal-timeline');
+            const description = document.getElementById('modal-description');
+
+            title.textContent = project.name;
+            subtitle.textContent = `${project.category} • Led by ${project.team_lead}`;
+
+            details.innerHTML = `
+                <p><strong>Priority:</strong> ${project.priority}</p>
+                <p><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</p>
+                <p><strong>Status:</strong> ${getProjectStatus(project)}</p>
+            `;
+
+            const prepStart = new Date(project.preparing_stage.start);
+            const prepEnd = new Date(project.preparing_stage.end);
+            const execStart = new Date(project.execution_stage.start);
+            const execEnd = new Date(project.execution_stage.end);
+
+            timeline.innerHTML = `
+                <p><strong>Preparation:</strong> ${prepStart.toLocaleDateString()} - ${prepEnd.toLocaleDateString()}</p>
+                <p><strong>Execution:</strong> ${execStart.toLocaleDateString()} - ${execEnd.toLocaleDateString()}</p>
+                <p><strong>Total Duration:</strong> ${Math.ceil((execEnd - prepStart) / (1000 * 60 * 60 * 24))} days</p>
+            `;
+
+            description.textContent = project.description;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('task-modal');
+            modal.classList.remove('active');
+            
+            // Remove selection from task
+            if (selectedTaskElement) {
+                selectedTaskElement.classed('selected', false);
+                selectedTaskElement = null;
+            }
+        }
+
+        function getProjectStatus(project) {
+            const now = new Date();
+            const execEnd = new Date(project.execution_stage.end);
+            const progress = project.execution_stage.progress_percent;
+
+            if (progress === 100) return 'Completed';
+            if (now > execEnd) return 'Overdue';
+            if (progress > 0) return 'In Progress';
+            return 'Not Started';
+        }
 
         // Load D3.js and initialize chart
         (function(){
             var script = document.createElement('script');
             script.src = 'https://d3js.org/d3.v7.min.js';
-            script.onload = initChart;
+            script.onload = function() {
+                initChart();
+                setupFilters();
+                populateFilterOptions();
+                setupModal();
+            };
             script.onerror = function() {
                 alert('Cannot load D3.js from CDN. This chart requires an internet connection.');
             };

@@ -156,6 +156,51 @@ Interactive filter controls for:
   - `5_interactive_design.html` - Modern interactive design
   - `6_frappe_design.html` - Clean, modern Frappe-inspired design
 
+## Filter Functionality (Fixed Issues)
+
+### Comprehensive Filter Fixes (August 2025)
+Fixed critical filter functionality issues across all Gantt chart templates to ensure consistent behavior:
+
+#### 1. Sidebar Content Clearing
+- **Issue**: Sidebar accumulated duplicate projects instead of showing only filtered results
+- **Root Cause**: Missing `sidebarContent.innerHTML = '';` in `createProjectSidebar()` function
+- **Fix Applied**: Added content clearing to 4 templates (2_minimal, 3_dark, 4_colorful, 6_frappe)
+- **Location**: First line inside `createProjectSidebar()` function
+
+#### 2. Today Marker Duplication  
+- **Issue**: Today lines stacked visually when filters were applied repeatedly
+- **Root Cause**: Missing cleanup code for existing today line elements
+- **Fix Applied**: Added `if (window.todayLineElement) { window.todayLineElement.remove(); }` cleanup
+- **Templates Fixed**: 2_minimal, 3_dark, 4_colorful designs
+- **Location**: Beginning of today line creation in `createTimelineContent()` function
+
+#### 3. Infinite Loop Prevention
+- **Issue**: Browser froze when applying filters due to recursive function calls
+- **Root Cause**: `applyFilters()` called `initChart()` which called `setupFilters()` again
+- **Fix Applied**: Created separate `renderGanttChart()` function for rendering-only operations
+- **Template Fixed**: gantt_chart.html
+- **Solution**: Separated initialization from rendering to break recursion
+
+#### 4. Timeline Content Accumulation
+- **Issue**: Timeline content accumulated instead of being cleared when filters applied
+- **Root Cause**: Missing `content.innerHTML = '';` in `createTimelineContent()` function
+- **Fix Applied**: Added content clearing to 4 templates (2_minimal, 3_dark, 4_colorful, 6_frappe)
+- **Location**: First line inside `createTimelineContent()` function
+
+#### Working Reference Template
+- **5_interactive_design.html** serves as the working reference implementation
+- All fixes implemented to match this template's behavior patterns
+- Contains proper content clearing and cleanup patterns
+
+#### Filter Functionality Testing
+When testing filter functionality across templates, verify:
+- Sidebar updates to show only filtered projects (no accumulation)
+- No visual duplication of today markers after repeated filtering
+- No browser freezing or infinite loops when applying filters
+- Timeline content properly rebuilds without element accumulation
+- Consistent behavior across all 6 Gantt chart design templates
+
 ## Memory Logs
 
 - Memorized the commit code flow to understand project enhancement and versioning process
+- Documented comprehensive filter functionality fixes for future reference and troubleshooting

@@ -1790,6 +1790,13 @@
                 content.appendChild(line);
             });
             
+            // Clean up existing today line before creating new one
+            if (window.todayLineElement) {
+                window.todayLineElement.remove();
+                window.todayLineElement = null;
+                window.todayLineOriginalX = null;
+            }
+            
             // Add today's vertical line (fixed position)
             const today = new Date();
             const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);

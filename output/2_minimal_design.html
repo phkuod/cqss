@@ -1255,6 +1255,7 @@
         
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
+            sidebarContent.innerHTML = '';
             
             projectData.forEach(project => {
                 const row = document.createElement('div');
@@ -1283,6 +1284,13 @@
                 line.style.left = (index * weekWidth) + 'px';
                 content.appendChild(line);
             });
+            
+            // Clean up existing today line before creating new one
+            if (window.todayLineElement) {
+                window.todayLineElement.remove();
+                window.todayLineElement = null;
+                window.todayLineOriginalX = null;
+            }
             
             // Add today's vertical line (fixed position)
             const today = new Date();

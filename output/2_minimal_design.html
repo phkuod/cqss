@@ -1197,15 +1197,10 @@
             setupInteractions();
             
             // Add scroll-to-today button
-            addScrollToTodayButton();
             
             // Setup filters
             setupFilters(projectData);
             
-            // Auto-scroll to today's date on page load
-            setTimeout(() => {
-                scrollToToday(weeks, weekWidth, false);
-            }, 500);
         }
         
         function createTimelineHeader(weeks, weekWidth) {
@@ -1516,139 +1511,8 @@
             document.getElementById('tooltip').style.display = 'none';
         }
         
-        function scrollToToday(weeks, weekWidth, smooth = false) {
-            const today = new Date();
-            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
-            const timelineHeader = document.getElementById('timeline-header');
-            
-            if (!weeks || weeks.length === 0 || !contentWrapper) {
-                console.warn('ScrollToToday: Missing required elements');
-                return;
-            }
-            
-            // Calculate today's exact position
-            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
-            const totalWidth = weeks.length * weekWidth;
-            
-            if (todayX >= 0 && todayX <= totalWidth) {
-                // Scroll to center today's line
-                const scrollPosition = Math.max(0, todayX - (contentWrapper.clientWidth / 2));
-                
-                if (smooth) {
-                    // Smooth scroll animation
-                    contentWrapper.scrollTo({
-                        left: scrollPosition,
-                        behavior: 'smooth'
-                    });
-                    if (timelineHeader) {
-                        timelineHeader.scrollTo({
-                            left: scrollPosition, 
-                            behavior: 'smooth'
-                        });
-                    }
-                } else {
-                    // Instant scroll (for initial load)
-                    contentWrapper.scrollLeft = scrollPosition;
-                    if (timelineHeader) {
-                        timelineHeader.scrollLeft = scrollPosition;
-                    }
-                }
-                
-                // Show a brief "scrolled to today" indicator
-                if (smooth) {
-                    showScrollToTodayNotification();
-                }
-            } else {
-                // Today is outside the visible range
-                if (smooth) {
-                    showScrollToTodayNotification('Today is outside the current timeline range');
-                }
-            }
-        }
         
-        function showScrollToTodayNotification(message = 'Scrolled to Today') {
-            const notification = document.createElement('div');
-            notification.className = 'scroll-notification';
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 100px;
-                right: 40px;
-                background: #6366f1;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 1000;
-                opacity: 0;
-                transform: translateY(-10px);
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Animate in
-            setTimeout(() => {
-                notification.style.opacity = '1';
-                notification.style.transform = 'translateY(0)';
-            }, 10);
-            
-            // Animate out and remove
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateY(-10px)';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }, 2000);
-        }
         
-        function addScrollToTodayButton() {
-            const button = document.createElement('button');
-            button.className = 'scroll-to-today-btn';
-            button.innerHTML = '📅 Today';
-            button.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 40px;
-                background: #6366f1;
-                color: white;
-                border: none;
-                padding: 10px 18px;
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: 500;
-                cursor: pointer;
-                z-index: 1000;
-                transition: all 0.2s ease;
-                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-                backdrop-filter: blur(8px);
-            `;
-            
-            button.addEventListener('mouseover', () => {
-                button.style.background = '#5856eb';
-                button.style.transform = 'translateY(-1px)';
-            });
-            
-            button.addEventListener('mouseout', () => {
-                button.style.background = '#6366f1';
-                button.style.transform = 'translateY(0)';
-            });
-            
-            button.addEventListener('click', () => {
-                // Get current weeks and weekWidth from global scope or recalculate
-                if (window.ganttWeeks && window.ganttWeekWidth) {
-                    scrollToToday(window.ganttWeeks, window.ganttWeekWidth, true);
-                }
-            });
-            
-            // Add to body instead of timeline header to avoid positioning issues
-            document.body.appendChild(button);
-        }
         
         function setupFilters(projectData) {
             // Store project data globally for filtering
@@ -1711,76 +1575,74 @@
             const startDateFilter = document.getElementById('start-date-filter').value;
             const endDateFilter = document.getElementById('end-date-filter').value;
             
-            const sidebarRows = document.querySelectorAll('.gantt-sidebar-content .gantt-row');
-            const timelineRows = document.querySelectorAll('.gantt-timeline-content .gantt-row-content');
-            
-            let visibleCount = 0;
-            
-            window.allProjects.forEach((project, index) => {
-                let isVisible = true;
-                
+            // Filter the project data instead of manipulating DOM
+            const filteredProjects = window.allProjects.filter(project => {
                 // Category filter
                 if (categoryFilter && project.category !== categoryFilter) {
-                    isVisible = false;
+                    return false;
                 }
                 
                 // Priority filter
                 if (priorityFilter && project.priority !== priorityFilter) {
-                    isVisible = false;
+                    return false;
                 }
                 
                 // Team filter
                 if (teamFilter && project.team_lead !== teamFilter) {
-                    isVisible = false;
+                    return false;
                 }
                 
                 // Search filter
                 if (searchQuery && !project.name.toLowerCase().includes(searchQuery) && 
                     !project.description.toLowerCase().includes(searchQuery)) {
-                    isVisible = false;
+                    return false;
                 }
 
                 // Date range filter
                 if (startDateFilter || endDateFilter) {
-                    const projectStartDate = new Date(project.preparing_stage.start_date);
-                    const projectEndDate = new Date(project.execution_stage.end_date);
+                    const projectStartDate = new Date(project.preparing_stage.start);
+                    const projectEndDate = new Date(project.execution_stage.end);
                     
                     if (startDateFilter) {
                         const filterStartDate = new Date(startDateFilter);
                         if (projectEndDate < filterStartDate) {
-                            isVisible = false;
+                            return false;
                         }
                     }
                     
                     if (endDateFilter) {
                         const filterEndDate = new Date(endDateFilter);
                         if (projectStartDate > filterEndDate) {
-                            isVisible = false;
+                            return false;
                         }
                     }
                 }
                 
-                // Apply visibility
-                const sidebarRow = sidebarRows[index];
-                const timelineRow = timelineRows[index];
-                
-                if (isVisible) {
-                    visibleCount++;
-                    if (sidebarRow) sidebarRow.classList.remove('project-row-hidden');
-                    if (timelineRow) timelineRow.classList.remove('project-row-hidden');
-                } else {
-                    if (sidebarRow) sidebarRow.classList.add('project-row-hidden');
-                    if (timelineRow) timelineRow.classList.add('project-row-hidden');
-                }
+                return true;
             });
             
-            // Update filter results
-            document.getElementById('visible-count').textContent = visibleCount;
-            document.getElementById('total-count').textContent = window.allProjects.length;
+            // Store filtered data globally for rebuilding
+            window.filteredProjects = filteredProjects;
+            
+            // Rebuild sidebar and timeline with filtered data
+            rebuildGanttChart(filteredProjects);
             
             // Update project info in header
             document.getElementById('project-info').textContent = 
-                `${visibleCount} of ${window.allProjects.length} projects`;
+                `${filteredProjects.length} of ${window.allProjects.length} projects`;
+        }
+        
+        function rebuildGanttChart(projectData) {
+            // Get stored timeline parameters from initial setup
+            const weeks = window.ganttWeeks;
+            const weekWidth = window.ganttWeekWidth;
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            
+            // Rebuild sidebar with filtered data
+            createProjectSidebar(projectData);
+            
+            // Rebuild timeline content with filtered data
+            createTimelineContent(projectData, weeks, weekWidth, parseTime);
         }
         
         function clearAllFilters() {

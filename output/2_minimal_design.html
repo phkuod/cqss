@@ -1267,6 +1267,7 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
+            content.innerHTML = ''; // Clear existing content to prevent accumulation
             const totalWidth = weeks.length * weekWidth;
             content.style.width = totalWidth + 'px';
             content.style.minWidth = totalWidth + 'px';

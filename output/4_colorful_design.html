@@ -720,24 +720,25 @@
                 }
 
                 // Date range filter
-                if (currentFilters.startDate || currentFilters.endDate) {
+                if (currentFilters.startDate && currentFilters.startDate.trim() !== '') {
                     const projectStartDate = new Date(project.preparing_stage.start);
                     const projectEndDate = new Date(project.execution_stage.end);
+                    const filterStartDate = new Date(currentFilters.startDate);
                     
-                    if (currentFilters.startDate && currentFilters.startDate.trim() !== '') {
-                        const filterStartDate = new Date(currentFilters.startDate);
-                        // Project must end after or on the filter start date (overlap check)
-                        if (projectEndDate < filterStartDate) {
-                            return false;
-                        }
+                    // Project must end after or on the filter start date (overlap check)
+                    if (projectEndDate < filterStartDate) {
+                        return false;
                     }
+                }
+                
+                if (currentFilters.endDate && currentFilters.endDate.trim() !== '') {
+                    const projectStartDate = new Date(project.preparing_stage.start);
+                    const projectEndDate = new Date(project.execution_stage.end);
+                    const filterEndDate = new Date(currentFilters.endDate);
                     
-                    if (currentFilters.endDate && currentFilters.endDate.trim() !== '') {
-                        const filterEndDate = new Date(currentFilters.endDate);
-                        // Project must start before or on the filter end date (overlap check)
-                        if (projectStartDate > filterEndDate) {
-                            return false;
-                        }
+                    // Project must start before or on the filter end date (overlap check)  
+                    if (projectStartDate > filterEndDate) {
+                        return false;
                     }
                 }
 

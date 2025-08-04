@@ -644,8 +644,24 @@
                 filter.addEventListener('change', applyFilters);
             });
             
-            [startDateFilter, endDateFilter].forEach(filter => {
-                filter.addEventListener('change', applyFilters);
+            // Start date filter
+            document.getElementById('start-date-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.startDate = e.target.value;
+                } else {
+                    delete currentFilters.startDate;
+                }
+                applyFilters();
+            });
+
+            // End date filter
+            document.getElementById('end-date-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.endDate = e.target.value;
+                } else {
+                    delete currentFilters.endDate;
+                }
+                applyFilters();
             });
             
             searchFilter.addEventListener('input', debounce(applyFilters, 300));
@@ -684,13 +700,11 @@
         }
 
         function applyFilters() {
-            // Update current filters
+            // Update current filters (date filters handled by individual event listeners)
             currentFilters.priority = document.getElementById('priority-filter').value;
             currentFilters.category = document.getElementById('category-filter').value;
             currentFilters.team = document.getElementById('team-filter').value;
             currentFilters.progress = document.getElementById('progress-filter').value;
-            currentFilters.startDate = document.getElementById('start-date-filter').value;
-            currentFilters.endDate = document.getElementById('end-date-filter').value;
             currentFilters.search = document.getElementById('search-filter').value.toLowerCase();
 
             // Filter project data

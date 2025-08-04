@@ -31,7 +31,13 @@
       "Bash(gh pr edit:*)",
       "Bash(start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\gantt_chart.html\")",
       "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\gantt_chart.html\")",
-      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\today_horizontal_text.html\")"
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\today_horizontal_text.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\2_minimal_design.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\3_dark_professional.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\4_colorful_friendly.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\6_frappe_gantt.html\")",
+      "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\3_dark_design.html\")",
+      "Bash(cmd /c start:*)"
     ],
     "deny": []
   }

@@ -116,6 +116,66 @@
             background: #5856eb;
         }
 
+        .export-btn {
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            margin-left: 16px;
+        }
+
+        .export-btn:hover {
+            background: #059669;
+        }
+
+        .export-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .export-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 120px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            border: 1px solid #e5e5e5;
+        }
+
+        .export-dropdown-content button {
+            color: #374151;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.15s ease;
+        }
+
+        .export-dropdown-content button:hover {
+            background-color: #f3f4f6;
+        }
+
+        .export-dropdown-content button:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .export-dropdown-content button:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
         .gantt-wrapper {
             display: flex;
             flex: 1;
@@ -574,9 +634,18 @@
     <div class="gantt-container">
         <div class="gantt-header">
             <div class="gantt-title">CQSS Interactive Gantt Chart</div>
-            <div class="gantt-info">
-                <span id="project-info">Loading projects...</span>
-                <span id="date-range" style="margin-left: 24px; font-weight: 500;"></span>
+            <div style="display: flex; align-items: center;">
+                <div class="gantt-info">
+                    <span id="project-info">Loading projects...</span>
+                    <span id="date-range" style="margin-left: 24px; font-weight: 500;"></span>
+                </div>
+                <div class="export-dropdown">
+                    <button class="export-btn" id="export-btn">Export Chart ↓</button>
+                    <div class="export-dropdown-content" id="export-dropdown">
+                        <button onclick="exportChart('png')">Export as PNG</button>
+                        <button onclick="exportChart('svg')">Export as SVG</button>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -616,6 +685,16 @@
                     <option value="51-75">51-75%</option>
                     <option value="76-100">76-100%</option>
                 </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Start Date:</label>
+                <input type="date" id="start-date-filter" class="filter-input">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">End Date:</label>
+                <input type="date" id="end-date-filter" class="filter-input">
             </div>
             
             <button id="clear-filters" class="clear-filters-btn">Clear All</button>
@@ -672,6 +751,8 @@
 
     <!-- Load local D3.js -->
     <script src="../static/js/d3.v7.min.js"></script>
+    <!-- Load saveSvgAsPng for export functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/save-svg-as-png@1.4.17/lib/saveSvgAsPng.min.js"></script>
     
     <script>
         // Global variables
@@ -1237,6 +1318,7 @@
             setupInteractions();
             setupFilters();
             setupModal();
+            setupExport();
             
             // Auto-scroll to today's date
             scrollToToday(weeks, weekWidth);
@@ -1299,6 +1381,26 @@
                     }
                 }
 
+                // Date range filter
+                if (currentFilters.startDate || currentFilters.endDate) {
+                    const projectStartDate = new Date(project.preparing_stage.start_date);
+                    const projectEndDate = new Date(project.execution_stage.end_date);
+                    
+                    if (currentFilters.startDate) {
+                        const filterStartDate = new Date(currentFilters.startDate);
+                        if (projectEndDate < filterStartDate) {
+                            return false;
+                        }
+                    }
+                    
+                    if (currentFilters.endDate) {
+                        const filterEndDate = new Date(currentFilters.endDate);
+                        if (projectStartDate > filterEndDate) {
+                            return false;
+                        }
+                    }
+                }
+
                 return true;
             });
 
@@ -1345,7 +1447,17 @@
                 if (value) {
                     const badge = document.createElement('span');
                     badge.className = 'filter-badge';
-                    badge.innerHTML = `${key}: ${value} <span class="remove" data-filter="${key}">×</span>`;
+                    
+                    // Format display text based on filter type
+                    let displayKey = key;
+                    let displayValue = value;
+                    if (key === 'startDate') {
+                        displayKey = 'Start Date';
+                    } else if (key === 'endDate') {
+                        displayKey = 'End Date';
+                    }
+                    
+                    badge.innerHTML = `${displayKey}: ${displayValue} <span class="remove" data-filter="${key}">×</span>`;
                     activeFiltersDiv.appendChild(badge);
                 }
             });
@@ -1355,7 +1467,17 @@
                 btn.addEventListener('click', (e) => {
                     const filterKey = e.target.dataset.filter;
                     delete currentFilters[filterKey];
-                    document.getElementById(`${filterKey}-filter`).value = '';
+                    
+                    // Clear the appropriate input element
+                    if (filterKey === 'startDate') {
+                        document.getElementById('start-date-filter').value = '';
+                    } else if (filterKey === 'endDate') {
+                        document.getElementById('end-date-filter').value = '';
+                    } else {
+                        const element = document.getElementById(`${filterKey}-filter`);
+                        if (element) element.value = '';
+                    }
+                    
                     applyFilters();
                 });
             });
@@ -1402,11 +1524,34 @@
                 applyFilters();
             });
 
+            // Start date filter
+            document.getElementById('start-date-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.startDate = e.target.value;
+                } else {
+                    delete currentFilters.startDate;
+                }
+                applyFilters();
+            });
+
+            // End date filter
+            document.getElementById('end-date-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.endDate = e.target.value;
+                } else {
+                    delete currentFilters.endDate;
+                }
+                applyFilters();
+            });
+
             // Clear all filters
             document.getElementById('clear-filters').addEventListener('click', () => {
                 currentFilters = {};
                 document.querySelectorAll('.filter-select').forEach(select => {
                     select.value = '';
+                });
+                document.querySelectorAll('.filter-input').forEach(input => {
+                    input.value = '';
                 });
                 applyFilters();
             });
@@ -1472,6 +1617,63 @@
                 selectedTaskBar.classList.remove('selected');
                 selectedTaskBar = null;
             }
+        }
+
+        // Export functionality
+        function setupExport() {
+            const exportBtn = document.getElementById('export-btn');
+            const exportDropdown = document.getElementById('export-dropdown');
+            
+            if (exportBtn && exportDropdown) {
+                exportBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    exportDropdown.style.display = exportDropdown.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    exportDropdown.style.display = 'none';
+                });
+            }
+        }
+
+        function exportChart(format) {
+            const ganttSvg = document.querySelector('.gantt-timeline svg');
+            if (!ganttSvg) {
+                alert('No chart to export. Please wait for the chart to load.');
+                return;
+            }
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:\-]/g, '');
+            const filename = `CQSS_Gantt_Chart_${timestamp}`;
+            
+            if (format === 'svg') {
+                // Export as SVG
+                const svgData = new XMLSerializer().serializeToString(ganttSvg);
+                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = filename + '.svg';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                URL.revokeObjectURL(url);
+            } else if (format === 'png') {
+                // Export as PNG using saveSvgAsPng
+                if (typeof saveSvgAsPng !== 'undefined') {
+                    saveSvgAsPng.saveSvgAsPng(ganttSvg, filename + '.png', {
+                        scale: 2,
+                        backgroundColor: '#ffffff'
+                    });
+                } else {
+                    alert('PNG export library not loaded. Please refresh the page and try again.');
+                }
+            }
+            
+            // Close dropdown after export
+            document.getElementById('export-dropdown').style.display = 'none';
         }
 
         function getProjectStatus(project) {

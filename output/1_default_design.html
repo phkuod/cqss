@@ -238,6 +238,61 @@
             white-space: nowrap;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        .export-btn {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            float: right;
+            margin-top: 10px;
+        }
+
+        .export-btn:hover {
+            background: #0056b3;
+        }
+
+        .export-dropdown {
+            position: relative;
+            display: inline-block;
+            float: right;
+            margin-top: 10px;
+        }
+
+        .export-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 120px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            z-index: 1000;
+            border: 1px solid #ddd;
+        }
+
+        .export-dropdown-content button {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.15s ease;
+        }
+
+        .export-dropdown-content button:hover {
+            background-color: #f1f1f1;
+        }
         
     </style>
 </head>
@@ -246,6 +301,13 @@
         <div class="header">
             <h1>CQSS Project Gantt Chart</h1>
             <p>Cyber Query Security System - Project Timeline Overview</p>
+            <div class="export-dropdown">
+                <button class="export-btn" id="export-btn">Export Chart ↓</button>
+                <div class="export-dropdown-content" id="export-dropdown">
+                    <button onclick="exportChart('png')">Export as PNG</button>
+                    <button onclick="exportChart('svg')">Export as SVG</button>
+                </div>
+            </div>
         </div>
         
         <div class="info-bar">
@@ -1123,6 +1185,73 @@
         }
 
         // Load D3.js and initialize chart
+        // Export functionality
+        function setupExport() {
+            const exportBtn = document.getElementById('export-btn');
+            const exportDropdown = document.getElementById('export-dropdown');
+            
+            if (exportBtn && exportDropdown) {
+                exportBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    exportDropdown.style.display = exportDropdown.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    exportDropdown.style.display = 'none';
+                });
+            }
+        }
+
+        function exportChart(format) {
+            const ganttSvg = document.querySelector('.gantt-chart');
+            if (!ganttSvg) {
+                alert('No chart to export. Please wait for the chart to load.');
+                return;
+            }
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:\-]/g, '');
+            const filename = `CQSS_Gantt_Chart_${timestamp}`;
+            
+            if (format === 'svg') {
+                // Export as SVG
+                const svgData = new XMLSerializer().serializeToString(ganttSvg);
+                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = filename + '.svg';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                URL.revokeObjectURL(url);
+            } else if (format === 'png') {
+                // Export as PNG using saveSvgAsPng
+                if (typeof saveSvgAsPng !== 'undefined') {
+                    saveSvgAsPng.saveSvgAsPng(ganttSvg, filename + '.png', {
+                        scale: 2,
+                        backgroundColor: '#ffffff'
+                    });
+                } else {
+                    alert('PNG export library not loaded. Please refresh the page and try again.');
+                }
+            }
+            
+            // Close dropdown after export
+            document.getElementById('export-dropdown').style.display = 'none';
+        }
+
+        // Load saveSvgAsPng library and initialize
+        (function(){
+            var exportScript = document.createElement('script');
+            exportScript.src = 'https://cdn.jsdelivr.net/npm/save-svg-as-png@1.4.17/lib/saveSvgAsPng.min.js';
+            exportScript.onload = function() {
+                setupExport();
+            };
+            document.head.appendChild(exportScript);
+        })();
+
         (function(){
             var script = document.createElement('script');
             script.src = 'https://d3js.org/d3.v7.min.js';

@@ -1604,15 +1604,17 @@
                     const projectStartDate = new Date(project.preparing_stage.start);
                     const projectEndDate = new Date(project.execution_stage.end);
                     
-                    if (startDateFilter) {
+                    if (startDateFilter && startDateFilter.trim() !== '') {
                         const filterStartDate = new Date(startDateFilter);
+                        // Project must end after or on the filter start date (overlap check)
                         if (projectEndDate < filterStartDate) {
                             return false;
                         }
                     }
                     
-                    if (endDateFilter) {
+                    if (endDateFilter && endDateFilter.trim() !== '') {
                         const filterEndDate = new Date(endDateFilter);
+                        // Project must start before or on the filter end date (overlap check)
                         if (projectStartDate > filterEndDate) {
                             return false;
                         }

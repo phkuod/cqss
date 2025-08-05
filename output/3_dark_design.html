@@ -37,6 +37,78 @@
             flex-direction: column;
         }
 
+        /* Filter Controls */
+        .filter-section {
+            background: #0d1117;
+            border-bottom: 1px solid #21262d;
+            padding: 16px 32px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #f0f6fc;
+            min-width: fit-content;
+        }
+
+        .filter-select, .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #161b22;
+            color: #f0f6fc;
+            min-width: 120px;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        .clear-filters-btn {
+            background: #da3633;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .clear-filters-btn:hover {
+            background: #b93430;
+        }
+
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #58a6ff;
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+        }
+
+        .filter-badge .remove {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         .gantt-header {
             background: #161b22;
             border-bottom: 1px solid #21262d;
@@ -648,6 +720,21 @@
                 </select>
             </div>
             
+            <div class="filter-group">
+                <label class="filter-label">Start Date:</label>
+                <input type="date" id="start-date-filter" class="filter-input">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">End Date:</label>
+                <input type="date" id="end-date-filter" class="filter-input">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Search:</label>
+                <input type="text" id="search-filter" class="filter-input" placeholder="Search projects...">
+            </div>
+            
             <button id="clear-filters" class="clear-filters-btn">Clear All</button>
             
             <div id="active-filters"></div>
@@ -701,11 +788,219 @@
     </div>
 
     <script>
-        // Global variables for filter functionality
-        let allProjectData;
-        let filteredProjectData;
-        let currentFilters = {};
-        let selectedTaskBar = null;
+        // Filter functionality
+        let allProjectData = [];
+        let filteredProjectData = [];
+        let currentFilters = {
+            priority: '',
+            category: '',
+            team: '',
+            progress: '',
+            startDate: '',
+            endDate: '',
+            search: ''
+        };
+
+        function setupFilters() {
+            const priorityFilter = document.getElementById('priority-filter');
+            const categoryFilter = document.getElementById('category-filter');
+            const teamFilter = document.getElementById('team-filter');
+            const progressFilter = document.getElementById('progress-filter');
+            const startDateFilter = document.getElementById('start-date-filter');
+            const endDateFilter = document.getElementById('end-date-filter');
+            const searchFilter = document.getElementById('search-filter');
+            const clearFiltersBtn = document.getElementById('clear-filters');
+
+            // Populate filter options
+            populateFilterOptions(allProjectData);
+
+            // Add event listeners with debouncing for text search
+            [priorityFilter, categoryFilter, teamFilter, progressFilter].forEach(filter => {
+                filter.addEventListener('change', applyFilters);
+            });
+            
+            // Start date filter
+            document.getElementById('start-date-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.startDate = e.target.value;
+                } else {
+                    delete currentFilters.startDate;
+                }
+                applyFilters();
+            });
+
+            // End date filter
+            document.getElementById('end-date-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.endDate = e.target.value;
+                } else {
+                    delete currentFilters.endDate;
+                }
+                applyFilters();
+            });
+            
+            searchFilter.addEventListener('input', debounce(applyFilters, 300));
+            clearFiltersBtn.addEventListener('click', clearAllFilters);
+            
+            // Initial filter application
+            applyFilters();
+        }
+
+        function populateFilterOptions(projectData) {
+            const categories = [...new Set(projectData.map(p => p.category))].sort();
+            const teams = [...new Set(projectData.map(p => p.team_lead))].sort();
+            
+            const categoryFilter = document.getElementById('category-filter');
+            const teamFilter = document.getElementById('team-filter');
+            
+            // Clear existing options (except "All" option)
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            teamFilter.innerHTML = '<option value="">All Teams</option>';
+            
+            // Add category options
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+            
+            // Add team options
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                teamFilter.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            // Update current filters (date filters handled by individual event listeners)
+            currentFilters.priority = document.getElementById('priority-filter').value;
+            currentFilters.category = document.getElementById('category-filter').value;
+            currentFilters.team = document.getElementById('team-filter').value;
+            currentFilters.progress = document.getElementById('progress-filter').value;
+            currentFilters.search = document.getElementById('search-filter').value.toLowerCase();
+
+            // Filter project data
+            filteredProjectData = allProjectData.filter(project => {
+                // Priority filter
+                if (currentFilters.priority && project.priority !== currentFilters.priority) {
+                    return false;
+                }
+
+                // Category filter
+                if (currentFilters.category && project.category !== currentFilters.category) {
+                    return false;
+                }
+
+                // Team lead filter
+                if (currentFilters.team && project.team_lead !== currentFilters.team) {
+                    return false;
+                }
+
+                // Progress filter
+                if (currentFilters.progress) {
+                    const progress = project.execution_stage.progress_percent;
+                    const [min, max] = currentFilters.progress.split('-').map(Number);
+                    if (progress < min || progress > max) {
+                        return false;
+                    }
+                }
+
+                // Date range filter
+                if (currentFilters.startDate && currentFilters.startDate.trim() !== '') {
+                    const projectStartDate = new Date(project.preparing_stage.start);
+                    const projectEndDate = new Date(project.execution_stage.end);
+                    const filterStartDate = new Date(currentFilters.startDate);
+                    
+                    // Project must end after or on the filter start date (overlap check)
+                    if (projectEndDate < filterStartDate) {
+                        return false;
+                    }
+                }
+                
+                if (currentFilters.endDate && currentFilters.endDate.trim() !== '') {
+                    const projectStartDate = new Date(project.preparing_stage.start);
+                    const projectEndDate = new Date(project.execution_stage.end);
+                    const filterEndDate = new Date(currentFilters.endDate);
+                    
+                    // Project must start before or on the filter end date (overlap check)  
+                    if (projectStartDate > filterEndDate) {
+                        return false;
+                    }
+                }
+
+                // Search filter
+                if (currentFilters.search) {
+                    const searchTerm = currentFilters.search;
+                    const searchableText = [
+                        project.name,
+                        project.description,
+                        project.category,
+                        project.team_lead
+                    ].join(' ').toLowerCase();
+                    
+                    if (!searchableText.includes(searchTerm)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Re-render chart with filtered data
+            renderGanttChart();
+        }
+
+        function renderGanttChart() {
+            // Get stored timeline parameters from initialization
+            const weeks = window.ganttWeeks;
+            const weekWidth = window.ganttWeekWidth;
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            
+            // Check if any filters are actually active
+            const hasActiveFilters = Object.values(currentFilters).some(filter => filter && filter.trim() !== '');
+            const projectData = hasActiveFilters ? filteredProjectData : allProjectData;
+            
+            // Update project count
+            document.getElementById('project-info').textContent = `${projectData.length} projects`;
+            
+            // Rebuild sidebar and timeline with filtered data
+            createProjectSidebar(projectData);
+            createTimelineContent(projectData, weeks, weekWidth, parseTime);
+        }
+
+        function clearAllFilters() {
+            // Reset all filter controls
+            document.querySelectorAll('.filter-select').forEach(select => {
+                select.value = '';
+            });
+            document.querySelectorAll('.filter-input').forEach(input => {
+                input.value = '';
+            });
+            
+            // Reset current filters object
+            Object.keys(currentFilters).forEach(key => {
+                currentFilters[key] = '';
+            });
+            
+            // Apply filters (which will show all projects)
+            applyFilters();
+        }
+
+        // Utility function for debouncing
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
         function initFrappeGantt() {
             // Project data will be embedded here
@@ -1255,20 +1550,35 @@
             const weekWidth = 200;
             const totalWidth = weeks.length * weekWidth;
             
+            // Store globally for filter rebuilding
+            window.ganttWeeks = weeks;
+            window.ganttWeekWidth = weekWidth;
+            
+            // Initialize filter system
+            if (allProjectData.length === 0) {
+                allProjectData = [...projectData];
+                filteredProjectData = [...projectData];
+                setTimeout(setupFilters, 100); // Setup filters after DOM is ready
+            }
+            
+            // Use filtered data for rendering
+            const workingData = filteredProjectData.length > 0 ? filteredProjectData : projectData;
+            
+            // Update project count
+            document.getElementById('project-info').textContent = `${workingData.length} projects`;
+            
             // Create timeline header
             createTimelineHeader(weeks, weekWidth);
             
             // Create project sidebar
-            createProjectSidebar(projectData);
+            createProjectSidebar(workingData);
             
             // Create timeline content
-            createTimelineContent(projectData, weeks, weekWidth, parseTime);
+            createTimelineContent(workingData, weeks, weekWidth, parseTime);
             
             // Setup interactions
             setupInteractions();
             
-            // Auto-scroll to today's date
-            scrollToToday(weeks, weekWidth);
         }
         
         function createTimelineHeader(weeks, weekWidth) {
@@ -1326,7 +1636,7 @@
         
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
-            sidebarContent.innerHTML = '';
+            sidebarContent.innerHTML = ''; // Clear existing content to prevent duplication
             
             projectData.forEach(project => {
                 const row = document.createElement('div');
@@ -1343,8 +1653,8 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
-            content.innerHTML = '';
-            
+
+            content.innerHTML = ''; // Clear existing content to prevent duplication
             const totalWidth = weeks.length * weekWidth;
             content.style.width = totalWidth + 'px';
             content.style.minWidth = totalWidth + 'px';
@@ -1358,9 +1668,12 @@
                 content.appendChild(line);
             });
             
-            // Remove existing today line if it exists
+            // Clean up existing today line before creating new one
             if (window.todayLineElement) {
                 window.todayLineElement.remove();
+                window.todayLineElement = null;
+                window.todayLineOriginalX = null;
+
             }
             
             // Add today's vertical line (fixed position)
@@ -1570,19 +1883,6 @@
             document.getElementById('tooltip').style.display = 'none';
         }
         
-        function scrollToToday(weeks, weekWidth) {
-            const today = new Date();
-            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
-            
-            // Calculate today's exact position
-            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
-            
-            if (todayX >= 0 && contentWrapper) {
-                // Scroll to center today's line
-                const scrollPosition = Math.max(0, todayX - (contentWrapper.clientWidth / 2));
-                contentWrapper.scrollLeft = scrollPosition;
-            }
-        }
         
         function setupFilters() {
             // Priority filter

@@ -784,8 +784,9 @@
             const weekWidth = window.ganttWeekWidth;
             const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
             
-            // Use filtered data if available, otherwise use all data
-            const projectData = filteredProjectData.length > 0 ? filteredProjectData : allProjectData;
+            // Check if any filters are actually active
+            const hasActiveFilters = Object.values(currentFilters).some(filter => filter && filter.trim() !== '');
+            const projectData = hasActiveFilters ? filteredProjectData : allProjectData;
             
             // Update project count
             document.getElementById('project-info').textContent = `${projectData.length} projects`;

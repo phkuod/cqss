@@ -565,22 +565,71 @@
             background: #f5f5f5;
         }
 
-        /* Filter badges */
-        .filter-badge {
-            display: inline-flex;
-            align-items: center;
-            background: #6366f1;
+        .export-btn {
+            padding: 8px 16px;
+            background: #10b981;
             color: white;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            margin-left: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            margin-left: 16px;
         }
 
-        .filter-badge .remove {
-            margin-left: 6px;
+        .export-btn:hover {
+            background: #059669;
+        }
+
+        .export-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .export-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 120px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            border: 1px solid #e5e5e5;
+        }
+
+        .export-dropdown-content button {
+            color: #374151;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
             cursor: pointer;
-            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.15s ease;
+        }
+
+        .export-dropdown-content button:hover {
+            background-color: #f3f4f6;
+        }
+
+        .export-dropdown-content button:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .export-dropdown-content button:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .filter-results {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+            margin-left: auto;
         }
 
         /* Hidden rows for filtering */
@@ -595,9 +644,18 @@
     <div class="gantt-container">
         <div class="gantt-header">
             <div class="gantt-title">CQSS Project Gantt Chart</div>
-            <div class="gantt-info">
-                <span id="project-info">Loading projects...</span>
-                <span id="date-range" style="margin-left: 24px; font-weight: 500;"></span>
+            <div style="display: flex; align-items: center;">
+                <div class="gantt-info">
+                    <span id="project-info">Loading projects...</span>
+                    <span id="date-range" style="margin-left: 24px; font-weight: 500;"></span>
+                </div>
+                <div class="export-dropdown">
+                    <button class="export-btn" id="export-btn">Export Chart ↓</button>
+                    <div class="export-dropdown-content" id="export-dropdown">
+                        <button onclick="exportChart('png')">Export as PNG</button>
+                        <button onclick="exportChart('svg')">Export as SVG</button>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -639,7 +697,17 @@
                 </select>
             </div>
             
-            <button id="clear-filters" class="clear-filters-btn">Clear All</button>
+            <div class="filter-group">
+                <label class="filter-label">Start Date:</label>
+                <input type="date" id="start-date-filter" class="filter-input">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">End Date:</label>
+                <input type="date" id="end-date-filter" class="filter-input">
+            </div>
+            
+            <button class="clear-filters-btn" id="clear-filters">Clear All</button>
             
             <div id="active-filters"></div>
         </div>
@@ -1265,16 +1333,11 @@
             setupInteractions();
             
             // Add scroll-to-today button
-            addScrollToTodayButton();
             
             // Initialize filter system
             setupFilters();
             setupModal();
             
-            // Auto-scroll to today's date on page load
-            setTimeout(() => {
-                scrollToToday(weeks, weekWidth, false);
-            }, 500);
         }
         
         function createTimelineHeader(weeks, weekWidth) {
@@ -1324,6 +1387,7 @@
         
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
+            sidebarContent.innerHTML = '';
             
             projectData.forEach(project => {
                 const row = document.createElement('div');
@@ -1340,6 +1404,7 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
+            content.innerHTML = ''; // Clear existing content to prevent accumulation
             const totalWidth = weeks.length * weekWidth;
             content.style.width = totalWidth + 'px';
             content.style.minWidth = totalWidth + 'px';
@@ -1352,6 +1417,13 @@
                 line.style.left = (index * weekWidth) + 'px';
                 content.appendChild(line);
             });
+            
+            // Clean up existing today line before creating new one
+            if (window.todayLineElement) {
+                window.todayLineElement.remove();
+                window.todayLineElement = null;
+                window.todayLineOriginalX = null;
+            }
             
             // Add today's vertical line (fixed position)
             const today = new Date();
@@ -1377,7 +1449,7 @@
                 // Add to body so it's not affected by container scrolling
                 document.body.appendChild(todayLine);
                 
-                // Store reference for scroll updates
+                // Store reference to today line element for cleanup
                 window.todayLineElement = todayLine;
                 window.todayLineOriginalX = todayX;
             }
@@ -1621,189 +1693,23 @@
             document.getElementById('tooltip').style.display = 'none';
         }
         
-        function scrollToToday(weeks, weekWidth, smooth = false) {
-            const today = new Date();
-            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
-            const timelineHeader = document.getElementById('timeline-header');
-            
-            if (!weeks || weeks.length === 0 || !contentWrapper) {
-                console.warn('ScrollToToday: Missing required elements');
-                return;
-            }
-            
-            // Calculate today's exact position
-            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
-            const totalWidth = weeks.length * weekWidth;
-            
-            if (todayX >= 0 && todayX <= totalWidth) {
-                // Scroll to center today's line
-                const scrollPosition = Math.max(0, todayX - (contentWrapper.clientWidth / 2));
-                
-                if (smooth) {
-                    // Smooth scroll animation
-                    contentWrapper.scrollTo({
-                        left: scrollPosition,
-                        behavior: 'smooth'
-                    });
-                    if (timelineHeader) {
-                        timelineHeader.scrollTo({
-                            left: scrollPosition, 
-                            behavior: 'smooth'
-                        });
-                    }
-                } else {
-                    // Instant scroll (for initial load)
-                    contentWrapper.scrollLeft = scrollPosition;
-                    if (timelineHeader) {
-                        timelineHeader.scrollLeft = scrollPosition;
-                    }
-                }
-                
-                // Show a brief "scrolled to today" indicator
-                if (smooth) {
-                    showScrollToTodayNotification();
-                }
-            } else {
-                // Today is outside the visible range
-                if (smooth) {
-                    showScrollToTodayNotification('Today is outside the current timeline range');
-                }
-            }
-        }
         
-        function showScrollToTodayNotification(message = 'Scrolled to Today') {
-            const notification = document.createElement('div');
-            notification.className = 'scroll-notification';
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 100px;
-                right: 40px;
-                background: #6366f1;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 1000;
-                opacity: 0;
-                transform: translateY(-10px);
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Animate in
-            setTimeout(() => {
-                notification.style.opacity = '1';
-                notification.style.transform = 'translateY(0)';
-            }, 10);
-            
-            // Animate out and remove
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateY(-10px)';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }, 2000);
-        }
         
-        function addScrollToTodayButton() {
-            const button = document.createElement('button');
-            button.className = 'scroll-to-today-btn';
-            button.innerHTML = '📅 Today';
-            button.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 40px;
-                background: #6366f1;
-                color: white;
-                border: none;
-                padding: 10px 18px;
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: 500;
-                cursor: pointer;
-                z-index: 1000;
-                transition: all 0.2s ease;
-                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-                backdrop-filter: blur(8px);
-            `;
-            
-            button.addEventListener('mouseover', () => {
-                button.style.background = '#5856eb';
-                button.style.transform = 'translateY(-1px)';
-            });
-            
-            button.addEventListener('mouseout', () => {
-                button.style.background = '#6366f1';
-                button.style.transform = 'translateY(0)';
-            });
-            
-            button.addEventListener('click', () => {
-                // Get current weeks and weekWidth from global scope or recalculate
-                if (window.ganttWeeks && window.ganttWeekWidth) {
-                    scrollToToday(window.ganttWeeks, window.ganttWeekWidth, true);
-                }
-            });
-            
-            // Add to body instead of timeline header to avoid positioning issues
-            document.body.appendChild(button);
-        }
         
         function setupFilters() {
-            // Priority filter
-            document.getElementById('priority-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.priority = e.target.value;
-                } else {
-                    delete currentFilters.priority;
-                }
-                applyFilters();
+            // Setup filter event listeners
+            const categoryFilter = document.getElementById('category-filter');
+            const priorityFilter = document.getElementById('priority-filter');
+            const teamFilter = document.getElementById('team-filter');
+            const startDateFilter = document.getElementById('start-date-filter');
+            const endDateFilter = document.getElementById('end-date-filter');
+            const clearFiltersBtn = document.getElementById('clear-filters');
+            
+            [categoryFilter, priorityFilter, teamFilter, startDateFilter, endDateFilter].forEach(filter => {
+                filter.addEventListener('change', applyFilters);
             });
-
-            // Category filter
-            document.getElementById('category-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.category = e.target.value;
-                } else {
-                    delete currentFilters.category;
-                }
-                applyFilters();
-            });
-
-            // Team filter
-            document.getElementById('team-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.team = e.target.value;
-                } else {
-                    delete currentFilters.team;
-                }
-                applyFilters();
-            });
-
-            // Progress filter
-            document.getElementById('progress-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.progress = e.target.value;
-                } else {
-                    delete currentFilters.progress;
-                }
-                applyFilters();
-            });
-
-            // Clear all filters
-            document.getElementById('clear-filters').addEventListener('click', () => {
-                currentFilters = {};
-                document.querySelectorAll('.filter-select').forEach(select => {
-                    select.value = '';
-                });
-                applyFilters();
-            });
+            
+            clearFiltersBtn.addEventListener('click', clearAllFilters);
         }
         
         function populateFilterOptions() {
@@ -1831,6 +1737,13 @@
         }
         
         function applyFilters() {
+            // Get current filter values
+            currentFilters.priority = document.getElementById('priority-filter').value;
+            currentFilters.category = document.getElementById('category-filter').value;
+            currentFilters.team = document.getElementById('team-filter').value;
+            currentFilters.startDate = document.getElementById('start-date-filter').value;
+            currentFilters.endDate = document.getElementById('end-date-filter').value;
+            
             filteredProjectData = allProjectData.filter(project => {
                 // Priority filter
                 if (currentFilters.priority && project.priority !== currentFilters.priority) {
@@ -1847,55 +1760,109 @@
                     return false;
                 }
 
-                // Progress filter
-                if (currentFilters.progress) {
-                    const progress = project.execution_stage.progress_percent;
-                    const [min, max] = currentFilters.progress.split('-').map(Number);
-                    if (progress < min || progress > max) {
-                        return false;
+                // Date range filter
+                if (currentFilters.startDate || currentFilters.endDate) {
+                    const projectStartDate = new Date(project.preparing_stage.start);
+                    const projectEndDate = new Date(project.execution_stage.end);
+                    
+                    if (currentFilters.startDate) {
+                        const filterStartDate = new Date(currentFilters.startDate);
+                        if (projectEndDate < filterStartDate) {
+                            return false;
+                        }
+                    }
+                    
+                    if (currentFilters.endDate) {
+                        const filterEndDate = new Date(currentFilters.endDate);
+                        if (projectStartDate > filterEndDate) {
+                            return false;
+                        }
                     }
                 }
 
                 return true;
             });
 
-            updateProjectInfo();
-            updateActiveFilters();
-            
-            // Re-render with filtered data
-            const weeks = window.ganttWeeks;
-            const weekWidth = window.ganttWeekWidth;
+            // Update project info in header
+            document.getElementById('project-info').textContent = 
+                `${filteredProjectData.length} of ${allProjectData.length} projects`;
+                
+            // Render the chart with filtered data
             const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
-            
+            renderGanttChart(window.ganttWeeks, window.ganttWeekWidth, parseTime);
+        }
+        
+        function renderGanttChart(weeks, weekWidth, parseTime) {
+            // Clear and recreate sidebar content
             createProjectSidebar(filteredProjectData);
+            
+            // Clear and recreate timeline content
             createTimelineContent(filteredProjectData, weeks, weekWidth, parseTime);
-            setupInteractions();
+        }
+        
+        function clearAllFilters() {
+            document.getElementById('category-filter').value = '';
+            document.getElementById('priority-filter').value = '';
+            document.getElementById('team-filter').value = '';
+            document.getElementById('start-date-filter').value = '';
+            document.getElementById('end-date-filter').value = '';
+            
+            // Clear current filters object
+            currentFilters = {};
+            
+            applyFilters();
         }
         
         function updateProjectInfo() {
-            document.getElementById('project-info').textContent = `${filteredProjectData.length} of ${allProjectData.length} projects`;
+            // Update project info display - placeholder function for compatibility
         }
         
         function updateActiveFilters() {
-            const activeFiltersDiv = document.getElementById('active-filters');
-            activeFiltersDiv.innerHTML = '';
+            // Update active filters display - placeholder function for compatibility
+        }
+        
+        function openModal(project) {
+            const modal = document.getElementById('task-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalSubtitle = document.getElementById('modal-subtitle');
+            const modalDetails = document.getElementById('modal-details');
+            const modalTimeline = document.getElementById('modal-timeline');
+            const modalDescription = document.getElementById('modal-description');
+
+            modalTitle.textContent = project.name;
+            modalSubtitle.textContent = `${project.category} • ${project.priority} Priority`;
             
-            Object.keys(currentFilters).forEach(filterKey => {
-                const badge = document.createElement('span');
-                badge.className = 'filter-badge';
-                badge.innerHTML = `${filterKey}: ${currentFilters[filterKey]} <span class="remove" data-filter="${filterKey}">×</span>`;
-                activeFiltersDiv.appendChild(badge);
-            });
+            modalDetails.innerHTML = `
+                <p><strong>Team Lead:</strong> ${project.team_lead}</p>
+                <p><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</p>
+                <p><strong>Total Duration:</strong> ${project.total_duration_days} days</p>
+            `;
+
+            const formatDate = d3.timeFormat('%b %d, %Y');
+            const prepStart = new Date(project.preparing_stage.start);
+            const prepEnd = new Date(project.preparing_stage.end);
+            const execStart = new Date(project.execution_stage.start);
+            const execEnd = new Date(project.execution_stage.end);
+
+            modalTimeline.innerHTML = `
+                <p><strong>Preparing Phase:</strong> ${formatDate(prepStart)} - ${formatDate(prepEnd)} (${project.preparing_stage.duration_days} days)</p>
+                <p><strong>Execution Phase:</strong> ${formatDate(execStart)} - ${formatDate(execEnd)} (${project.execution_stage.duration_days} days)</p>
+            `;
+
+            modalDescription.innerHTML = `<p>${project.description}</p>`;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('task-modal');
+            modal.classList.remove('active');
             
-            // Add click handlers for remove buttons
-            activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const filterKey = e.target.dataset.filter;
-                    delete currentFilters[filterKey];
-                    document.getElementById(`${filterKey}-filter`).value = '';
-                    applyFilters();
-                });
-            });
+            // Deselect any selected task bar
+            if (selectedTaskBar) {
+                selectedTaskBar.classList.remove('selected');
+                selectedTaskBar = null;
+            }
         }
         
         function setupModal() {
@@ -1916,66 +1883,74 @@
             });
         }
 
-        function openModal(project) {
-            const modal = document.getElementById('task-modal');
-            const title = document.getElementById('modal-title');
-            const subtitle = document.getElementById('modal-subtitle');
-            const details = document.getElementById('modal-details');
-            const timeline = document.getElementById('modal-timeline');
-            const description = document.getElementById('modal-description');
-
-            title.textContent = project.name;
-            subtitle.textContent = `${project.category} • Led by ${project.team_lead}`;
-
-            details.innerHTML = `
-                <p><strong>Priority:</strong> ${project.priority}</p>
-                <p><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</p>
-                <p><strong>Status:</strong> ${getProjectStatus(project)}</p>
-            `;
-
-            const prepStart = new Date(project.preparing_stage.start);
-            const prepEnd = new Date(project.preparing_stage.end);
-            const execStart = new Date(project.execution_stage.start);
-            const execEnd = new Date(project.execution_stage.end);
-
-            timeline.innerHTML = `
-                <p><strong>Preparation:</strong> ${prepStart.toLocaleDateString()} - ${prepEnd.toLocaleDateString()}</p>
-                <p><strong>Execution:</strong> ${execStart.toLocaleDateString()} - ${execEnd.toLocaleDateString()}</p>
-                <p><strong>Total Duration:</strong> ${Math.ceil((execEnd - prepStart) / (1000 * 60 * 60 * 24))} days</p>
-            `;
-
-            description.textContent = project.description;
-
-            modal.classList.add('active');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('task-modal');
-            modal.classList.remove('active');
+        // Export functionality
+        function setupExport() {
+            const exportBtn = document.getElementById('export-btn');
+            const exportDropdown = document.getElementById('export-dropdown');
             
-            // Remove selection from task bar
-            if (selectedTaskBar) {
-                selectedTaskBar.classList.remove('selected');
-                selectedTaskBar = null;
+            if (exportBtn && exportDropdown) {
+                exportBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    exportDropdown.style.display = exportDropdown.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    exportDropdown.style.display = 'none';
+                });
             }
         }
 
-        function getProjectStatus(project) {
-            const now = new Date();
-            const execEnd = new Date(project.execution_stage.end);
-            const progress = project.execution_stage.progress_percent;
-
-            if (progress === 100) return 'Completed';
-            if (now > execEnd) return 'Overdue';
-            if (progress > 0) return 'In Progress';
-            return 'Not Started';
+        function exportChart(format) {
+            const ganttSvg = document.querySelector('.gantt-timeline svg');
+            if (!ganttSvg) {
+                alert('No chart to export. Please wait for the chart to load.');
+                return;
+            }
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:\-]/g, '');
+            const filename = `CQSS_Gantt_Chart_${timestamp}`;
+            
+            if (format === 'svg') {
+                // Export as SVG
+                const svgData = new XMLSerializer().serializeToString(ganttSvg);
+                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = filename + '.svg';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                URL.revokeObjectURL(url);
+            } else if (format === 'png') {
+                // Export as PNG using saveSvgAsPng
+                if (typeof saveSvgAsPng !== 'undefined') {
+                    saveSvgAsPng.saveSvgAsPng(ganttSvg, filename + '.png', {
+                        scale: 2,
+                        backgroundColor: '#ffffff'
+                    });
+                } else {
+                    alert('PNG export library not loaded. Please refresh the page and try again.');
+                }
+            }
+            
+            // Close dropdown after export
+            document.getElementById('export-dropdown').style.display = 'none';
         }
-        
+
+        // Initialize export functionality when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setupExport();
+        });
         
     </script>
     
     <!-- Load local D3.js -->
     <script src="../static/js/d3.v7.min.js"></script>
+    <!-- Load saveSvgAsPng for export functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/save-svg-as-png@1.4.17/lib/saveSvgAsPng.min.js"></script>
     
     <script>
         // Initialize when D3.js is loaded

@@ -1696,35 +1696,20 @@
         
         
         
-        function setupFilters(projectData) {
-            // Store project data globally for filtering
-            window.allProjects = projectData;
-            
-            // Populate filter dropdowns
-            populateFilterOptions(projectData);
-            
+        function setupFilters() {
             // Setup filter event listeners
             const categoryFilter = document.getElementById('category-filter');
             const priorityFilter = document.getElementById('priority-filter');
             const teamFilter = document.getElementById('team-filter');
-            const searchFilter = document.getElementById('search-filter');
             const startDateFilter = document.getElementById('start-date-filter');
             const endDateFilter = document.getElementById('end-date-filter');
             const clearFiltersBtn = document.getElementById('clear-filters');
             
-            [categoryFilter, priorityFilter, teamFilter].forEach(filter => {
+            [categoryFilter, priorityFilter, teamFilter, startDateFilter, endDateFilter].forEach(filter => {
                 filter.addEventListener('change', applyFilters);
             });
             
-            [startDateFilter, endDateFilter].forEach(filter => {
-                filter.addEventListener('change', applyFilters);
-            });
-            
-            searchFilter.addEventListener('input', debounce(applyFilters, 300));
             clearFiltersBtn.addEventListener('click', clearAllFilters);
-            
-            // Initial filter application
-            applyFilters();
         }
         
         function populateFilterOptions() {
@@ -1752,105 +1737,132 @@
         }
         
         function applyFilters() {
-            const categoryFilter = document.getElementById('category-filter').value;
-            const priorityFilter = document.getElementById('priority-filter').value;
-            const teamFilter = document.getElementById('team-filter').value;
-            const searchQuery = document.getElementById('search-filter').value.toLowerCase();
-            const startDateFilter = document.getElementById('start-date-filter').value;
-            const endDateFilter = document.getElementById('end-date-filter').value;
+            // Get current filter values
+            currentFilters.priority = document.getElementById('priority-filter').value;
+            currentFilters.category = document.getElementById('category-filter').value;
+            currentFilters.team = document.getElementById('team-filter').value;
+            currentFilters.startDate = document.getElementById('start-date-filter').value;
+            currentFilters.endDate = document.getElementById('end-date-filter').value;
             
-            // Filter the project data instead of manipulating DOM
-            const filteredProjects = window.allProjects.filter(project => {
-                // Category filter
-                if (categoryFilter && project.category !== categoryFilter) {
-                    return false;
-                }
-                
+            filteredProjectData = allProjectData.filter(project => {
                 // Priority filter
-                if (priorityFilter && project.priority !== priorityFilter) {
+                if (currentFilters.priority && project.priority !== currentFilters.priority) {
                     return false;
                 }
-                
-                // Team filter
-                if (teamFilter && project.team_lead !== teamFilter) {
+
+                // Category filter
+                if (currentFilters.category && project.category !== currentFilters.category) {
                     return false;
                 }
-                
-                // Search filter
-                if (searchQuery && !project.name.toLowerCase().includes(searchQuery) && 
-                    !project.description.toLowerCase().includes(searchQuery)) {
+
+                // Team lead filter
+                if (currentFilters.team && project.team_lead !== currentFilters.team) {
                     return false;
                 }
 
                 // Date range filter
-                if (startDateFilter || endDateFilter) {
+                if (currentFilters.startDate || currentFilters.endDate) {
                     const projectStartDate = new Date(project.preparing_stage.start);
                     const projectEndDate = new Date(project.execution_stage.end);
                     
-                    if (startDateFilter && startDateFilter.trim() !== '') {
-                        const filterStartDate = new Date(startDateFilter);
-                        // Project must end after or on the filter start date (overlap check)
+                    if (currentFilters.startDate) {
+                        const filterStartDate = new Date(currentFilters.startDate);
                         if (projectEndDate < filterStartDate) {
                             return false;
                         }
                     }
                     
-                    if (endDateFilter && endDateFilter.trim() !== '') {
-                        const filterEndDate = new Date(endDateFilter);
-                        // Project must start before or on the filter end date (overlap check)
+                    if (currentFilters.endDate) {
+                        const filterEndDate = new Date(currentFilters.endDate);
                         if (projectStartDate > filterEndDate) {
                             return false;
                         }
                     }
                 }
-                
+
                 return true;
             });
 
-            updateProjectInfo();
-            updateActiveFilters();
-            
-            // Store filtered data globally for rebuilding
-            window.filteredProjects = filteredProjects;
-            
-            // Rebuild sidebar and timeline with filtered data
-            rebuildGanttChart(filteredProjects);
-            
             // Update project info in header
             document.getElementById('project-info').textContent = 
-                `${filteredProjects.length} of ${window.allProjects.length} projects`;
+                `${filteredProjectData.length} of ${allProjectData.length} projects`;
+                
+            // Render the chart with filtered data
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            renderGanttChart(window.ganttWeeks, window.ganttWeekWidth, parseTime);
         }
         
-        function rebuildGanttChart(projectData) {
-            // Get stored timeline parameters from initial setup
-            const weeks = window.ganttWeeks;
-            const weekWidth = window.ganttWeekWidth;
-            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+        function renderGanttChart(weeks, weekWidth, parseTime) {
+            // Clear and recreate sidebar content
+            createProjectSidebar(filteredProjectData);
             
-            // Rebuild sidebar with filtered data
-            createProjectSidebar(projectData);
-            
-            // Rebuild timeline content with filtered data
-            createTimelineContent(projectData, weeks, weekWidth, parseTime);
+            // Clear and recreate timeline content
+            createTimelineContent(filteredProjectData, weeks, weekWidth, parseTime);
         }
         
         function clearAllFilters() {
             document.getElementById('category-filter').value = '';
             document.getElementById('priority-filter').value = '';
             document.getElementById('team-filter').value = '';
-            document.getElementById('search-filter').value = '';
             document.getElementById('start-date-filter').value = '';
             document.getElementById('end-date-filter').value = '';
             
-            // Add click handlers for remove buttons
-            activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const filterKey = e.target.dataset.filter;
-                    delete currentFilters[filterKey];
-                    document.getElementById(`${filterKey}-filter`).value = '';
-                    applyFilters();
-                });
-            });
+            // Clear current filters object
+            currentFilters = {};
+            
+            applyFilters();
+        }
+        
+        function updateProjectInfo() {
+            // Update project info display - placeholder function for compatibility
+        }
+        
+        function updateActiveFilters() {
+            // Update active filters display - placeholder function for compatibility
+        }
+        
+        function openModal(project) {
+            const modal = document.getElementById('task-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalSubtitle = document.getElementById('modal-subtitle');
+            const modalDetails = document.getElementById('modal-details');
+            const modalTimeline = document.getElementById('modal-timeline');
+            const modalDescription = document.getElementById('modal-description');
+
+            modalTitle.textContent = project.name;
+            modalSubtitle.textContent = `${project.category} • ${project.priority} Priority`;
+            
+            modalDetails.innerHTML = `
+                <p><strong>Team Lead:</strong> ${project.team_lead}</p>
+                <p><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</p>
+                <p><strong>Total Duration:</strong> ${project.total_duration_days} days</p>
+            `;
+
+            const formatDate = d3.timeFormat('%b %d, %Y');
+            const prepStart = new Date(project.preparing_stage.start);
+            const prepEnd = new Date(project.preparing_stage.end);
+            const execStart = new Date(project.execution_stage.start);
+            const execEnd = new Date(project.execution_stage.end);
+
+            modalTimeline.innerHTML = `
+                <p><strong>Preparing Phase:</strong> ${formatDate(prepStart)} - ${formatDate(prepEnd)} (${project.preparing_stage.duration_days} days)</p>
+                <p><strong>Execution Phase:</strong> ${formatDate(execStart)} - ${formatDate(execEnd)} (${project.execution_stage.duration_days} days)</p>
+            `;
+
+            modalDescription.innerHTML = `<p>${project.description}</p>`;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('task-modal');
+            modal.classList.remove('active');
+            
+            // Deselect any selected task bar
+            if (selectedTaskBar) {
+                selectedTaskBar.classList.remove('selected');
+                selectedTaskBar = null;
+            }
         }
         
         function setupModal() {

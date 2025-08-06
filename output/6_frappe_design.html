@@ -918,6 +918,10 @@
                 return true;
             });
 
+            // Update project info and active filters display
+            updateProjectInfo();
+            updateActiveFilters();
+            
             // Re-render chart with filtered data
             renderGanttChart();
         }
@@ -1851,56 +1855,6 @@
         }
         
         
-        function setupFilters() {
-            // Priority filter
-            document.getElementById('priority-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.priority = e.target.value;
-                } else {
-                    delete currentFilters.priority;
-                }
-                applyFilters();
-            });
-
-            // Category filter
-            document.getElementById('category-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.category = e.target.value;
-                } else {
-                    delete currentFilters.category;
-                }
-                applyFilters();
-            });
-
-            // Team filter
-            document.getElementById('team-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.team = e.target.value;
-                } else {
-                    delete currentFilters.team;
-                }
-                applyFilters();
-            });
-
-            // Progress filter
-            document.getElementById('progress-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.progress = e.target.value;
-                } else {
-                    delete currentFilters.progress;
-                }
-                applyFilters();
-            });
-
-            // Clear all filters
-            document.getElementById('clear-filters').addEventListener('click', () => {
-                currentFilters = {};
-                document.querySelectorAll('.filter-select').forEach(select => {
-                    select.value = '';
-                });
-                applyFilters();
-            });
-        }
         
         function populateFilterOptions() {
             // Get unique categories and team leads
@@ -1926,66 +1880,6 @@
             });
         }
         
-        function applyFilters() {
-            filteredProjectData = allProjectData.filter(project => {
-                // Priority filter
-                if (currentFilters.priority && project.priority !== currentFilters.priority) {
-                    return false;
-                }
-
-                // Category filter
-                if (currentFilters.category && project.category !== currentFilters.category) {
-                    return false;
-                }
-
-                // Team lead filter
-                if (currentFilters.team && project.team_lead !== currentFilters.team) {
-                    return false;
-                }
-
-                // Progress filter
-                if (currentFilters.progress) {
-                    const progress = project.execution_stage.progress_percent;
-                    const [min, max] = currentFilters.progress.split('-').map(Number);
-                    if (progress < min || progress > max) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-
-            updateProjectInfo();
-            updateActiveFilters();
-            
-            // Re-render with filtered data
-            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
-            const dateRange = {
-  "min_date": "2025-07-03T00:00:00",
-  "max_date": "2025-12-08T00:00:00"
-};
-            const minDate = parseTime(dateRange.min_date);
-            const maxDate = parseTime(dateRange.max_date);
-            
-            const startDate = new Date(minDate);
-            startDate.setDate(startDate.getDate() - startDate.getDay());
-            
-            const endDate = new Date(maxDate);
-            endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
-            
-            const weeks = [];
-            const currentWeek = new Date(startDate);
-            while (currentWeek <= endDate) {
-                weeks.push(new Date(currentWeek));
-                currentWeek.setDate(currentWeek.getDate() + 7);
-            }
-            
-            const weekWidth = 200;
-            
-            createProjectSidebar(filteredProjectData);
-            createTimelineContent(filteredProjectData, weeks, weekWidth, parseTime);
-            setupInteractions();
-        }
         
         function updateProjectInfo() {
             document.getElementById('project-info').textContent = `${filteredProjectData.length} of ${allProjectData.length} projects`;
@@ -1995,22 +1889,29 @@
             const activeFiltersDiv = document.getElementById('active-filters');
             activeFiltersDiv.innerHTML = '';
             
-            Object.keys(currentFilters).forEach(filterKey => {
-                const badge = document.createElement('span');
-                badge.className = 'filter-badge';
-                badge.innerHTML = `${filterKey}: ${currentFilters[filterKey]} <span class="remove" data-filter="${filterKey}">×</span>`;
-                activeFiltersDiv.appendChild(badge);
-            });
+            // Only show filters that have actual values
+            const activeFilters = Object.keys(currentFilters).filter(key => 
+                currentFilters[key] && currentFilters[key].toString().trim() !== ''
+            );
             
-            // Add click handlers for remove buttons
-            activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const filterKey = e.target.dataset.filter;
-                    delete currentFilters[filterKey];
-                    document.getElementById(`${filterKey}-filter`).value = '';
-                    applyFilters();
+            if (activeFilters.length > 0) {
+                activeFilters.forEach(filterKey => {
+                    const badge = document.createElement('span');
+                    badge.className = 'filter-badge';
+                    badge.innerHTML = `${filterKey}: ${currentFilters[filterKey]} <span class="remove" data-filter="${filterKey}">×</span>`;
+                    activeFiltersDiv.appendChild(badge);
                 });
-            });
+                
+                // Add click handlers for remove buttons
+                activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const filterKey = e.target.dataset.filter;
+                        delete currentFilters[filterKey];
+                        document.getElementById(`${filterKey}-filter`).value = '';
+                        applyFilters();
+                    });
+                });
+            }
         }
         
         function setupModal() {

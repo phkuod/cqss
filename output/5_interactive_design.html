@@ -1383,8 +1383,8 @@
 
                 // Date range filter
                 if (currentFilters.startDate || currentFilters.endDate) {
-                    const projectStartDate = new Date(project.preparing_stage.start_date);
-                    const projectEndDate = new Date(project.execution_stage.end_date);
+                    const projectStartDate = new Date(project.preparing_stage.start);
+                    const projectEndDate = new Date(project.execution_stage.end);
                     
                     if (currentFilters.startDate) {
                         const filterStartDate = new Date(currentFilters.startDate);

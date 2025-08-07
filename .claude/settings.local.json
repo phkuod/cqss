@@ -37,7 +37,10 @@
       "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\4_colorful_friendly.html\")",
       "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\6_frappe_gantt.html\")",
       "Bash(cmd /c start \"\" \"C:\\Users\\phkuo\\workspace\\cqss-system\\output\\3_dark_design.html\")",
-      "Bash(cmd /c start:*)"
+      "Bash(cmd /c start:*)",
+      "Bash(grep:*)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)"
     ],
     "deny": []
   }

@@ -41,7 +41,8 @@
       "Bash(grep:*)",
       "Bash(git fetch:*)",
       "Bash(git merge:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "mcp__filesystem__list_directory"
     ],
     "deny": []
   }

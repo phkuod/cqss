@@ -18,18 +18,13 @@ Examples:
   python main.py data/sample_projects.csv
   python main.py data/sample_projects.csv output/my_gantt.html
   python main.py data/sample_projects.csv --standalone
-  python main.py data/sample_projects.csv --style minimal --open
-  python main.py data/sample_projects.csv --style dark --open
-  python main.py data/sample_projects.csv --style colorful --open
-  python main.py data/sample_projects.csv --style interactive --open
+  python main.py data/sample_projects.csv --open
 
-Available Styles:
-  default     - Classic Gantt chart design
-  frappe      - Clean, modern Frappe-inspired design
-  minimal     - Ultra-clean minimal design (Notion/Linear style)
-  dark        - Professional dark theme (GitHub/Figma style)
-  colorful    - Vibrant, friendly design (Monday.com/Asana style)
-  interactive - Modern interactive design with filters & click features
+Always generates interactive Gantt charts with:
+  - Advanced filtering (category, priority, team, search)
+  - Auto-scroll to today functionality
+  - Modern responsive design with tooltips
+  - Export capabilities and project details modal
         """
     )
     
@@ -57,12 +52,7 @@ Available Styles:
         action='store_true'
     )
     
-    parser.add_argument(
-        '--style',
-        help='Gantt chart style (default, frappe, minimal, dark, colorful, interactive)',
-        choices=['default', 'frappe', 'minimal', 'dark', 'colorful', 'interactive'],
-        default='default'
-    )
+    # Style parameter removed - now always uses interactive template
     
     parser.add_argument(
         '--open',
@@ -80,17 +70,7 @@ Available Styles:
     
     # Set default output file if not provided
     if args.output_file is None:
-        if args.style == 'frappe':
-            default_output = 'output/gantt_chart_frappe.html'
-        elif args.style == 'minimal':
-            default_output = 'output/gantt_chart_minimal.html'
-        elif args.style == 'dark':
-            default_output = 'output/gantt_chart_dark.html'
-        elif args.style == 'colorful':
-            default_output = 'output/gantt_chart_colorful.html'
-        elif args.style == 'interactive':
-            default_output = 'output/gantt_chart_interactive.html'
-        elif args.standalone:
+        if args.standalone:
             default_output = 'output/gantt_chart_standalone.html'
         else:
             default_output = 'output/gantt_chart.html'
@@ -101,8 +81,8 @@ Available Styles:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     try:
-        # Generate Gantt chart
-        generator = GanttChartGenerator(template_path=args.template, standalone=args.standalone, style=args.style)
+        # Generate Gantt chart using interactive template
+        generator = GanttChartGenerator(template_path=args.template, standalone=args.standalone)
         generator.generate_chart(str(csv_path), str(output_path))
         
         print(f"\nSuccess! Open {output_path} in your web browser to view the Gantt chart.")

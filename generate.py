@@ -17,7 +17,6 @@ def main():
     
     output_file = "output/gantt_chart.html"
     standalone = False
-    style = "default"
     
     # Check for command line arguments
     if len(sys.argv) > 1:
@@ -27,9 +26,6 @@ def main():
         if sys.argv[2] == "--standalone":
             standalone = True
             output_file = "output/gantt_chart_standalone.html"
-        elif sys.argv[2] == "--frappe":
-            style = "frappe"
-            output_file = "output/gantt_chart_frappe.html"
     
     # Validate input file
     csv_path = Path(csv_file)
@@ -47,10 +43,9 @@ def main():
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     try:
-        # Generate Gantt chart
-        style_text = f" ({style} style)" if style != "default" else ""
-        print(f"Generating Gantt chart{style_text} from {csv_file}...")
-        generator = GanttChartGenerator(standalone=standalone, style=style)
+        # Generate Gantt chart using interactive template
+        print(f"Generating interactive Gantt chart from {csv_file}...")
+        generator = GanttChartGenerator(standalone=standalone)
         generator.generate_chart(str(csv_path), str(output_path))
         
         print(f"\nSuccess! Chart saved to: {output_path}")

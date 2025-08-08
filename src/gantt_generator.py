@@ -8,22 +8,10 @@ class GanttChartGenerator:
     Generates static HTML Gantt chart from processed project data
     """
     
-    def __init__(self, template_path: str = None, standalone: bool = False, style: str = "default"):
+    def __init__(self, template_path: str = None, standalone: bool = False, style: str = "interactive"):
         if template_path is None:
-            if style == "frappe":
-                template_name = 'frappe_gantt_template.html'
-            elif style == "minimal":
-                template_name = 'modern_minimal_template.html'
-            elif style == "dark":
-                template_name = 'dark_professional_template.html'
-            elif style == "colorful":
-                template_name = 'colorful_friendly_template.html'
-            elif style == "interactive":
-                template_name = 'interactive_modern_template.html'
-            elif standalone:
-                template_name = 'standalone_gantt_template.html'
-            else:
-                template_name = 'gantt_template.html'
+            # Always use the interactive modern template - it's the most feature-complete
+            template_name = 'interactive_modern_template.html'
             template_path = Path(__file__).parent.parent / 'templates' / template_name
         
         self.template_path = Path(template_path)

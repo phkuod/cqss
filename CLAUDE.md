@@ -23,8 +23,8 @@ python main.py data/sample_projects.csv output/test_chart.html
 ### Core Components
 
 - **`src/data_processor.py`**: CSV processing, validation, and data transformation for D3.js
-- **`src/gantt_generator.py`**: HTML generation using Jinja2 templates and processed data
-- **`templates/gantt_template.html`**: D3.js-based interactive Gantt chart template
+- **`src/gantt_generator.py`**: HTML generation using single interactive template and processed data
+- **`templates/interactive_modern_template.html`**: Unified D3.js-based interactive Gantt chart template
 - **`main.py`**: CLI entry point with argument parsing
 
 ### Data Flow
@@ -48,7 +48,7 @@ python main.py data/sample_projects.csv output/test_chart.html
 ## Common Commands
 
 ```bash
-# Quick generation with mock data (includes all new features)
+# Quick generation with mock data (interactive template with all features)
 python generate.py
 
 # Generate mock data for testing (3-month range around today)
@@ -57,11 +57,14 @@ python generate_mock_data.py --projects 30 --output data/mock_projects.csv
 # Quick generation with standalone version
 python generate.py --standalone
 
-# Advanced usage with custom output and specific template
-python main.py data/mock_three_months.csv output/custom.html --template templates/modern_minimal_template.html
-
-# Generate Gantt chart from CSV (uses defaults)
+# Generate Gantt chart from CSV (always uses interactive template)
 python main.py data/sample_projects.csv
+
+# Generate with custom output file
+python main.py data/mock_three_months.csv output/custom.html
+
+# Auto-open in browser after generation
+python main.py data/sample_projects.csv --open
 
 # Run data processor directly (for testing)
 cd src && python data_processor.py
@@ -148,13 +151,9 @@ Interactive filter controls for:
 - **ONLY** create PR when explicitly requested by user after verification
 - Self-test thoroughly before committing
 - Use descriptive branch names (e.g., `feature/export-pdf`, `feature/mobile-responsive`)
-- **MAINTAIN** existing output file names when implementing new features:
-  - `1_default_design.html` - Classic Gantt chart design
-  - `2_minimal_design.html` - Ultra-clean minimal design  
-  - `3_dark_design.html` - Professional dark theme
-  - `4_colorful_design.html` - Vibrant, friendly design
-  - `5_interactive_design.html` - Modern interactive design
-  - `6_frappe_design.html` - Clean, modern Frappe-inspired design
+- **SINGLE TEMPLATE APPROACH**: System now uses unified interactive template (`interactive_modern_template.html`)
+- **MAINTAIN** primary output file: `gantt_chart.html` - Interactive design with all advanced features
+- All generation commands now produce consistent interactive Gantt charts with filtering, auto-scroll, export, and modern responsive design
 
 ## Filter Functionality (Fixed Issues)
 
@@ -187,20 +186,24 @@ Fixed critical filter functionality issues across all Gantt chart templates to e
 - **Fix Applied**: Added content clearing to 4 templates (2_minimal, 3_dark, 4_colorful, 6_frappe)
 - **Location**: First line inside `createTimelineContent()` function
 
-#### Working Reference Template
-- **5_interactive_design.html** serves as the working reference implementation
-- All fixes implemented to match this template's behavior patterns
-- Contains proper content clearing and cleanup patterns
+#### Single Template Implementation
+- **interactive_modern_template.html** is now the unified template with all functionality
+- Contains proper content clearing and cleanup patterns for reliable filtering
+- Serves as the single source of truth for all Gantt chart features
 
 #### Filter Functionality Testing
-When testing filter functionality across templates, verify:
+When testing filter functionality, verify:
 - Sidebar updates to show only filtered projects (no accumulation)
 - No visual duplication of today markers after repeated filtering
 - No browser freezing or infinite loops when applying filters
 - Timeline content properly rebuilds without element accumulation
-- Consistent behavior across all 6 Gantt chart design templates
+- All advanced features work consistently: filtering, auto-scroll, export, tooltips
 
 ## Memory Logs
 
 - Memorized the commit code flow to understand project enhancement and versioning process
 - Documented comprehensive filter functionality fixes for future reference and troubleshooting
+- **August 2025**: Consolidated from 6 template variants to single unified interactive template
+  - Reduced maintenance complexity while preserving all advanced features
+  - `interactive_modern_template.html` is now the single template for all generations
+  - All scripts updated to use unified approach (generate.py, main.py, gantt_generator.py)

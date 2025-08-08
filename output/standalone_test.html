@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CQSS Modern Minimal Gantt Chart</title>
+    <title>CQSS Interactive Modern Gantt Chart</title>
     <style>
         /* Import Inter font for modern typography */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -40,7 +40,7 @@
         .gantt-header {
             background: #ffffff;
             border-bottom: 1px solid #e5e5e5;
-            padding: 32px 40px;
+            padding: 24px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -225,7 +225,7 @@
 
         .gantt-task-bar:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
         }
 
         .gantt-task-bar.selected {
@@ -349,14 +349,15 @@
             position: absolute;
             top: 0;
             left: 5px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 11px;
             font-weight: 600;
             color: #1e40af;
             white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
         
 
@@ -455,27 +456,6 @@
             pointer-events: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             backdrop-filter: blur(8px);
-            transition: opacity 0.3s ease;
-        }
-
-        .scroll-fade-indicator {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 20px;
-            pointer-events: none;
-            z-index: 5;
-            transition: opacity 0.3s ease;
-        }
-
-        .scroll-fade-left {
-            left: 0;
-            background: linear-gradient(to right, rgba(255,255,255,0.8), transparent);
-        }
-
-        .scroll-fade-right {
-            right: 0;
-            background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
         }
 
         /* Task Detail Modal */
@@ -565,71 +545,22 @@
             background: #f5f5f5;
         }
 
-        .export-btn {
-            padding: 8px 16px;
-            background: #10b981;
+        /* Filter badges */
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #6366f1;
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-left: 8px;
+        }
+
+        .filter-badge .remove {
+            margin-left: 6px;
             cursor: pointer;
-            transition: background-color 0.15s ease;
-            margin-left: 16px;
-        }
-
-        .export-btn:hover {
-            background: #059669;
-        }
-
-        .export-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .export-dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 120px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            z-index: 1000;
-            border: 1px solid #e5e5e5;
-        }
-
-        .export-dropdown-content button {
-            color: #374151;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.15s ease;
-        }
-
-        .export-dropdown-content button:hover {
-            background-color: #f3f4f6;
-        }
-
-        .export-dropdown-content button:first-child {
-            border-radius: 8px 8px 0 0;
-        }
-
-        .export-dropdown-content button:last-child {
-            border-radius: 0 0 8px 8px;
-        }
-
-        .filter-results {
-            font-size: 14px;
-            color: #6b7280;
-            font-weight: 500;
-            margin-left: auto;
+            font-weight: bold;
         }
 
         /* Hidden rows for filtering */
@@ -637,25 +568,15 @@
         .gantt-row-content.filtered-out {
             display: none;
         }
-
     </style>
 </head>
 <body>
     <div class="gantt-container">
         <div class="gantt-header">
-            <div class="gantt-title">CQSS Project Gantt Chart</div>
-            <div style="display: flex; align-items: center;">
-                <div class="gantt-info">
-                    <span id="project-info">Loading projects...</span>
-                    <span id="date-range" style="margin-left: 24px; font-weight: 500;"></span>
-                </div>
-                <div class="export-dropdown">
-                    <button class="export-btn" id="export-btn">Export Chart ↓</button>
-                    <div class="export-dropdown-content" id="export-dropdown">
-                        <button onclick="exportChart('png')">Export as PNG</button>
-                        <button onclick="exportChart('svg')">Export as SVG</button>
-                    </div>
-                </div>
+            <div class="gantt-title">CQSS Interactive Gantt Chart</div>
+            <div class="gantt-info">
+                <span id="project-info">Loading projects...</span>
+                <span id="date-range" style="margin-left: 24px; font-weight: 500;"></span>
             </div>
         </div>
         
@@ -697,17 +618,7 @@
                 </select>
             </div>
             
-            <div class="filter-group">
-                <label class="filter-label">Start Date:</label>
-                <input type="date" id="start-date-filter" class="filter-input">
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">End Date:</label>
-                <input type="date" id="end-date-filter" class="filter-input">
-            </div>
-            
-            <button class="clear-filters-btn" id="clear-filters">Clear All</button>
+            <button id="clear-filters" class="clear-filters-btn">Clear All</button>
             
             <div id="active-filters"></div>
         </div>
@@ -722,9 +633,7 @@
             
             <div class="gantt-main" id="gantt-main">
                 <div class="gantt-timeline-header" id="timeline-header">
-                    <div class="scroll-hint" id="scroll-hint">← → Scroll horizontally</div>
-                    <div class="scroll-fade-indicator scroll-fade-left" id="scroll-fade-left" style="opacity: 0;"></div>
-                    <div class="scroll-fade-indicator scroll-fade-right" id="scroll-fade-right" style="opacity: 0;"></div>
+                    <div class="scroll-hint">← → Scroll horizontally • Click bars for details</div>
                     <!-- Timeline header will be populated here -->
                 </div>
                 <div class="gantt-timeline-content-wrapper">
@@ -747,7 +656,7 @@
                 <div class="task-modal-subtitle" id="modal-subtitle"></div>
             </div>
             <div class="task-modal-section">
-                <h4>Details</h4>
+                <h4>Project Details</h4>
                 <div id="modal-details"></div>
             </div>
             <div class="task-modal-section">
@@ -756,535 +665,437 @@
             </div>
             <div class="task-modal-section">
                 <h4>Description</h4>
-                <div id="modal-description"></div>
+                <p id="modal-description"></p>
             </div>
         </div>
     </div>
 
+    <!-- Load local D3.js -->
+    <script src="../static/js/d3.v7.min.js"></script>
+    
     <script>
-        // Global variables for filter functionality
-        let allProjectData;
-        let filteredProjectData;
+        // Global variables
+        let allProjectData = [];
+        let filteredProjectData = [];
         let currentFilters = {};
         let selectedTaskBar = null;
 
-        function initFrappeGantt() {
+        function initInteractiveGantt() {
             // Project data will be embedded here
-            const projectData = [
+            allProjectData = [
   {
     "id": "project_0",
-    "name": "Cloud Migration Security",
-    "category": "Infrastructure",
-    "priority": "Medium",
-    "description": "Strategic infrastructure initiative focused on improving operational efficiency and user experience.",
-    "team_lead": "SRE Team",
+    "name": "Competitor Analysis Q4",
+    "category": "Research & Analysis",
+    "priority": "Low",
+    "description": "Comprehensive research & analysis project targeting scalability and reliability improvements.",
+    "team_lead": "Analytics Team",
     "preparing_stage": {
-      "start": "2025-07-03T00:00:00",
-      "end": "2025-07-16T00:00:00",
-      "duration_days": 13
+      "start": "2025-07-10T00:00:00",
+      "end": "2025-07-20T00:00:00",
+      "duration_days": 10
     },
     "execution_stage": {
-      "start": "2025-07-16T00:00:00",
-      "end": "2025-07-25T00:00:00",
-      "duration_days": 9,
-      "progress_percent": 100
+      "start": "2025-07-20T00:00:00",
+      "end": "2025-10-17T00:00:00",
+      "duration_days": 89,
+      "progress_percent": 26
     },
-    "total_duration_days": 22
+    "total_duration_days": 99
   },
   {
     "id": "project_1",
-    "name": "Email Marketing B2C",
-    "category": "Marketing Campaign",
-    "priority": "Medium",
-    "description": "Cross-functional marketing campaign project aimed at enhancing system capabilities and performance.",
-    "team_lead": "Content Team",
-    "preparing_stage": {
-      "start": "2025-07-06T00:00:00",
-      "end": "2025-07-19T00:00:00",
-      "duration_days": 13
-    },
-    "execution_stage": {
-      "start": "2025-07-19T00:00:00",
-      "end": "2025-08-27T00:00:00",
-      "duration_days": 39,
-      "progress_percent": 28
-    },
-    "total_duration_days": 52
-  },
-  {
-    "id": "project_2",
-    "name": "Performance Analytics Report",
+    "name": "Customer Feedback Analysis",
     "category": "Research & Analysis",
-    "priority": "Low",
-    "description": "Cross-functional research & analysis project aimed at enhancing system capabilities and performance.",
+    "priority": "Medium",
+    "description": "Innovative research & analysis solution designed to address key business requirements.",
     "team_lead": "Analytics Team",
     "preparing_stage": {
-      "start": "2025-07-08T00:00:00",
-      "end": "2025-07-18T00:00:00",
-      "duration_days": 10
-    },
-    "execution_stage": {
-      "start": "2025-07-18T00:00:00",
-      "end": "2025-09-23T00:00:00",
-      "duration_days": 67,
-      "progress_percent": 14
-    },
-    "total_duration_days": 77
-  },
-  {
-    "id": "project_3",
-    "name": "QQ1 Starter Campaign",
-    "category": "Marketing Campaign",
-    "priority": "High",
-    "description": "Comprehensive marketing campaign project targeting scalability and reliability improvements.",
-    "team_lead": "Content Team",
-    "preparing_stage": {
-      "start": "2025-07-08T00:00:00",
-      "end": "2025-07-14T00:00:00",
-      "duration_days": 6
-    },
-    "execution_stage": {
-      "start": "2025-07-14T00:00:00",
-      "end": "2025-08-25T00:00:00",
-      "duration_days": 42,
-      "progress_percent": 39
-    },
-    "total_duration_days": 48
-  },
-  {
-    "id": "project_4",
-    "name": "Product Demo Package",
-    "category": "Marketing Campaign",
-    "priority": "High",
-    "description": "Critical marketing campaign effort to modernize infrastructure and streamline processes.",
-    "team_lead": "Design Team",
-    "preparing_stage": {
-      "start": "2025-07-09T00:00:00",
-      "end": "2025-07-16T00:00:00",
-      "duration_days": 7
-    },
-    "execution_stage": {
-      "start": "2025-07-16T00:00:00",
-      "end": "2025-08-11T00:00:00",
-      "duration_days": 26,
-      "progress_percent": 62
-    },
-    "total_duration_days": 33
-  },
-  {
-    "id": "project_5",
-    "name": "Go-to-Market Aggressive",
-    "category": "Product Launch",
-    "priority": "High",
-    "description": "Innovative product launch solution designed to address key business requirements.",
-    "team_lead": "Engineering Team",
-    "preparing_stage": {
-      "start": "2025-07-11T00:00:00",
-      "end": "2025-08-01T00:00:00",
-      "duration_days": 21
-    },
-    "execution_stage": {
-      "start": "2025-08-01T00:00:00",
-      "end": "2025-09-07T00:00:00",
-      "duration_days": 37,
-      "progress_percent": 14
-    },
-    "total_duration_days": 58
-  },
-  {
-    "id": "project_6",
-    "name": "Social Media Azure Strategy",
-    "category": "Marketing Campaign",
-    "priority": "High",
-    "description": "Critical marketing campaign effort to modernize infrastructure and streamline processes.",
-    "team_lead": "Design Team",
-    "preparing_stage": {
       "start": "2025-07-13T00:00:00",
-      "end": "2025-07-23T00:00:00",
-      "duration_days": 10
-    },
-    "execution_stage": {
-      "start": "2025-07-23T00:00:00",
-      "end": "2025-08-05T00:00:00",
-      "duration_days": 13,
-      "progress_percent": 73
-    },
-    "total_duration_days": 23
-  },
-  {
-    "id": "project_7",
-    "name": "New Feature Enhanced Release",
-    "category": "Product Launch",
-    "priority": "Critical",
-    "description": "Innovative product launch solution designed to address key business requirements.",
-    "team_lead": "Sales Team",
-    "preparing_stage": {
-      "start": "2025-07-14T00:00:00",
-      "end": "2025-08-03T00:00:00",
-      "duration_days": 20
-    },
-    "execution_stage": {
-      "start": "2025-08-03T00:00:00",
-      "end": "2025-11-24T00:00:00",
-      "duration_days": 113,
-      "progress_percent": 0
-    },
-    "total_duration_days": 133
-  },
-  {
-    "id": "project_8",
-    "name": "Partnership Technology Integration",
-    "category": "Product Launch",
-    "priority": "High",
-    "description": "Cross-functional product launch project aimed at enhancing system capabilities and performance.",
-    "team_lead": "Engineering Team",
-    "preparing_stage": {
-      "start": "2025-07-17T00:00:00",
-      "end": "2025-08-04T00:00:00",
+      "end": "2025-07-31T00:00:00",
       "duration_days": 18
     },
     "execution_stage": {
-      "start": "2025-08-04T00:00:00",
-      "end": "2025-09-27T00:00:00",
-      "duration_days": 54,
-      "progress_percent": 0
+      "start": "2025-07-31T00:00:00",
+      "end": "2025-09-08T00:00:00",
+      "duration_days": 39,
+      "progress_percent": 18
     },
-    "total_duration_days": 72
+    "total_duration_days": 57
   },
   {
-    "id": "project_9",
-    "name": "Security Framework Update",
+    "id": "project_2",
+    "name": "User Authentication V2",
     "category": "Software Development",
-    "priority": "Medium",
-    "description": "Cross-functional software development project aimed at enhancing system capabilities and performance.",
+    "priority": "Critical",
+    "description": "Comprehensive software development project targeting scalability and reliability improvements.",
     "team_lead": "Backend Team",
     "preparing_stage": {
-      "start": "2025-07-18T00:00:00",
-      "end": "2025-08-01T00:00:00",
+      "start": "2025-07-19T00:00:00",
+      "end": "2025-08-02T00:00:00",
       "duration_days": 14
     },
     "execution_stage": {
-      "start": "2025-08-01T00:00:00",
-      "end": "2025-10-03T00:00:00",
-      "duration_days": 63,
+      "start": "2025-08-02T00:00:00",
+      "end": "2025-09-25T00:00:00",
+      "duration_days": 54,
       "progress_percent": 5
     },
-    "total_duration_days": 77
+    "total_duration_days": 68
   },
   {
-    "id": "project_10",
-    "name": "Server Upgrade Staging",
+    "id": "project_3",
+    "name": "Database Scaling Horizontal",
     "category": "Infrastructure",
-    "priority": "Critical",
-    "description": "Innovative infrastructure solution designed to address key business requirements.",
-    "team_lead": "DevOps Team",
+    "priority": "High",
+    "description": "Cross-functional infrastructure project aimed at enhancing system capabilities and performance.",
+    "team_lead": "Platform Team",
     "preparing_stage": {
-      "start": "2025-07-18T00:00:00",
-      "end": "2025-07-28T00:00:00",
-      "duration_days": 10
+      "start": "2025-07-19T00:00:00",
+      "end": "2025-07-26T00:00:00",
+      "duration_days": 7
     },
     "execution_stage": {
-      "start": "2025-07-28T00:00:00",
-      "end": "2025-08-31T00:00:00",
-      "duration_days": 34,
-      "progress_percent": 16
+      "start": "2025-07-26T00:00:00",
+      "end": "2025-09-01T00:00:00",
+      "duration_days": 37,
+      "progress_percent": 44
     },
     "total_duration_days": 44
   },
   {
-    "id": "project_11",
-    "name": "Winter Product Launch",
+    "id": "project_4",
+    "name": "Mobile App Search",
+    "category": "Software Development",
+    "priority": "Critical",
+    "description": "Strategic software development initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Backend Team",
+    "preparing_stage": {
+      "start": "2025-07-23T00:00:00",
+      "end": "2025-08-10T00:00:00",
+      "duration_days": 18
+    },
+    "execution_stage": {
+      "start": "2025-08-10T00:00:00",
+      "end": "2025-10-31T00:00:00",
+      "duration_days": 82,
+      "progress_percent": 0
+    },
+    "total_duration_days": 100
+  },
+  {
+    "id": "project_5",
+    "name": "Customer Acquisition Direct",
     "category": "Marketing Campaign",
     "priority": "High",
-    "description": "Innovative marketing campaign solution designed to address key business requirements.",
+    "description": "Strategic marketing campaign initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Design Team",
+    "preparing_stage": {
+      "start": "2025-07-23T00:00:00",
+      "end": "2025-08-03T00:00:00",
+      "duration_days": 11
+    },
+    "execution_stage": {
+      "start": "2025-08-03T00:00:00",
+      "end": "2025-09-24T00:00:00",
+      "duration_days": 52,
+      "progress_percent": 5
+    },
+    "total_duration_days": 63
+  },
+  {
+    "id": "project_6",
+    "name": "Fall Product Launch",
+    "category": "Marketing Campaign",
+    "priority": "Low",
+    "description": "Comprehensive marketing campaign project targeting scalability and reliability improvements.",
     "team_lead": "Marketing Team",
     "preparing_stage": {
-      "start": "2025-07-19T00:00:00",
-      "end": "2025-07-27T00:00:00",
+      "start": "2025-07-25T00:00:00",
+      "end": "2025-08-02T00:00:00",
       "duration_days": 8
     },
     "execution_stage": {
-      "start": "2025-07-27T00:00:00",
-      "end": "2025-08-24T00:00:00",
-      "duration_days": 28,
-      "progress_percent": 35
+      "start": "2025-08-02T00:00:00",
+      "end": "2025-09-18T00:00:00",
+      "duration_days": 47,
+      "progress_percent": 27
     },
-    "total_duration_days": 36
+    "total_duration_days": 55
   },
   {
-    "id": "project_12",
-    "name": "Microservice Compute Development",
+    "id": "project_7",
+    "name": "Network Security Annual",
+    "category": "Infrastructure",
+    "priority": "High",
+    "description": "Strategic infrastructure initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Security Team",
+    "preparing_stage": {
+      "start": "2025-07-26T00:00:00",
+      "end": "2025-08-08T00:00:00",
+      "duration_days": 13
+    },
+    "execution_stage": {
+      "start": "2025-08-08T00:00:00",
+      "end": "2025-09-12T00:00:00",
+      "duration_days": 35,
+      "progress_percent": 5
+    },
+    "total_duration_days": 48
+  },
+  {
+    "id": "project_8",
+    "name": "Mobile App Dashboard",
     "category": "Software Development",
     "priority": "Medium",
-    "description": "Comprehensive software development project targeting scalability and reliability improvements.",
+    "description": "Cross-functional software development project aimed at enhancing system capabilities and performance.",
     "team_lead": "DevOps Team",
     "preparing_stage": {
-      "start": "2025-07-19T00:00:00",
+      "start": "2025-07-26T00:00:00",
       "end": "2025-08-05T00:00:00",
-      "duration_days": 17
+      "duration_days": 10
     },
     "execution_stage": {
       "start": "2025-08-05T00:00:00",
-      "end": "2025-09-04T00:00:00",
+      "end": "2025-08-27T00:00:00",
+      "duration_days": 22,
+      "progress_percent": 12
+    },
+    "total_duration_days": 32
+  },
+  {
+    "id": "project_9",
+    "name": "Market Research B2C",
+    "category": "Research & Analysis",
+    "priority": "Medium",
+    "description": "Strategic research & analysis initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Analytics Team",
+    "preparing_stage": {
+      "start": "2025-07-30T00:00:00",
+      "end": "2025-08-12T00:00:00",
+      "duration_days": 13
+    },
+    "execution_stage": {
+      "start": "2025-08-12T00:00:00",
+      "end": "2025-09-11T00:00:00",
       "duration_days": 30,
       "progress_percent": 0
     },
-    "total_duration_days": 47
+    "total_duration_days": 43
+  },
+  {
+    "id": "project_10",
+    "name": "Microservice Storage Development",
+    "category": "Software Development",
+    "priority": "Medium",
+    "description": "Cross-functional software development project aimed at enhancing system capabilities and performance.",
+    "team_lead": "Frontend Team",
+    "preparing_stage": {
+      "start": "2025-07-30T00:00:00",
+      "end": "2025-08-09T00:00:00",
+      "duration_days": 10
+    },
+    "execution_stage": {
+      "start": "2025-08-09T00:00:00",
+      "end": "2025-10-27T00:00:00",
+      "duration_days": 79,
+      "progress_percent": 0
+    },
+    "total_duration_days": 89
+  },
+  {
+    "id": "project_11",
+    "name": "Mobile App Reporting",
+    "category": "Software Development",
+    "priority": "High",
+    "description": "Innovative software development solution designed to address key business requirements.",
+    "team_lead": "Mobile Team",
+    "preparing_stage": {
+      "start": "2025-07-31T00:00:00",
+      "end": "2025-08-15T00:00:00",
+      "duration_days": 15
+    },
+    "execution_stage": {
+      "start": "2025-08-15T00:00:00",
+      "end": "2025-11-02T00:00:00",
+      "duration_days": 79,
+      "progress_percent": 0
+    },
+    "total_duration_days": 94
+  },
+  {
+    "id": "project_12",
+    "name": "Security Infrastructure Update",
+    "category": "Software Development",
+    "priority": "High",
+    "description": "Strategic software development initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Mobile Team",
+    "preparing_stage": {
+      "start": "2025-08-01T00:00:00",
+      "end": "2025-08-09T00:00:00",
+      "duration_days": 8
+    },
+    "execution_stage": {
+      "start": "2025-08-09T00:00:00",
+      "end": "2025-11-01T00:00:00",
+      "duration_days": 84,
+      "progress_percent": 0
+    },
+    "total_duration_days": 92
   },
   {
     "id": "project_13",
-    "name": "Performance Analytics Dashboard",
+    "name": "Trend Analysis Manufacturing",
     "category": "Research & Analysis",
     "priority": "Low",
-    "description": "Comprehensive research & analysis project targeting scalability and reliability improvements.",
+    "description": "Cross-functional research & analysis project aimed at enhancing system capabilities and performance.",
     "team_lead": "Strategy Team",
     "preparing_stage": {
-      "start": "2025-07-24T00:00:00",
-      "end": "2025-08-13T00:00:00",
-      "duration_days": 20
+      "start": "2025-08-03T00:00:00",
+      "end": "2025-08-16T00:00:00",
+      "duration_days": 13
     },
     "execution_stage": {
-      "start": "2025-08-13T00:00:00",
-      "end": "2025-10-29T00:00:00",
-      "duration_days": 77,
-      "progress_percent": 0
-    },
-    "total_duration_days": 97
-  },
-  {
-    "id": "project_14",
-    "name": "User Behavior Investigation",
-    "category": "Research & Analysis",
-    "priority": "Low",
-    "description": "Comprehensive research & analysis project targeting scalability and reliability improvements.",
-    "team_lead": "Strategy Team",
-    "preparing_stage": {
-      "start": "2025-07-25T00:00:00",
-      "end": "2025-08-14T00:00:00",
-      "duration_days": 20
-    },
-    "execution_stage": {
-      "start": "2025-08-14T00:00:00",
-      "end": "2025-11-01T00:00:00",
-      "duration_days": 79,
+      "start": "2025-08-16T00:00:00",
+      "end": "2025-11-10T00:00:00",
+      "duration_days": 86,
       "progress_percent": 0
     },
     "total_duration_days": 99
   },
   {
-    "id": "project_15",
-    "name": "Customer Onboarding Streamlined",
-    "category": "Product Launch",
-    "priority": "High",
-    "description": "Strategic product launch initiative focused on improving operational efficiency and user experience.",
-    "team_lead": "Marketing Team",
+    "id": "project_14",
+    "name": "Cloud Migration Security",
+    "category": "Infrastructure",
+    "priority": "Critical",
+    "description": "Critical infrastructure effort to modernize infrastructure and streamline processes.",
+    "team_lead": "Platform Team",
     "preparing_stage": {
-      "start": "2025-07-30T00:00:00",
-      "end": "2025-08-24T00:00:00",
-      "duration_days": 25
+      "start": "2025-08-06T00:00:00",
+      "end": "2025-08-15T00:00:00",
+      "duration_days": 9
     },
     "execution_stage": {
-      "start": "2025-08-24T00:00:00",
-      "end": "2025-12-08T00:00:00",
-      "duration_days": 106,
+      "start": "2025-08-15T00:00:00",
+      "end": "2025-09-01T00:00:00",
+      "duration_days": 17,
       "progress_percent": 0
     },
-    "total_duration_days": 131
+    "total_duration_days": 26
+  },
+  {
+    "id": "project_15",
+    "name": "Customer Onboarding Enhanced",
+    "category": "Product Launch",
+    "priority": "High",
+    "description": "Innovative product launch solution designed to address key business requirements.",
+    "team_lead": "Product Team",
+    "preparing_stage": {
+      "start": "2025-08-20T00:00:00",
+      "end": "2025-09-07T00:00:00",
+      "duration_days": 18
+    },
+    "execution_stage": {
+      "start": "2025-09-07T00:00:00",
+      "end": "2025-11-30T00:00:00",
+      "duration_days": 84,
+      "progress_percent": 0
+    },
+    "total_duration_days": 102
   },
   {
     "id": "project_16",
-    "name": "API Analytics Implementation",
-    "category": "Software Development",
+    "name": "Suite v3.2 Launch",
+    "category": "Product Launch",
     "priority": "High",
-    "description": "Cross-functional software development project aimed at enhancing system capabilities and performance.",
-    "team_lead": "Frontend Team",
+    "description": "Innovative product launch solution designed to address key business requirements.",
+    "team_lead": "Engineering Team",
     "preparing_stage": {
-      "start": "2025-07-31T00:00:00",
-      "end": "2025-08-21T00:00:00",
+      "start": "2025-08-26T00:00:00",
+      "end": "2025-09-16T00:00:00",
       "duration_days": 21
     },
     "execution_stage": {
-      "start": "2025-08-21T00:00:00",
-      "end": "2025-09-17T00:00:00",
-      "duration_days": 27,
+      "start": "2025-09-16T00:00:00",
+      "end": "2025-12-19T00:00:00",
+      "duration_days": 94,
       "progress_percent": 0
     },
-    "total_duration_days": 48
+    "total_duration_days": 115
   },
   {
     "id": "project_17",
-    "name": "Network Security Annual",
-    "category": "Infrastructure",
-    "priority": "Critical",
-    "description": "Strategic infrastructure initiative focused on improving operational efficiency and user experience.",
-    "team_lead": "Security Team",
-    "preparing_stage": {
-      "start": "2025-08-02T00:00:00",
-      "end": "2025-08-10T00:00:00",
-      "duration_days": 8
-    },
-    "execution_stage": {
-      "start": "2025-08-10T00:00:00",
-      "end": "2025-09-20T00:00:00",
-      "duration_days": 41,
-      "progress_percent": 0
-    },
-    "total_duration_days": 49
-  },
-  {
-    "id": "project_18",
-    "name": "Customer Feedback Review",
+    "name": "Strategic Planning Innovation",
     "category": "Research & Analysis",
-    "priority": "Medium",
-    "description": "Innovative research & analysis solution designed to address key business requirements.",
-    "team_lead": "Research Team",
+    "priority": "Low",
+    "description": "Strategic research & analysis initiative focused on improving operational efficiency and user experience.",
+    "team_lead": "Analytics Team",
     "preparing_stage": {
-      "start": "2025-08-08T00:00:00",
-      "end": "2025-08-23T00:00:00",
-      "duration_days": 15
+      "start": "2025-08-26T00:00:00",
+      "end": "2025-09-07T00:00:00",
+      "duration_days": 12
     },
     "execution_stage": {
-      "start": "2025-08-23T00:00:00",
-      "end": "2025-09-21T00:00:00",
-      "duration_days": 29,
+      "start": "2025-09-07T00:00:00",
+      "end": "2025-10-09T00:00:00",
+      "duration_days": 32,
       "progress_percent": 0
     },
     "total_duration_days": 44
   },
   {
-    "id": "project_19",
-    "name": "Performance Optimization Frontend",
+    "id": "project_18",
+    "name": "User Authentication V2 1",
     "category": "Software Development",
-    "priority": "Critical",
-    "description": "Critical software development effort to modernize infrastructure and streamline processes.",
-    "team_lead": "Frontend Team",
-    "preparing_stage": {
-      "start": "2025-08-12T00:00:00",
-      "end": "2025-08-30T00:00:00",
-      "duration_days": 18
-    },
-    "execution_stage": {
-      "start": "2025-08-30T00:00:00",
-      "end": "2025-09-27T00:00:00",
-      "duration_days": 28,
-      "progress_percent": 0
-    },
-    "total_duration_days": 46
-  },
-  {
-    "id": "project_20",
-    "name": "Product Roadmap Q2",
-    "category": "Product Launch",
-    "priority": "Critical",
-    "description": "Critical product launch effort to modernize infrastructure and streamline processes.",
-    "team_lead": "Engineering Team",
-    "preparing_stage": {
-      "start": "2025-08-12T00:00:00",
-      "end": "2025-09-01T00:00:00",
-      "duration_days": 20
-    },
-    "execution_stage": {
-      "start": "2025-09-01T00:00:00",
-      "end": "2025-11-13T00:00:00",
-      "duration_days": 73,
-      "progress_percent": 0
-    },
-    "total_duration_days": 93
-  },
-  {
-    "id": "project_21",
-    "name": "Performance Optimization Backend",
-    "category": "Software Development",
-    "priority": "High",
-    "description": "Innovative software development solution designed to address key business requirements.",
+    "priority": "Medium",
+    "description": "Cross-functional software development project aimed at enhancing system capabilities and performance.",
     "team_lead": "DevOps Team",
     "preparing_stage": {
-      "start": "2025-08-13T00:00:00",
-      "end": "2025-09-02T00:00:00",
-      "duration_days": 20
+      "start": "2025-08-31T00:00:00",
+      "end": "2025-09-13T00:00:00",
+      "duration_days": 13
     },
     "execution_stage": {
-      "start": "2025-09-02T00:00:00",
-      "end": "2025-11-14T00:00:00",
-      "duration_days": 73,
+      "start": "2025-09-13T00:00:00",
+      "end": "2025-11-26T00:00:00",
+      "duration_days": 74,
       "progress_percent": 0
     },
-    "total_duration_days": 93
+    "total_duration_days": 87
   },
   {
-    "id": "project_22",
-    "name": "Market Research B2B",
-    "category": "Research & Analysis",
-    "priority": "Low",
-    "description": "Innovative research & analysis solution designed to address key business requirements.",
-    "team_lead": "Research Team",
+    "id": "project_19",
+    "name": "Beta Testing Engine",
+    "category": "Product Launch",
+    "priority": "High",
+    "description": "Critical product launch effort to modernize infrastructure and streamline processes.",
+    "team_lead": "Sales Team",
     "preparing_stage": {
-      "start": "2025-08-13T00:00:00",
-      "end": "2025-08-22T00:00:00",
-      "duration_days": 9
+      "start": "2025-09-01T00:00:00",
+      "end": "2025-09-24T00:00:00",
+      "duration_days": 23
     },
     "execution_stage": {
-      "start": "2025-08-22T00:00:00",
-      "end": "2025-10-25T00:00:00",
-      "duration_days": 64,
+      "start": "2025-09-24T00:00:00",
+      "end": "2026-01-01T00:00:00",
+      "duration_days": 99,
       "progress_percent": 0
     },
-    "total_duration_days": 73
-  },
-  {
-    "id": "project_23",
-    "name": "Trend Analysis Finance",
-    "category": "Research & Analysis",
-    "priority": "Low",
-    "description": "Strategic research & analysis initiative focused on improving operational efficiency and user experience.",
-    "team_lead": "Data Team",
-    "preparing_stage": {
-      "start": "2025-08-23T00:00:00",
-      "end": "2025-09-03T00:00:00",
-      "duration_days": 11
-    },
-    "execution_stage": {
-      "start": "2025-09-03T00:00:00",
-      "end": "2025-11-01T00:00:00",
-      "duration_days": 59,
-      "progress_percent": 0
-    },
-    "total_duration_days": 70
-  },
-  {
-    "id": "project_24",
-    "name": "ROI Assessment Project",
-    "category": "Research & Analysis",
-    "priority": "Low",
-    "description": "Strategic research & analysis initiative focused on improving operational efficiency and user experience.",
-    "team_lead": "Data Team",
-    "preparing_stage": {
-      "start": "2025-08-23T00:00:00",
-      "end": "2025-09-07T00:00:00",
-      "duration_days": 15
-    },
-    "execution_stage": {
-      "start": "2025-09-07T00:00:00",
-      "end": "2025-10-25T00:00:00",
-      "duration_days": 48,
-      "progress_percent": 0
-    },
-    "total_duration_days": 63
+    "total_duration_days": 122
   }
 ];
+            filteredProjectData = [...allProjectData]; // Show all data by default
+            currentFilters = {}; // No filters applied initially
             const dateRange = {
-  "min_date": "2025-07-03T00:00:00",
-  "max_date": "2025-12-08T00:00:00"
+  "min_date": "2025-07-10T00:00:00",
+  "max_date": "2026-01-01T00:00:00"
 };
             
-            // Initialize filter variables
-            allProjectData = [...projectData];
-            filteredProjectData = [...projectData];
+            // Initialize filter options
+            initializeFilterOptions();
             
-            // Initialize filter options after data is available
-            populateFilterOptions();
-            
-            document.getElementById('project-info').textContent = `${projectData.length} projects`;
+            // Update project info
+            updateProjectInfo();
             
             // Calculate timeline (full project range)
             const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
@@ -1316,47 +1127,288 @@
             const weekWidth = 200;
             const totalWidth = weeks.length * weekWidth;
             
-            // Store globally for scroll-to-today functionality
-            window.ganttWeeks = weeks;
-            window.ganttWeekWidth = weekWidth;
-            
             // Create timeline header
             createTimelineHeader(weeks, weekWidth);
             
-            // Create project sidebar
-            createProjectSidebar(projectData);
-            
-            // Create timeline content
-            createTimelineContent(projectData, weeks, weekWidth, parseTime);
+            // Create project sidebar and timeline content
+            renderGanttChart(weeks, weekWidth, parseTime);
             
             // Setup interactions
             setupInteractions();
-            
-            // Add scroll-to-today button
-            
-            // Initialize filter system
             setupFilters();
             setupModal();
             
+            // Auto-scroll to today's date
+            scrollToToday(weeks, weekWidth);
+        }
+
+        function initializeFilterOptions() {
+            // Get unique categories
+            const categories = [...new Set(allProjectData.map(p => p.category))].sort();
+            const categorySelect = document.getElementById('category-filter');
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+
+            // Get unique team leads
+            const teamLeads = [...new Set(allProjectData.map(p => p.team_lead))].sort();
+            const teamSelect = document.getElementById('team-filter');
+            teamLeads.forEach(lead => {
+                const option = document.createElement('option');
+                option.value = lead;
+                option.textContent = lead;
+                teamSelect.appendChild(option);
+            });
+        }
+
+        function updateProjectInfo() {
+            const visibleCount = filteredProjectData.length;
+            const totalCount = allProjectData.length;
+            const infoText = visibleCount === totalCount 
+                ? `${totalCount} projects (showing all)` 
+                : `${visibleCount} of ${totalCount} projects (filtered)`;
+            document.getElementById('project-info').textContent = infoText;
+        }
+
+        function applyFilters() {
+            filteredProjectData = allProjectData.filter(project => {
+                // Priority filter
+                if (currentFilters.priority && project.priority !== currentFilters.priority) {
+                    return false;
+                }
+
+                // Category filter
+                if (currentFilters.category && project.category !== currentFilters.category) {
+                    return false;
+                }
+
+                // Team lead filter
+                if (currentFilters.team && project.team_lead !== currentFilters.team) {
+                    return false;
+                }
+
+                // Progress filter
+                if (currentFilters.progress) {
+                    const progress = project.execution_stage.progress_percent;
+                    const [min, max] = currentFilters.progress.split('-').map(Number);
+                    if (progress < min || progress > max) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            updateProjectInfo();
+            updateActiveFilters();
+            
+            // Re-render the chart with filtered data
+            const weeks = getWeeksFromCurrentChart();
+            const weekWidth = 200;
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            renderGanttChart(weeks, weekWidth, parseTime);
+        }
+
+        function getWeeksFromCurrentChart() {
+            // Extract weeks from current timeline (simplified)
+            const dateRange = {
+  "min_date": "2025-07-10T00:00:00",
+  "max_date": "2026-01-01T00:00:00"
+};
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            const minDate = parseTime(dateRange.min_date);
+            const maxDate = parseTime(dateRange.max_date);
+            
+            const startDate = new Date(minDate);
+            startDate.setDate(startDate.getDate() - startDate.getDay());
+            
+            const endDate = new Date(maxDate);
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+            
+            const weeks = [];
+            const currentWeek = new Date(startDate);
+            while (currentWeek <= endDate) {
+                weeks.push(new Date(currentWeek));
+                currentWeek.setDate(currentWeek.getDate() + 7);
+            }
+            return weeks;
+        }
+
+        function updateActiveFilters() {
+            const activeFiltersDiv = document.getElementById('active-filters');
+            activeFiltersDiv.innerHTML = '';
+
+            Object.entries(currentFilters).forEach(([key, value]) => {
+                if (value) {
+                    const badge = document.createElement('span');
+                    badge.className = 'filter-badge';
+                    badge.innerHTML = `${key}: ${value} <span class="remove" data-filter="${key}">×</span>`;
+                    activeFiltersDiv.appendChild(badge);
+                }
+            });
+
+            // Add click handlers for filter removal
+            activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const filterKey = e.target.dataset.filter;
+                    delete currentFilters[filterKey];
+                    document.getElementById(`${filterKey}-filter`).value = '';
+                    applyFilters();
+                });
+            });
+        }
+
+        function setupFilters() {
+            // Priority filter
+            document.getElementById('priority-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.priority = e.target.value;
+                } else {
+                    delete currentFilters.priority;
+                }
+                applyFilters();
+            });
+
+            // Category filter
+            document.getElementById('category-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.category = e.target.value;
+                } else {
+                    delete currentFilters.category;
+                }
+                applyFilters();
+            });
+
+            // Team filter
+            document.getElementById('team-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.team = e.target.value;
+                } else {
+                    delete currentFilters.team;
+                }
+                applyFilters();
+            });
+
+            // Progress filter
+            document.getElementById('progress-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.progress = e.target.value;
+                } else {
+                    delete currentFilters.progress;
+                }
+                applyFilters();
+            });
+
+            // Clear all filters
+            document.getElementById('clear-filters').addEventListener('click', () => {
+                currentFilters = {};
+                document.querySelectorAll('.filter-select').forEach(select => {
+                    select.value = '';
+                });
+                applyFilters();
+            });
+        }
+
+        function setupModal() {
+            const modal = document.getElementById('task-modal');
+            const closeBtn = document.getElementById('modal-close');
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        }
+
+        function openModal(project) {
+            const modal = document.getElementById('task-modal');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
+            const details = document.getElementById('modal-details');
+            const timeline = document.getElementById('modal-timeline');
+            const description = document.getElementById('modal-description');
+
+            title.textContent = project.name;
+            subtitle.textContent = `${project.category} • Led by ${project.team_lead}`;
+
+            details.innerHTML = `
+                <p><strong>Priority:</strong> ${project.priority}</p>
+                <p><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</p>
+                <p><strong>Status:</strong> ${getProjectStatus(project)}</p>
+            `;
+
+            const prepStart = new Date(project.preparing_stage.start);
+            const prepEnd = new Date(project.preparing_stage.end);
+            const execStart = new Date(project.execution_stage.start);
+            const execEnd = new Date(project.execution_stage.end);
+
+            timeline.innerHTML = `
+                <p><strong>Preparation:</strong> ${prepStart.toLocaleDateString()} - ${prepEnd.toLocaleDateString()}</p>
+                <p><strong>Execution:</strong> ${execStart.toLocaleDateString()} - ${execEnd.toLocaleDateString()}</p>
+                <p><strong>Total Duration:</strong> ${Math.ceil((execEnd - prepStart) / (1000 * 60 * 60 * 24))} days</p>
+            `;
+
+            description.textContent = project.description;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('task-modal');
+            modal.classList.remove('active');
+            
+            // Remove selection from task bar
+            if (selectedTaskBar) {
+                selectedTaskBar.classList.remove('selected');
+                selectedTaskBar = null;
+            }
+        }
+
+        function getProjectStatus(project) {
+            const now = new Date();
+            const execEnd = new Date(project.execution_stage.end);
+            const progress = project.execution_stage.progress_percent;
+
+            if (progress === 100) return 'Completed';
+            if (now > execEnd) return 'Overdue';
+            if (progress > 0) return 'In Progress';
+            return 'Not Started';
         }
         
         function createTimelineHeader(weeks, weekWidth) {
             const header = document.getElementById('timeline-header');
+            
+            // Clear existing content except scroll hint
+            const scrollHint = header.querySelector('.scroll-hint');
+            header.innerHTML = '';
+            if (scrollHint) {
+                header.appendChild(scrollHint);
+            }
+            
             const totalWidth = weeks.length * weekWidth;
+            header.style.width = totalWidth + 'px';
+            header.style.minWidth = totalWidth + 'px';
             
             // Week headers
             const weekHeader = document.createElement('div');
             weekHeader.className = 'gantt-week-header';
             weekHeader.style.position = 'relative';
-            weekHeader.style.width = totalWidth + 'px';
-            weekHeader.style.minWidth = totalWidth + 'px';
             
             weeks.forEach(week => {
                 const weekCol = document.createElement('div');
                 weekCol.className = 'gantt-week-column';
                 weekCol.style.minWidth = weekWidth + 'px';
                 weekCol.style.maxWidth = weekWidth + 'px';
-                weekCol.style.width = weekWidth + 'px';
                 
                 const endWeek = new Date(week);
                 endWeek.setDate(week.getDate() + 6);
@@ -1381,10 +1433,27 @@
                 weekHeader.appendChild(weekCol);
             });
             
+            // Add today marker to the week header (scrollable area)
+            addTodayMarkerToHeader(weekHeader, weeks, weekWidth);
+            
             header.appendChild(weekHeader);
         }
         
+        function addTodayMarkerToHeader(weekHeader, weeks, weekWidth) {
+            const today = new Date();
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
+            const totalWidth = weeks.length * weekWidth;
+            
+        }
         
+        function renderGanttChart(weeks, weekWidth, parseTime) {
+            // Clear and recreate sidebar content
+            createProjectSidebar(filteredProjectData);
+            
+            // Clear and recreate timeline content
+            createTimelineContent(filteredProjectData, weeks, weekWidth, parseTime);
+        }
+
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
             sidebarContent.innerHTML = '';
@@ -1404,7 +1473,8 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
-            content.innerHTML = ''; // Clear existing content to prevent accumulation
+            content.innerHTML = '';
+            
             const totalWidth = weeks.length * weekWidth;
             content.style.width = totalWidth + 'px';
             content.style.minWidth = totalWidth + 'px';
@@ -1417,13 +1487,6 @@
                 line.style.left = (index * weekWidth) + 'px';
                 content.appendChild(line);
             });
-            
-            // Clean up existing today line before creating new one
-            if (window.todayLineElement) {
-                window.todayLineElement.remove();
-                window.todayLineElement = null;
-                window.todayLineOriginalX = null;
-            }
             
             // Add today's vertical line (fixed position)
             const today = new Date();
@@ -1449,7 +1512,7 @@
                 // Add to body so it's not affected by container scrolling
                 document.body.appendChild(todayLine);
                 
-                // Store reference to today line element for cleanup
+                // Store reference for scroll updates
                 window.todayLineElement = todayLine;
                 window.todayLineOriginalX = todayX;
             }
@@ -1473,23 +1536,8 @@
                 prepBar.style.left = prepStartX + 'px';
                 prepBar.style.width = prepWidth + 'px';
                 prepBar.innerHTML = `<div class="gantt-task-label">Preparing</div>`;
-                
-                // Add click handler for preparing bar
-                prepBar.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    
-                    // Remove previous selection
-                    if (selectedTaskBar) {
-                        selectedTaskBar.classList.remove('selected');
-                    }
-                    
-                    // Add selection to clicked bar
-                    prepBar.classList.add('selected');
-                    selectedTaskBar = prepBar;
-                    
-                    // Open modal
-                    openModal(project);
-                });
+                prepBar.dataset.projectIndex = projectIndex;
+                prepBar.dataset.phase = 'preparing';
                 
                 // Execution phase
                 const execStart = parseTime(project.execution_stage.start);
@@ -1501,6 +1549,8 @@
                 execBar.className = `gantt-task-bar gantt-task-execution gantt-task-${project.priority.toLowerCase()}`;
                 execBar.style.left = execStartX + 'px';
                 execBar.style.width = execWidth + 'px';
+                execBar.dataset.projectIndex = projectIndex;
+                execBar.dataset.phase = 'execution';
                 
                 // Progress bar
                 const progressBar = document.createElement('div');
@@ -1513,28 +1563,42 @@
                 `;
                 execBar.appendChild(progressBar);
                 
-                // Add click handler for execution bar
-                execBar.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    
-                    // Remove previous selection
-                    if (selectedTaskBar) {
-                        selectedTaskBar.classList.remove('selected');
-                    }
-                    
-                    // Add selection to clicked bar
-                    execBar.classList.add('selected');
-                    selectedTaskBar = execBar;
-                    
-                    // Open modal
-                    openModal(project);
-                });
-                
-                // Add tooltips
+                // Add click functionality to both bars
                 [prepBar, execBar].forEach(bar => {
+                    // Tooltip events
                     bar.addEventListener('mouseenter', (e) => showTooltip(e, project));
                     bar.addEventListener('mouseleave', hideTooltip);
                     bar.addEventListener('mousemove', moveTooltip);
+                    
+                    // Click events
+                    bar.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        // Remove previous selection
+                        if (selectedTaskBar) {
+                            selectedTaskBar.classList.remove('selected');
+                        }
+                        
+                        // Add selection to clicked bar
+                        bar.classList.add('selected');
+                        selectedTaskBar = bar;
+                        
+                        // Open modal with project details
+                        openModal(project);
+                    });
+                    
+                    // Make bars focusable for accessibility
+                    bar.setAttribute('tabindex', '0');
+                    bar.setAttribute('role', 'button');
+                    bar.setAttribute('aria-label', `${project.name} - ${bar.dataset.phase} phase`);
+                    
+                    // Keyboard support
+                    bar.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            bar.click();
+                        }
+                    });
                 });
                 
                 rowContent.appendChild(prepBar);
@@ -1556,47 +1620,13 @@
             
             if (relativeX >= 0 && relativeX <= contentWrapper.clientWidth) {
                 // Today line is in viewport - show it
-                window.todayLineElement.style.display = 'flex';
+                window.todayLineElement.style.display = 'block';
                 window.todayLineElement.style.left = (contentRect.left + relativeX) + 'px';
                 window.todayLineElement.style.top = contentRect.top + 'px';
                 window.todayLineElement.style.height = contentRect.height + 'px';
-                
-                // Ensure text attribute is still there (in case it gets lost during updates)
-                if (!window.todayLineElement.getAttribute('data-today-text')) {
-                    const today = new Date();
-                    const formatToday = d3.timeFormat('%Y/%m/%d');
-                    window.todayLineElement.setAttribute('data-today-text', `Today ${formatToday(today)}`);
-                }
             } else {
                 // Today line is outside viewport - hide it
                 window.todayLineElement.style.display = 'none';
-            }
-        }
-        
-        function updateScrollIndicators() {
-            const timelineHeader = document.getElementById('timeline-header');
-            const scrollFadeLeft = document.getElementById('scroll-fade-left');
-            const scrollFadeRight = document.getElementById('scroll-fade-right');
-            
-            if (!timelineHeader || !scrollFadeLeft || !scrollFadeRight) return;
-            
-            const scrollLeft = timelineHeader.scrollLeft;
-            const scrollWidth = timelineHeader.scrollWidth;
-            const clientWidth = timelineHeader.clientWidth;
-            const maxScrollLeft = scrollWidth - clientWidth;
-            
-            // Show/hide left fade indicator
-            if (scrollLeft > 0) {
-                scrollFadeLeft.style.opacity = '1';
-            } else {
-                scrollFadeLeft.style.opacity = '0';
-            }
-            
-            // Show/hide right fade indicator
-            if (scrollLeft < maxScrollLeft - 1) { // -1 for rounding errors
-                scrollFadeRight.style.opacity = '1';
-            } else {
-                scrollFadeRight.style.opacity = '0';
             }
         }
         
@@ -1615,8 +1645,6 @@
                     }
                     // Update today line position
                     updateTodayLinePosition();
-                    // Update scroll indicators
-                    updateScrollIndicators();
                 });
                 
                 sidebarContent.addEventListener('scroll', () => {
@@ -1629,36 +1657,11 @@
                         contentWrapper.scrollLeft = timelineHeader.scrollLeft;
                         // Update today line position
                         updateTodayLinePosition();
-                        // Update scroll indicators
-                        updateScrollIndicators();
                     });
                 }
             }
-            
-            // Initialize scroll indicators
-            updateScrollIndicators();
-            
-            // Hide scroll hint after first interaction
-            let hasScrolled = false;
-            const scrollHint = document.getElementById('scroll-hint');
-            
-            [contentWrapper, timelineHeader].forEach(element => {
-                if (element) {
-                    element.addEventListener('scroll', () => {
-                        if (!hasScrolled && scrollHint) {
-                            hasScrolled = true;
-                            setTimeout(() => {
-                                scrollHint.style.opacity = '0';
-                                setTimeout(() => {
-                                    scrollHint.style.display = 'none';
-                                }, 300);
-                            }, 1000);
-                        }
-                    });
-                }
-            });
-            
-            // Add click handler to deselect task bars when clicking elsewhere
+
+            // Close modal when clicking outside
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.gantt-task-bar') && !e.target.closest('.task-modal-content')) {
                     if (selectedTaskBar) {
@@ -1678,7 +1681,7 @@
                 <div><strong>Priority:</strong> ${project.priority}</div>
                 <div><strong>Team Lead:</strong> ${project.team_lead}</div>
                 <div><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</div>
-                <div><strong>Description:</strong> ${project.description}</div>
+                <div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">Click for details</div>
             `;
             moveTooltip(event);
         }
@@ -1693,269 +1696,23 @@
             document.getElementById('tooltip').style.display = 'none';
         }
         
-        
-        
-        
-        function setupFilters() {
-            // Setup filter event listeners
-            const categoryFilter = document.getElementById('category-filter');
-            const priorityFilter = document.getElementById('priority-filter');
-            const teamFilter = document.getElementById('team-filter');
-            const startDateFilter = document.getElementById('start-date-filter');
-            const endDateFilter = document.getElementById('end-date-filter');
-            const clearFiltersBtn = document.getElementById('clear-filters');
+        function scrollToToday(weeks, weekWidth) {
+            const today = new Date();
+            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
             
-            [categoryFilter, priorityFilter, teamFilter, startDateFilter, endDateFilter].forEach(filter => {
-                filter.addEventListener('change', applyFilters);
-            });
+            // Calculate today's exact position
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
             
-            clearFiltersBtn.addEventListener('click', clearAllFilters);
-        }
-        
-        function populateFilterOptions() {
-            // Get unique categories and team leads
-            const categories = [...new Set(allProjectData.map(p => p.category))];
-            const teamLeads = [...new Set(allProjectData.map(p => p.team_lead))];
-            
-            // Populate category filter
-            const categorySelect = document.getElementById('category-filter');
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category;
-                option.textContent = category;
-                categorySelect.appendChild(option);
-            });
-            
-            // Populate team filter
-            const teamSelect = document.getElementById('team-filter');
-            teamLeads.forEach(teamLead => {
-                const option = document.createElement('option');
-                option.value = teamLead;
-                option.textContent = teamLead;
-                teamSelect.appendChild(option);
-            });
-        }
-        
-        function applyFilters() {
-            // Get current filter values
-            currentFilters.priority = document.getElementById('priority-filter').value;
-            currentFilters.category = document.getElementById('category-filter').value;
-            currentFilters.team = document.getElementById('team-filter').value;
-            currentFilters.startDate = document.getElementById('start-date-filter').value;
-            currentFilters.endDate = document.getElementById('end-date-filter').value;
-            
-            filteredProjectData = allProjectData.filter(project => {
-                // Priority filter
-                if (currentFilters.priority && project.priority !== currentFilters.priority) {
-                    return false;
-                }
-
-                // Category filter
-                if (currentFilters.category && project.category !== currentFilters.category) {
-                    return false;
-                }
-
-                // Team lead filter
-                if (currentFilters.team && project.team_lead !== currentFilters.team) {
-                    return false;
-                }
-
-                // Date range filter
-                if (currentFilters.startDate || currentFilters.endDate) {
-                    const projectStartDate = new Date(project.preparing_stage.start);
-                    const projectEndDate = new Date(project.execution_stage.end);
-                    
-                    if (currentFilters.startDate) {
-                        const filterStartDate = new Date(currentFilters.startDate);
-                        if (projectEndDate < filterStartDate) {
-                            return false;
-                        }
-                    }
-                    
-                    if (currentFilters.endDate) {
-                        const filterEndDate = new Date(currentFilters.endDate);
-                        if (projectStartDate > filterEndDate) {
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            });
-
-            // Update project info in header
-            document.getElementById('project-info').textContent = 
-                `${filteredProjectData.length} of ${allProjectData.length} projects`;
-                
-            // Render the chart with filtered data
-            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
-            renderGanttChart(window.ganttWeeks, window.ganttWeekWidth, parseTime);
-        }
-        
-        function renderGanttChart(weeks, weekWidth, parseTime) {
-            // Clear and recreate sidebar content
-            createProjectSidebar(filteredProjectData);
-            
-            // Clear and recreate timeline content
-            createTimelineContent(filteredProjectData, weeks, weekWidth, parseTime);
-        }
-        
-        function clearAllFilters() {
-            document.getElementById('category-filter').value = '';
-            document.getElementById('priority-filter').value = '';
-            document.getElementById('team-filter').value = '';
-            document.getElementById('start-date-filter').value = '';
-            document.getElementById('end-date-filter').value = '';
-            
-            // Clear current filters object
-            currentFilters = {};
-            
-            applyFilters();
-        }
-        
-        function updateProjectInfo() {
-            // Update project info display - placeholder function for compatibility
-        }
-        
-        function updateActiveFilters() {
-            // Update active filters display - placeholder function for compatibility
-        }
-        
-        function openModal(project) {
-            const modal = document.getElementById('task-modal');
-            const modalTitle = document.getElementById('modal-title');
-            const modalSubtitle = document.getElementById('modal-subtitle');
-            const modalDetails = document.getElementById('modal-details');
-            const modalTimeline = document.getElementById('modal-timeline');
-            const modalDescription = document.getElementById('modal-description');
-
-            modalTitle.textContent = project.name;
-            modalSubtitle.textContent = `${project.category} • ${project.priority} Priority`;
-            
-            modalDetails.innerHTML = `
-                <p><strong>Team Lead:</strong> ${project.team_lead}</p>
-                <p><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</p>
-                <p><strong>Total Duration:</strong> ${project.total_duration_days} days</p>
-            `;
-
-            const formatDate = d3.timeFormat('%b %d, %Y');
-            const prepStart = new Date(project.preparing_stage.start);
-            const prepEnd = new Date(project.preparing_stage.end);
-            const execStart = new Date(project.execution_stage.start);
-            const execEnd = new Date(project.execution_stage.end);
-
-            modalTimeline.innerHTML = `
-                <p><strong>Preparing Phase:</strong> ${formatDate(prepStart)} - ${formatDate(prepEnd)} (${project.preparing_stage.duration_days} days)</p>
-                <p><strong>Execution Phase:</strong> ${formatDate(execStart)} - ${formatDate(execEnd)} (${project.execution_stage.duration_days} days)</p>
-            `;
-
-            modalDescription.innerHTML = `<p>${project.description}</p>`;
-
-            modal.classList.add('active');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('task-modal');
-            modal.classList.remove('active');
-            
-            // Deselect any selected task bar
-            if (selectedTaskBar) {
-                selectedTaskBar.classList.remove('selected');
-                selectedTaskBar = null;
+            if (todayX >= 0 && contentWrapper) {
+                // Scroll to center today's line
+                const scrollPosition = Math.max(0, todayX - (contentWrapper.clientWidth / 2));
+                contentWrapper.scrollLeft = scrollPosition;
             }
         }
         
-        function setupModal() {
-            const modal = document.getElementById('task-modal');
-            const closeBtn = document.getElementById('modal-close');
-
-            closeBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeModal();
-                }
-            });
-        }
-
-        // Export functionality
-        function setupExport() {
-            const exportBtn = document.getElementById('export-btn');
-            const exportDropdown = document.getElementById('export-dropdown');
-            
-            if (exportBtn && exportDropdown) {
-                exportBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    exportDropdown.style.display = exportDropdown.style.display === 'block' ? 'none' : 'block';
-                });
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', () => {
-                    exportDropdown.style.display = 'none';
-                });
-            }
-        }
-
-        function exportChart(format) {
-            const ganttSvg = document.querySelector('.gantt-timeline svg');
-            if (!ganttSvg) {
-                alert('No chart to export. Please wait for the chart to load.');
-                return;
-            }
-            
-            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:\-]/g, '');
-            const filename = `CQSS_Gantt_Chart_${timestamp}`;
-            
-            if (format === 'svg') {
-                // Export as SVG
-                const svgData = new XMLSerializer().serializeToString(ganttSvg);
-                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-                const url = URL.createObjectURL(svgBlob);
-                
-                const downloadLink = document.createElement('a');
-                downloadLink.href = url;
-                downloadLink.download = filename + '.svg';
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                URL.revokeObjectURL(url);
-            } else if (format === 'png') {
-                // Export as PNG using saveSvgAsPng
-                if (typeof saveSvgAsPng !== 'undefined') {
-                    saveSvgAsPng.saveSvgAsPng(ganttSvg, filename + '.png', {
-                        scale: 2,
-                        backgroundColor: '#ffffff'
-                    });
-                } else {
-                    alert('PNG export library not loaded. Please refresh the page and try again.');
-                }
-            }
-            
-            // Close dropdown after export
-            document.getElementById('export-dropdown').style.display = 'none';
-        }
-
-        // Initialize export functionality when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            setupExport();
-        });
-        
-    </script>
-    
-    <!-- Load local D3.js -->
-    <script src="../static/js/d3.v7.min.js"></script>
-    <!-- Load saveSvgAsPng for export functionality -->
-    <script src="https://cdn.jsdelivr.net/npm/save-svg-as-png@1.4.17/lib/saveSvgAsPng.min.js"></script>
-    
-    <script>
         // Initialize when D3.js is loaded
         if (typeof d3 !== 'undefined') {
-            initFrappeGantt();
+            initInteractiveGantt();
         } else {
             console.error('D3.js not loaded');
         }

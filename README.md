@@ -6,10 +6,13 @@ A Python-based tool for generating interactive Gantt charts from CSV project dat
 
 - **Two-stage project visualization**: Preparing stage and execution stage with different colors
 - **Progress tracking**: Visual progress bars showing completion percentage
-- **Interactive tooltips**: Click on execution bars to see project details
+- **Advanced filtering**: Filter by category, priority, team, and search text
+- **Auto-scroll to today**: Automatically centers timeline on current date
+- **Interactive features**: Tooltips, project details modal, click interactions
+- **Export capabilities**: Built-in export functionality for charts
 - **Priority-based coloring**: Color-coded by project priority (Critical, High, Medium, Low)
 - **Static HTML output**: No web server required, just open in browser
-- **Responsive design**: Works on different screen sizes
+- **Modern responsive design**: Professional appearance that works on all screen sizes
 
 ## Installation
 
@@ -23,11 +26,8 @@ pip install -r requirements.txt
 
 ### Quick Generation (Same Output File Each Time)
 ```bash
-# Generate default style to output/gantt_chart.html
+# Generate interactive Gantt chart to output/gantt_chart.html
 python generate.py
-
-# Generate Frappe-style Gantt chart (like GitHub's Frappe Gantt)
-python generate.py data/extended_projects.csv --frappe
 
 # Generate standalone version (no internet required)
 python generate.py data/extended_projects.csv --standalone
@@ -41,17 +41,14 @@ generate.bat
 # Basic usage with default output location
 python main.py data/sample_projects.csv
 
-# Frappe-style Gantt chart
-python main.py data/sample_projects.csv --style frappe
-
 # Specify custom output file
 python main.py data/sample_projects.csv output/my_chart.html
 
 # Generate standalone version
 python main.py data/sample_projects.csv --standalone
 
-# Combine options
-python main.py data/sample_projects.csv output/frappe_chart.html --style frappe
+# Auto-open in browser after generation
+python main.py data/sample_projects.csv --open
 ```
 
 ## CSV Data Format
@@ -83,7 +80,7 @@ cqss-system/
 │   ├── data_processor.py  # CSV processing and validation
 │   └── gantt_generator.py # HTML generation
 ├── templates/             # HTML templates
-│   └── gantt_template.html
+│   └── interactive_modern_template.html
 ├── output/               # Generated HTML files
 ├── main.py              # Main application entry point
 └── requirements.txt     # Python dependencies
@@ -99,16 +96,18 @@ Priority colors can be modified in the HTML template:
 - Low: Green (#28a745)
 
 ### Template
-You can create custom HTML templates based on `templates/gantt_template.html` and use them with the `--template` option.
+You can create custom HTML templates based on `templates/interactive_modern_template.html` and use them with the `--template` option. The system now uses a single, feature-complete interactive template by default.
 
 ## Output
 
 The generated HTML file includes:
-- Interactive Gantt chart with timeline
-- Hover tooltips showing project details
-- Click functionality on execution bars
-- Legend explaining colors and stages
-- Responsive design for different screen sizes
+- Interactive Gantt chart with responsive timeline
+- Advanced filtering controls (category, priority, team, search)
+- Auto-scroll to today functionality with smooth animations
+- Project details modal with comprehensive information
+- Hover tooltips and click interactions
+- Export capabilities for different formats
+- Modern, professional design optimized for all devices
 
 ## Example
 

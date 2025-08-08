@@ -40,7 +40,8 @@
       "Bash(cmd /c start:*)",
       "Bash(grep:*)",
       "Bash(git fetch:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

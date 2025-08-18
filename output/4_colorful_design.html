@@ -61,22 +61,22 @@
             font-weight: 600;
         }
 
-        /* Filter Controls - Colorful Theme */
+        /* Filter Controls */
         .filter-section {
-            background: linear-gradient(135deg, #48cae4 0%, #0096c7 100%);
-            border-bottom: 2px solid rgba(255,255,255,0.2);
-            padding: 20px 36px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-bottom: none;
+            padding: 16px 32px;
             display: flex;
-            gap: 24px;
+            gap: 20px;
             align-items: center;
             flex-wrap: wrap;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+            color: white;
         }
 
         .filter-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .filter-label {
@@ -84,68 +84,43 @@
             font-weight: 600;
             color: #ffffff;
             min-width: fit-content;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .filter-select, .filter-input {
-            padding: 10px 14px;
-            border: 2px solid rgba(255,255,255,0.3);
+            padding: 8px 12px;
+            border: 2px solid rgba(255,255,255,0.2);
             border-radius: 12px;
             font-size: 14px;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.9);
             color: #2d3748;
             min-width: 140px;
+            transition: all 0.15s ease;
             font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
         }
 
         .filter-select:focus, .filter-input:focus {
             outline: none;
-            border-color: #ff6b6b;
-            background: #ffffff;
-            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2), 0 4px 8px rgba(0,0,0,0.15);
+            border-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
             transform: translateY(-1px);
         }
 
         .clear-filters-btn {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
             color: white;
             border: none;
-            padding: 10px 20px;
             border-radius: 12px;
             font-size: 14px;
-            cursor: pointer;
             font-weight: 600;
-            box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
-            transition: all 0.2s ease;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
         }
 
         .clear-filters-btn:hover {
-            background: linear-gradient(135deg, #ee5a24 0%, #d63031 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(255, 107, 107, 0.4);
-        }
-
-        .filter-badge {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
-            color: #2d3748;
-            font-size: 12px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            margin: 4px;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .filter-badge .remove {
-            margin-left: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #e74c3c;
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            transform: translateY(-1px);
         }
 
         .gantt-wrapper {
@@ -331,16 +306,18 @@
             font-size: 14px;
             font-weight: 600;
             color: #2d3748;
+            min-width: fit-content;
         }
 
         .gantt-week-column {
-            flex: 1;
+            flex: none;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             border-right: 2px solid #e2e8f0;
             min-width: 200px;
+            width: 200px;
             padding: 18px 12px;
             text-align: center;
             transition: all 0.2s ease;
@@ -500,6 +477,27 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             border: 2px solid rgba(102, 126, 234, 0.1);
             font-weight: 600;
+        }
+
+        /* Scroll fade indicators */
+        .scroll-fade-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.3s ease;
+        }
+
+        .scroll-fade-left {
+            left: 0;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent);
+        }
+
+        .scroll-fade-right {
+            right: 0;
+            background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
         }
 
         /* Fun animated elements */
@@ -666,32 +664,32 @@
         <!-- Filter Controls -->
         <div class="filter-section">
             <div class="filter-group">
-                <label class="filter-label">Priority:</label>
+                <label class="filter-label">🎯 Priority:</label>
                 <select id="priority-filter" class="filter-select">
                     <option value="" selected>All Priorities</option>
-                    <option value="Critical">Critical</option>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
+                    <option value="Critical">🔴 Critical</option>
+                    <option value="High">🟠 High</option>
+                    <option value="Medium">🟡 Medium</option>
+                    <option value="Low">🔵 Low</option>
                 </select>
             </div>
             
             <div class="filter-group">
-                <label class="filter-label">Category:</label>
+                <label class="filter-label">📁 Category:</label>
                 <select id="category-filter" class="filter-select">
                     <option value="" selected>All Categories</option>
                 </select>
             </div>
             
             <div class="filter-group">
-                <label class="filter-label">Team Lead:</label>
+                <label class="filter-label">👥 Team Lead:</label>
                 <select id="team-filter" class="filter-select">
                     <option value="" selected>All Teams</option>
                 </select>
             </div>
             
             <div class="filter-group">
-                <label class="filter-label">Progress:</label>
+                <label class="filter-label">📊 Progress:</label>
                 <select id="progress-filter" class="filter-select">
                     <option value="" selected>All Progress</option>
                     <option value="0-25">0-25%</option>
@@ -701,22 +699,7 @@
                 </select>
             </div>
             
-            <div class="filter-group">
-                <label class="filter-label">Start Date:</label>
-                <input type="date" id="start-date-filter" class="filter-input">
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">End Date:</label>
-                <input type="date" id="end-date-filter" class="filter-input">
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">Search:</label>
-                <input type="text" id="search-filter" class="filter-input" placeholder="Search projects...">
-            </div>
-            
-            <button id="clear-filters" class="clear-filters-btn">Clear All</button>
+            <button id="clear-filters" class="clear-filters-btn">🗑️ Clear All</button>
             
             <div id="active-filters"></div>
         </div>
@@ -731,7 +714,9 @@
             
             <div class="gantt-main" id="gantt-main">
                 <div class="gantt-timeline-header" id="timeline-header">
-                    <div class="scroll-hint">← → Scroll horizontally</div>
+                    <div class="scroll-hint" id="scroll-hint">← → Scroll horizontally</div>
+                    <div class="scroll-fade-indicator scroll-fade-left" id="scroll-fade-left" style="opacity: 0;"></div>
+                    <div class="scroll-fade-indicator scroll-fade-right" id="scroll-fade-right" style="opacity: 0;"></div>
                     <!-- Timeline header will be populated here -->
                 </div>
                 <div class="gantt-timeline-content-wrapper">
@@ -769,223 +754,11 @@
     </div>
 
     <script>
-        // Filter functionality
-        let allProjectData = [];
-        let filteredProjectData = [];
-        let currentFilters = {
-            priority: '',
-            category: '',
-            team: '',
-            progress: '',
-            startDate: '',
-            endDate: '',
-            search: ''
-        };
-
-        function setupFilters() {
-            const priorityFilter = document.getElementById('priority-filter');
-            const categoryFilter = document.getElementById('category-filter');
-            const teamFilter = document.getElementById('team-filter');
-            const progressFilter = document.getElementById('progress-filter');
-            const startDateFilter = document.getElementById('start-date-filter');
-            const endDateFilter = document.getElementById('end-date-filter');
-            const searchFilter = document.getElementById('search-filter');
-            const clearFiltersBtn = document.getElementById('clear-filters');
-
-            // Populate filter options
-            populateFilterOptions(allProjectData);
-
-            // Add event listeners with debouncing for text search
-            [priorityFilter, categoryFilter, teamFilter, progressFilter].forEach(filter => {
-                filter.addEventListener('change', applyFilters);
-            });
-            
-            // Start date filter
-            document.getElementById('start-date-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.startDate = e.target.value;
-                } else {
-                    delete currentFilters.startDate;
-                }
-                applyFilters();
-            });
-
-            // End date filter
-            document.getElementById('end-date-filter').addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentFilters.endDate = e.target.value;
-                } else {
-                    delete currentFilters.endDate;
-                }
-                applyFilters();
-            });
-            
-            searchFilter.addEventListener('input', debounce(applyFilters, 300));
-            clearFiltersBtn.addEventListener('click', clearAllFilters);
-            
-            // Initial filter application
-            applyFilters();
-        }
-
-        function populateFilterOptions(projectData) {
-            const categories = [...new Set(projectData.map(p => p.category))].sort();
-            const teams = [...new Set(projectData.map(p => p.team_lead))].sort();
-            
-            const categoryFilter = document.getElementById('category-filter');
-            const teamFilter = document.getElementById('team-filter');
-            
-            // Clear existing options (except "All" option)
-            categoryFilter.innerHTML = '<option value="">All Categories</option>';
-            teamFilter.innerHTML = '<option value="">All Teams</option>';
-            
-            // Add category options
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category;
-                option.textContent = category;
-                categoryFilter.appendChild(option);
-            });
-            
-            // Add team options
-            teams.forEach(team => {
-                const option = document.createElement('option');
-                option.value = team;
-                option.textContent = team;
-                teamFilter.appendChild(option);
-            });
-        }
-
-        function applyFilters() {
-            // Update current filters (date filters handled by individual event listeners)
-            currentFilters.priority = document.getElementById('priority-filter').value;
-            currentFilters.category = document.getElementById('category-filter').value;
-            currentFilters.team = document.getElementById('team-filter').value;
-            currentFilters.progress = document.getElementById('progress-filter').value;
-            currentFilters.search = document.getElementById('search-filter').value.toLowerCase();
-
-            // Filter project data
-            filteredProjectData = allProjectData.filter(project => {
-                // Priority filter
-                if (currentFilters.priority && project.priority !== currentFilters.priority) {
-                    return false;
-                }
-
-                // Category filter
-                if (currentFilters.category && project.category !== currentFilters.category) {
-                    return false;
-                }
-
-                // Team lead filter
-                if (currentFilters.team && project.team_lead !== currentFilters.team) {
-                    return false;
-                }
-
-                // Progress filter
-                if (currentFilters.progress) {
-                    const progress = project.execution_stage.progress_percent;
-                    const [min, max] = currentFilters.progress.split('-').map(Number);
-                    if (progress < min || progress > max) {
-                        return false;
-                    }
-                }
-
-                // Date range filter
-                if (currentFilters.startDate && currentFilters.startDate.trim() !== '') {
-                    const projectStartDate = new Date(project.preparing_stage.start);
-                    const projectEndDate = new Date(project.execution_stage.end);
-                    const filterStartDate = new Date(currentFilters.startDate);
-                    
-                    // Project must end after or on the filter start date (overlap check)
-                    if (projectEndDate < filterStartDate) {
-                        return false;
-                    }
-                }
-                
-                if (currentFilters.endDate && currentFilters.endDate.trim() !== '') {
-                    const projectStartDate = new Date(project.preparing_stage.start);
-                    const projectEndDate = new Date(project.execution_stage.end);
-                    const filterEndDate = new Date(currentFilters.endDate);
-                    
-                    // Project must start before or on the filter end date (overlap check)  
-                    if (projectStartDate > filterEndDate) {
-                        return false;
-                    }
-                }
-
-                // Search filter
-                if (currentFilters.search) {
-                    const searchTerm = currentFilters.search;
-                    const searchableText = [
-                        project.name,
-                        project.description,
-                        project.category,
-                        project.team_lead
-                    ].join(' ').toLowerCase();
-                    
-                    if (!searchableText.includes(searchTerm)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-
-            // Update project info and active filters display
-            updateProjectInfo();
-            updateActiveFilters();
-            
-            // Re-render chart with filtered data
-            renderGanttChart();
-        }
-
-        function renderGanttChart() {
-            // Get stored timeline parameters from initialization
-            const weeks = window.ganttWeeks;
-            const weekWidth = window.ganttWeekWidth;
-            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
-            
-            // Check if any filters are actually active
-            const hasActiveFilters = Object.values(currentFilters).some(filter => filter && filter.trim() !== '');
-            const projectData = hasActiveFilters ? filteredProjectData : allProjectData;
-            
-            // Update project count
-            document.getElementById('project-info').textContent = `${projectData.length} projects`;
-            
-            // Rebuild sidebar and timeline with filtered data
-            createProjectSidebar(projectData);
-            createTimelineContent(projectData, weeks, weekWidth, parseTime);
-        }
-
-        function clearAllFilters() {
-            // Reset all filter controls
-            document.querySelectorAll('.filter-select').forEach(select => {
-                select.value = '';
-            });
-            document.querySelectorAll('.filter-input').forEach(input => {
-                input.value = '';
-            });
-            
-            // Reset current filters object
-            Object.keys(currentFilters).forEach(key => {
-                currentFilters[key] = '';
-            });
-            
-            // Apply filters (which will show all projects)
-            applyFilters();
-        }
-
-        // Utility function for debouncing
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
+        // Global variables for filter functionality
+        let allProjectData;
+        let filteredProjectData;
+        let currentFilters = {};
+        let selectedTaskBar = null;
 
         function initFrappeGantt() {
             // Project data will be embedded here
@@ -1535,47 +1308,39 @@
             const weekWidth = 200;
             const totalWidth = weeks.length * weekWidth;
             
-            // Store globally for filter rebuilding
-            window.ganttWeeks = weeks;
-            window.ganttWeekWidth = weekWidth;
-            
-            // Initialize filter system
-            if (allProjectData.length === 0) {
-                allProjectData = [...projectData];
-                filteredProjectData = [...projectData];
-                setTimeout(setupFilters, 100); // Setup filters after DOM is ready
-            }
-            
-            // Use filtered data for rendering
-            const workingData = filteredProjectData.length > 0 ? filteredProjectData : projectData;
-            
-            // Update project count
-            document.getElementById('project-info').textContent = `${workingData.length} projects`;
-            
             // Create timeline header
             createTimelineHeader(weeks, weekWidth);
             
             // Create project sidebar
-            createProjectSidebar(workingData);
+            createProjectSidebar(projectData);
             
             // Create timeline content
-            createTimelineContent(workingData, weeks, weekWidth, parseTime);
+            createTimelineContent(projectData, weeks, weekWidth, parseTime);
             
             // Setup interactions
             setupInteractions();
             
+            // Auto-scroll to today's date
+            scrollToToday(weeks, weekWidth);
         }
         
         function createTimelineHeader(weeks, weekWidth) {
             const header = document.getElementById('timeline-header');
             const totalWidth = weeks.length * weekWidth;
-            header.style.width = totalWidth + 'px';
-            header.style.minWidth = totalWidth + 'px';
+            
+            // Clear existing header content
+            header.innerHTML = `
+                <div class="scroll-hint" id="scroll-hint">← → Scroll horizontally</div>
+                <div class="scroll-fade-indicator scroll-fade-left" id="scroll-fade-left" style="opacity: 0;"></div>
+                <div class="scroll-fade-indicator scroll-fade-right" id="scroll-fade-right" style="opacity: 0;"></div>
+            `;
             
             // Week headers
             const weekHeader = document.createElement('div');
             weekHeader.className = 'gantt-week-header';
             weekHeader.style.position = 'relative';
+            weekHeader.style.width = totalWidth + 'px';
+            weekHeader.style.minWidth = totalWidth + 'px';
             
             weeks.forEach(week => {
                 const weekCol = document.createElement('div');
@@ -1621,7 +1386,6 @@
         
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
-            sidebarContent.innerHTML = ''; // Clear existing content to prevent duplication
             
             // Add some emojis for different categories
             const categoryEmojis = {
@@ -1652,7 +1416,6 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
-            content.innerHTML = ''; // Clear existing content to prevent accumulation
             const totalWidth = weeks.length * weekWidth;
             content.style.width = totalWidth + 'px';
             content.style.minWidth = totalWidth + 'px';
@@ -1665,13 +1428,6 @@
                 line.style.left = (index * weekWidth) + 'px';
                 content.appendChild(line);
             });
-           
-            // Clean up existing today line before creating new one
-            if (window.todayLineElement) {
-                window.todayLineElement.remove();
-                window.todayLineElement = null;
-                window.todayLineOriginalX = null;
-            }
             
             // Add today's vertical line (fixed position)
             const today = new Date();
@@ -1696,9 +1452,6 @@
                 
                 // Add to body so it's not affected by container scrolling
                 document.body.appendChild(todayLine);
-                
-                // Store reference to today line element for cleanup
-                window.todayLineElement = todayLine;
                 
                 // Store reference for scroll updates
                 window.todayLineElement = todayLine;
@@ -1827,6 +1580,33 @@
             }
         }
         
+        function updateScrollIndicators() {
+            const timelineHeader = document.getElementById('timeline-header');
+            const scrollFadeLeft = document.getElementById('scroll-fade-left');
+            const scrollFadeRight = document.getElementById('scroll-fade-right');
+            
+            if (!timelineHeader || !scrollFadeLeft || !scrollFadeRight) return;
+            
+            const scrollLeft = timelineHeader.scrollLeft;
+            const scrollWidth = timelineHeader.scrollWidth;
+            const clientWidth = timelineHeader.clientWidth;
+            const maxScrollLeft = scrollWidth - clientWidth;
+            
+            // Show/hide left fade indicator
+            if (scrollLeft > 0) {
+                scrollFadeLeft.style.opacity = '1';
+            } else {
+                scrollFadeLeft.style.opacity = '0';
+            }
+            
+            // Show/hide right fade indicator
+            if (scrollLeft < maxScrollLeft - 1) { // -1 for rounding errors
+                scrollFadeRight.style.opacity = '1';
+            } else {
+                scrollFadeRight.style.opacity = '0';
+            }
+        }
+        
         function setupInteractions() {
             const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
@@ -1842,6 +1622,8 @@
                     }
                     // Update today line position
                     updateTodayLinePosition();
+                    // Update scroll indicators
+                    updateScrollIndicators();
                 });
                 
                 sidebarContent.addEventListener('scroll', () => {
@@ -1854,6 +1636,8 @@
                         contentWrapper.scrollLeft = timelineHeader.scrollLeft;
                         // Update today line position
                         updateTodayLinePosition();
+                        // Update scroll indicators
+                        updateScrollIndicators();
                     });
                 }
             }
@@ -1865,6 +1649,27 @@
                         selectedTaskBar.classList.remove('selected');
                         selectedTaskBar = null;
                     }
+                }
+            });
+            
+            // Initialize scroll indicators
+            updateScrollIndicators();
+            
+            // Hide scroll hint after first interaction
+            let hasScrolled = false;
+            const scrollHint = document.getElementById('scroll-hint');
+            
+            [contentWrapper, timelineHeader].forEach(element => {
+                if (element) {
+                    element.addEventListener('scroll', () => {
+                        if (!hasScrolled && scrollHint) {
+                            hasScrolled = true;
+                            scrollHint.style.opacity = '0';
+                            setTimeout(() => {
+                                scrollHint.style.display = 'none';
+                            }, 500);
+                        }
+                    }, { once: false });
                 }
             });
         }
@@ -1893,7 +1698,70 @@
             document.getElementById('tooltip').style.display = 'none';
         }
         
+        function scrollToToday(weeks, weekWidth) {
+            const today = new Date();
+            const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
+            
+            // Calculate today's exact position
+            const todayX = (today - weeks[0]) / (1000 * 60 * 60 * 24) * (weekWidth / 7);
+            
+            if (todayX >= 0 && contentWrapper) {
+                // Scroll to center today's line
+                const scrollPosition = Math.max(0, todayX - (contentWrapper.clientWidth / 2));
+                contentWrapper.scrollLeft = scrollPosition;
+            }
+        }
         
+        function setupFilters() {
+            // Priority filter
+            document.getElementById('priority-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.priority = e.target.value;
+                } else {
+                    delete currentFilters.priority;
+                }
+                applyFilters();
+            });
+
+            // Category filter
+            document.getElementById('category-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.category = e.target.value;
+                } else {
+                    delete currentFilters.category;
+                }
+                applyFilters();
+            });
+
+            // Team filter
+            document.getElementById('team-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.team = e.target.value;
+                } else {
+                    delete currentFilters.team;
+                }
+                applyFilters();
+            });
+
+            // Progress filter
+            document.getElementById('progress-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentFilters.progress = e.target.value;
+                } else {
+                    delete currentFilters.progress;
+                }
+                applyFilters();
+            });
+
+            // Clear all filters
+            document.getElementById('clear-filters').addEventListener('click', () => {
+                currentFilters = {};
+                document.querySelectorAll('.filter-select').forEach(select => {
+                    select.value = '';
+                });
+                applyFilters();
+            });
+        }
         
         function populateFilterOptions() {
             // Get unique categories and team leads
@@ -1919,6 +1787,66 @@
             });
         }
         
+        function applyFilters() {
+            filteredProjectData = allProjectData.filter(project => {
+                // Priority filter
+                if (currentFilters.priority && project.priority !== currentFilters.priority) {
+                    return false;
+                }
+
+                // Category filter
+                if (currentFilters.category && project.category !== currentFilters.category) {
+                    return false;
+                }
+
+                // Team lead filter
+                if (currentFilters.team && project.team_lead !== currentFilters.team) {
+                    return false;
+                }
+
+                // Progress filter
+                if (currentFilters.progress) {
+                    const progress = project.execution_stage.progress_percent;
+                    const [min, max] = currentFilters.progress.split('-').map(Number);
+                    if (progress < min || progress > max) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            updateProjectInfo();
+            updateActiveFilters();
+            
+            // Re-render with filtered data
+            const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S');
+            const dateRange = {
+  "min_date": "2025-07-03T00:00:00",
+  "max_date": "2025-12-08T00:00:00"
+};
+            const minDate = parseTime(dateRange.min_date);
+            const maxDate = parseTime(dateRange.max_date);
+            
+            const startDate = new Date(minDate);
+            startDate.setDate(startDate.getDate() - startDate.getDay());
+            
+            const endDate = new Date(maxDate);
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+            
+            const weeks = [];
+            const currentWeek = new Date(startDate);
+            while (currentWeek <= endDate) {
+                weeks.push(new Date(currentWeek));
+                currentWeek.setDate(currentWeek.getDate() + 7);
+            }
+            
+            const weekWidth = 200;
+            
+            createProjectSidebar(filteredProjectData);
+            createTimelineContent(filteredProjectData, weeks, weekWidth, parseTime);
+            setupInteractions();
+        }
         
         function updateProjectInfo() {
             document.getElementById('project-info').textContent = `🚀 ${filteredProjectData.length} of ${allProjectData.length} projects`;
@@ -1928,29 +1856,22 @@
             const activeFiltersDiv = document.getElementById('active-filters');
             activeFiltersDiv.innerHTML = '';
             
-            // Only show filters that have actual values
-            const activeFilters = Object.keys(currentFilters).filter(key => 
-                currentFilters[key] && currentFilters[key].toString().trim() !== ''
-            );
+            Object.keys(currentFilters).forEach(filterKey => {
+                const badge = document.createElement('span');
+                badge.className = 'filter-badge';
+                badge.innerHTML = `${filterKey}: ${currentFilters[filterKey]} <span class="remove" data-filter="${filterKey}">×</span>`;
+                activeFiltersDiv.appendChild(badge);
+            });
             
-            if (activeFilters.length > 0) {
-                activeFilters.forEach(filterKey => {
-                    const badge = document.createElement('span');
-                    badge.className = 'filter-badge';
-                    badge.innerHTML = `${filterKey}: ${currentFilters[filterKey]} <span class="remove" data-filter="${filterKey}">×</span>`;
-                    activeFiltersDiv.appendChild(badge);
+            // Add click handlers for remove buttons
+            activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const filterKey = e.target.dataset.filter;
+                    delete currentFilters[filterKey];
+                    document.getElementById(`${filterKey}-filter`).value = '';
+                    applyFilters();
                 });
-                
-                // Add click handlers for remove buttons
-                activeFiltersDiv.querySelectorAll('.remove').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const filterKey = e.target.dataset.filter;
-                        delete currentFilters[filterKey];
-                        document.getElementById(`${filterKey}-filter`).value = '';
-                        applyFilters();
-                    });
-                });
-            }
+            });
         }
         
         function setupModal() {

@@ -324,16 +324,18 @@
             font-size: 13px;
             font-weight: 600;
             color: #1d2125;
+            min-width: fit-content;
         }
 
         .gantt-week-column {
-            flex: 1;
+            flex: none;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             border-right: 1px solid #e4e6ea;
             min-width: 200px;
+            width: 200px;
             padding: 16px 8px;
             text-align: center;
         }
@@ -508,6 +510,27 @@
             z-index: 20;
             pointer-events: none;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: opacity 0.5s ease;
+        }
+
+        .scroll-fade-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.3s ease;
+        }
+
+        .scroll-fade-left {
+            left: 0;
+            background: linear-gradient(to right, rgba(250, 251, 252, 0.8), transparent);
+        }
+
+        .scroll-fade-right {
+            right: 0;
+            background: linear-gradient(to left, rgba(250, 251, 252, 0.8), transparent);
         }
 
         /* Task Detail Modal */
@@ -686,7 +709,9 @@
             
             <div class="gantt-main" id="gantt-main">
                 <div class="gantt-timeline-header" id="timeline-header">
-                    <div class="scroll-hint">← → Scroll horizontally</div>
+                    <div class="scroll-hint" id="scroll-hint">← → Scroll horizontally</div>
+                    <div class="scroll-fade-indicator scroll-fade-left" id="scroll-fade-left" style="opacity: 0;"></div>
+                    <div class="scroll-fade-indicator scroll-fade-right" id="scroll-fade-right" style="opacity: 0;"></div>
                     <!-- Timeline header will be populated here -->
                 </div>
                 <div class="gantt-timeline-content-wrapper">
@@ -794,13 +819,20 @@
             const header = document.getElementById('timeline-header');
             const totalWidth = weeks.length * weekWidth;
             console.log('Timeline Header - Total Width:', totalWidth + 'px', 'Weeks:', weeks.length);
-            header.style.width = totalWidth + 'px';
-            header.style.minWidth = totalWidth + 'px';
+            
+            // Clear existing header content
+            header.innerHTML = `
+                <div class="scroll-hint" id="scroll-hint">← → Scroll horizontally</div>
+                <div class="scroll-fade-indicator scroll-fade-left" id="scroll-fade-left" style="opacity: 0;"></div>
+                <div class="scroll-fade-indicator scroll-fade-right" id="scroll-fade-right" style="opacity: 0;"></div>
+            `;
             
             // Week headers
             const weekHeader = document.createElement('div');
             weekHeader.className = 'gantt-week-header';
             weekHeader.style.position = 'relative';
+            weekHeader.style.width = totalWidth + 'px';
+            weekHeader.style.minWidth = totalWidth + 'px';
             
             weeks.forEach(week => {
                 const weekCol = document.createElement('div');
@@ -1016,6 +1048,31 @@
                 window.todayLineElement.style.display = 'none';
             }
         }
+
+        function updateScrollIndicators() {
+            const timelineHeader = document.getElementById('timeline-header');
+            const leftIndicator = document.getElementById('scroll-fade-left');
+            const rightIndicator = document.getElementById('scroll-fade-right');
+            
+            if (!timelineHeader || !leftIndicator || !rightIndicator) return;
+            
+            const scrollLeft = timelineHeader.scrollLeft;
+            const maxScrollLeft = timelineHeader.scrollWidth - timelineHeader.clientWidth;
+            
+            // Show left indicator if we can scroll left
+            if (scrollLeft > 0) {
+                leftIndicator.style.opacity = '1';
+            } else {
+                leftIndicator.style.opacity = '0';
+            }
+            
+            // Show right indicator if we can scroll right
+            if (scrollLeft < maxScrollLeft - 1) { // -1 for rounding errors
+                rightIndicator.style.opacity = '1';
+            } else {
+                rightIndicator.style.opacity = '0';
+            }
+        }
         
         function setupInteractions() {
             const contentWrapper = document.querySelector('.gantt-timeline-content-wrapper');
@@ -1032,6 +1089,8 @@
                     }
                     // Update today line position
                     updateTodayLinePosition();
+                    // Update scroll indicators
+                    updateScrollIndicators();
                 });
                 
                 sidebarContent.addEventListener('scroll', () => {
@@ -1044,6 +1103,8 @@
                         contentWrapper.scrollLeft = timelineHeader.scrollLeft;
                         // Update today line position
                         updateTodayLinePosition();
+                        // Update scroll indicators
+                        updateScrollIndicators();
                     });
                 }
             }
@@ -1055,6 +1116,27 @@
                         selectedTaskBar.classList.remove('selected');
                         selectedTaskBar = null;
                     }
+                }
+            });
+            
+            // Initialize scroll indicators
+            updateScrollIndicators();
+            
+            // Hide scroll hint after first interaction
+            let hasScrolled = false;
+            const scrollHint = document.getElementById('scroll-hint');
+            
+            [contentWrapper, timelineHeader].forEach(element => {
+                if (element) {
+                    element.addEventListener('scroll', () => {
+                        if (!hasScrolled && scrollHint) {
+                            hasScrolled = true;
+                            scrollHint.style.opacity = '0';
+                            setTimeout(() => {
+                                scrollHint.style.display = 'none';
+                            }, 500);
+                        }
+                    }, { once: false });
                 }
             });
         }

@@ -456,6 +456,27 @@
             pointer-events: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             backdrop-filter: blur(8px);
+            transition: opacity 0.5s ease;
+        }
+
+        .scroll-fade-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.3s ease;
+        }
+
+        .scroll-fade-left {
+            left: 0;
+            background: linear-gradient(to right, rgba(250, 250, 250, 0.8), transparent);
+        }
+
+        .scroll-fade-right {
+            right: 0;
+            background: linear-gradient(to left, rgba(250, 250, 250, 0.8), transparent);
         }
 
         /* Task Detail Modal */
@@ -633,7 +654,9 @@
             
             <div class="gantt-main" id="gantt-main">
                 <div class="gantt-timeline-header" id="timeline-header">
-                    <div class="scroll-hint">← → Scroll horizontally • Click bars for details</div>
+                    <div class="scroll-hint" id="scroll-hint">← → Scroll horizontally • Click bars for details</div>
+                    <div class="scroll-fade-indicator scroll-fade-left" id="scroll-fade-left" style="opacity: 0;"></div>
+                    <div class="scroll-fade-indicator scroll-fade-right" id="scroll-fade-right" style="opacity: 0;"></div>
                     <!-- Timeline header will be populated here -->
                 </div>
                 <div class="gantt-timeline-content-wrapper">
@@ -905,6 +928,31 @@
             });
         }
 
+        function updateScrollIndicators() {
+            const timelineHeader = document.getElementById('timeline-header');
+            const leftIndicator = document.getElementById('scroll-fade-left');
+            const rightIndicator = document.getElementById('scroll-fade-right');
+            
+            if (!timelineHeader || !leftIndicator || !rightIndicator) return;
+            
+            const scrollLeft = timelineHeader.scrollLeft;
+            const maxScrollLeft = timelineHeader.scrollWidth - timelineHeader.clientWidth;
+            
+            // Show left indicator if we can scroll left
+            if (scrollLeft > 0) {
+                leftIndicator.style.opacity = '1';
+            } else {
+                leftIndicator.style.opacity = '0';
+            }
+            
+            // Show right indicator if we can scroll right
+            if (scrollLeft < maxScrollLeft - 1) { // -1 for rounding errors
+                rightIndicator.style.opacity = '1';
+            } else {
+                rightIndicator.style.opacity = '0';
+            }
+        }
+
         function setupModal() {
             const modal = document.getElementById('task-modal');
             const closeBtn = document.getElementById('modal-close');
@@ -980,22 +1028,21 @@
         
         function createTimelineHeader(weeks, weekWidth) {
             const header = document.getElementById('timeline-header');
-            
-            // Clear existing content except scroll hint
-            const scrollHint = header.querySelector('.scroll-hint');
-            header.innerHTML = '';
-            if (scrollHint) {
-                header.appendChild(scrollHint);
-            }
-            
             const totalWidth = weeks.length * weekWidth;
-            header.style.width = totalWidth + 'px';
-            header.style.minWidth = totalWidth + 'px';
+            
+            // Clear existing header content
+            header.innerHTML = `
+                <div class="scroll-hint" id="scroll-hint">← → Scroll horizontally • Click bars for details</div>
+                <div class="scroll-fade-indicator scroll-fade-left" id="scroll-fade-left" style="opacity: 0;"></div>
+                <div class="scroll-fade-indicator scroll-fade-right" id="scroll-fade-right" style="opacity: 0;"></div>
+            `;
             
             // Week headers
             const weekHeader = document.createElement('div');
             weekHeader.className = 'gantt-week-header';
             weekHeader.style.position = 'relative';
+            weekHeader.style.width = totalWidth + 'px';
+            weekHeader.style.minWidth = totalWidth + 'px';
             
             weeks.forEach(week => {
                 const weekCol = document.createElement('div');
@@ -1238,6 +1285,8 @@
                     }
                     // Update today line position
                     updateTodayLinePosition();
+                    // Update scroll indicators
+                    updateScrollIndicators();
                 });
                 
                 sidebarContent.addEventListener('scroll', () => {
@@ -1250,6 +1299,8 @@
                         contentWrapper.scrollLeft = timelineHeader.scrollLeft;
                         // Update today line position
                         updateTodayLinePosition();
+                        // Update scroll indicators
+                        updateScrollIndicators();
                     });
                 }
             }
@@ -1261,6 +1312,27 @@
                         selectedTaskBar.classList.remove('selected');
                         selectedTaskBar = null;
                     }
+                }
+            });
+            
+            // Initialize scroll indicators
+            updateScrollIndicators();
+            
+            // Hide scroll hint after first interaction
+            let hasScrolled = false;
+            const scrollHint = document.getElementById('scroll-hint');
+            
+            [contentWrapper, timelineHeader].forEach(element => {
+                if (element) {
+                    element.addEventListener('scroll', () => {
+                        if (!hasScrolled && scrollHint) {
+                            hasScrolled = true;
+                            scrollHint.style.opacity = '0';
+                            setTimeout(() => {
+                                scrollHint.style.display = 'none';
+                            }, 500);
+                        }
+                    }, { once: false });
                 }
             });
         }

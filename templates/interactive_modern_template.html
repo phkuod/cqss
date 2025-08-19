@@ -1165,53 +1165,86 @@
                 rowContent.style.position = 'absolute';
                 rowContent.style.width = '100%';
                 
-                // Preparing phase
-                const prepStart = parseTime(project.preparing_stage.start);
-                const prepEnd = parseTime(project.preparing_stage.end);
-                const prepStartX = Math.max(0, (prepStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                const prepWidth = Math.max(weekWidth / 7, (prepEnd - prepStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                // Define stage colors for multi-stage support
+                const stageColors = {
+                    'Planning': '#6f42c1',
+                    'Preparing': '#6f42c1', 
+                    'Analysis': '#17a2b8',
+                    'Research': '#17a2b8',
+                    'Design': '#20c997',
+                    'Wireframes': '#20c997',
+                    'Development': '#28a745',
+                    'Implementation': '#28a745',
+                    'Testing': '#ffc107',
+                    'Audit': '#ffc107',
+                    'Migration': '#fd7e14',
+                    'Deployment': '#dc3545',
+                    'Execution': '#007bff'
+                };
                 
-                const prepBar = document.createElement('div');
-                prepBar.className = 'gantt-task-bar gantt-task-preparing';
-                prepBar.style.left = prepStartX + 'px';
-                prepBar.style.width = prepWidth + 'px';
-                prepBar.innerHTML = `<div class="gantt-task-label">Preparing</div>`;
-                prepBar.dataset.projectIndex = projectIndex;
-                prepBar.dataset.phase = 'preparing';
-                
-                // Execution phase
-                const execStart = parseTime(project.execution_stage.start);
-                const execEnd = parseTime(project.execution_stage.end);
-                const execStartX = Math.max(0, (execStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                const execWidth = Math.max(weekWidth / 7, (execEnd - execStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                
-                const execBar = document.createElement('div');
-                execBar.className = `gantt-task-bar gantt-task-execution gantt-task-${project.priority.toLowerCase()}`;
-                execBar.style.left = execStartX + 'px';
-                execBar.style.width = execWidth + 'px';
-                execBar.dataset.projectIndex = projectIndex;
-                execBar.dataset.phase = 'execution';
-                
-                // Progress bar
-                const progressBar = document.createElement('div');
-                progressBar.className = 'gantt-task-progress';
-                progressBar.style.width = project.execution_stage.progress_percent + '%';
-                
-                execBar.innerHTML = `
-                    <div class="gantt-task-label">${project.name}</div>
-                    <div class="gantt-task-progress-text">${project.execution_stage.progress_percent}%</div>
-                `;
-                execBar.appendChild(progressBar);
-                
-                // Add click functionality to both bars
-                [prepBar, execBar].forEach(bar => {
+                // Create bars for each stage dynamically
+                project.stages.forEach((stage, index) => {
+                    const stageStart = parseTime(stage.start);
+                    const stageEnd = parseTime(stage.end);
+                    const stageStartX = Math.max(0, (stageStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                    const stageWidth = Math.max(weekWidth / 7, (stageEnd - stageStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                    
+                    const stageBar = document.createElement('div');
+                    const isLastStage = index === project.stages.length - 1;
+                    const stageColor = stageColors[stage.name] || (index === 0 ? '#6f42c1' : '#007bff');
+                    
+                    // Set CSS classes based on stage type and completion
+                    stageBar.className = `gantt-task-bar gantt-task-stage-${index}`;
+                    if (stage.progress_percent === 100) {
+                        stageBar.className += ' gantt-task-completed';
+                    } else if (index === 0) {
+                        stageBar.className += ' gantt-task-preparing';
+                    } else {
+                        stageBar.className += ` gantt-task-execution gantt-task-${project.priority.toLowerCase()}`;
+                    }
+                    
+                    stageBar.style.left = stageStartX + 'px';
+                    stageBar.style.width = stageWidth + 'px';
+                    stageBar.style.backgroundColor = stageColor;
+                    stageBar.style.opacity = stage.progress_percent === 100 ? '0.9' : '0.8';
+                    stageBar.dataset.projectIndex = projectIndex;
+                    stageBar.dataset.phase = stage.name.toLowerCase();
+                    stageBar.dataset.stageIndex = index;
+                    
+                    // Progress bar for incomplete stages
+                    let progressBar = null;
+                    if (stage.progress_percent < 100 && stage.progress_percent > 0) {
+                        progressBar = document.createElement('div');
+                        progressBar.className = 'gantt-task-progress';
+                        progressBar.style.width = stage.progress_percent + '%';
+                        progressBar.style.backgroundColor = stageColor;
+                    }
+                    
+                    // Show project name on the longest/most prominent stage
+                    const longestStage = project.stages.reduce((prev, current) => 
+                        (parseTime(current.end) - parseTime(current.start)) > (parseTime(prev.end) - parseTime(prev.start)) ? current : prev
+                    );
+                    
+                    const showName = stage === longestStage;
+                    const showProgress = stage.progress_percent > 0 && stage.progress_percent < 100;
+                    
+                    stageBar.innerHTML = `
+                        <div class="gantt-task-label">${showName ? project.name : stage.name}</div>
+                        ${showProgress ? `<div class="gantt-task-progress-text">${stage.progress_percent}%</div>` : ''}
+                    `;
+                    
+                    if (progressBar) {
+                        stageBar.appendChild(progressBar);
+                    }
+                    
+                    // Add interactive functionality
                     // Tooltip events
-                    bar.addEventListener('mouseenter', (e) => showTooltip(e, project));
-                    bar.addEventListener('mouseleave', hideTooltip);
-                    bar.addEventListener('mousemove', moveTooltip);
+                    stageBar.addEventListener('mouseenter', (e) => showTooltip(e, project));
+                    stageBar.addEventListener('mouseleave', hideTooltip);
+                    stageBar.addEventListener('mousemove', moveTooltip);
                     
                     // Click events
-                    bar.addEventListener('click', (e) => {
+                    stageBar.addEventListener('click', (e) => {
                         e.stopPropagation();
                         
                         // Remove previous selection
@@ -1220,29 +1253,29 @@
                         }
                         
                         // Add selection to clicked bar
-                        bar.classList.add('selected');
-                        selectedTaskBar = bar;
+                        stageBar.classList.add('selected');
+                        selectedTaskBar = stageBar;
                         
                         // Open modal with project details
                         openModal(project);
                     });
                     
                     // Make bars focusable for accessibility
-                    bar.setAttribute('tabindex', '0');
-                    bar.setAttribute('role', 'button');
-                    bar.setAttribute('aria-label', `${project.name} - ${bar.dataset.phase} phase`);
+                    stageBar.setAttribute('tabindex', '0');
+                    stageBar.setAttribute('role', 'button');
+                    stageBar.setAttribute('aria-label', `${project.name} - ${stage.name} stage`);
                     
                     // Keyboard support
-                    bar.addEventListener('keydown', (e) => {
+                    stageBar.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            bar.click();
+                            stageBar.click();
                         }
                     });
+                    
+                    rowContent.appendChild(stageBar);
                 });
                 
-                rowContent.appendChild(prepBar);
-                rowContent.appendChild(execBar);
                 content.appendChild(rowContent);
             });
         }
@@ -1340,12 +1373,22 @@
         function showTooltip(event, project) {
             const tooltip = document.getElementById('tooltip');
             tooltip.style.display = 'block';
+            
+            // Generate stage information dynamically
+            const stagesHtml = project.stages.map(stage => 
+                `<div><strong>${stage.name}:</strong> ${stage.start.split('T')[0]} to ${stage.end.split('T')[0]} (${stage.progress_percent}%)</div>`
+            ).join('');
+            
             tooltip.innerHTML = `
                 <div class="tooltip-title">${project.name}</div>
                 <div><strong>Category:</strong> ${project.category}</div>
                 <div><strong>Priority:</strong> ${project.priority}</div>
                 <div><strong>Team Lead:</strong> ${project.team_lead}</div>
-                <div><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</div>
+                <div><strong>Overall Progress:</strong> ${project.execution_stage.progress_percent}%</div>
+                <div style="margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px;">
+                    <strong>Stages:</strong><br/>
+                    ${stagesHtml}
+                </div>
                 <div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">Click for details</div>
             `;
             moveTooltip(event);

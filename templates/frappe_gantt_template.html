@@ -878,6 +878,7 @@
         
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
+            sidebarContent.innerHTML = ''; // Clear existing content
             
             projectData.forEach(project => {
                 const row = document.createElement('div');
@@ -894,6 +895,7 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
+            content.innerHTML = ''; // Clear existing content
             const totalWidth = weeks.length * weekWidth;
             console.log('Timeline Content - Total Width:', totalWidth + 'px', 'Projects:', projectData.length);
             content.style.width = totalWidth + 'px';
@@ -945,83 +947,100 @@
                 rowContent.style.position = 'absolute';
                 rowContent.style.width = '100%';
                 
-                // Preparing phase
-                const prepStart = parseTime(project.preparing_stage.start);
-                const prepEnd = parseTime(project.preparing_stage.end);
-                const prepStartX = Math.max(0, (prepStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                const prepWidth = Math.max(weekWidth / 7, (prepEnd - prepStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                // Define stage colors for multi-stage support (Frappe-inspired clean colors)
+                const stageColors = {
+                    'Planning': '#667eea',
+                    'Preparing': '#667eea', 
+                    'Analysis': '#17a2b8',
+                    'Research': '#17a2b8',
+                    'Design': '#20c997',
+                    'Wireframes': '#20c997',
+                    'Development': '#28a745',
+                    'Implementation': '#28a745',
+                    'Testing': '#ffc107',
+                    'Audit': '#ffc107',
+                    'Migration': '#f093fb',
+                    'Deployment': '#f093fb',
+                    'Execution': '#4facfe'
+                };
                 
-                const prepBar = document.createElement('div');
-                prepBar.className = 'gantt-task-bar gantt-task-preparing';
-                prepBar.style.left = prepStartX + 'px';
-                prepBar.style.width = prepWidth + 'px';
-                prepBar.innerHTML = `<div class="gantt-task-label">Preparing</div>`;
-                
-                // Add click handler for preparing bar
-                prepBar.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                // Create bars for each stage dynamically
+                project.stages.forEach((stage, index) => {
+                    const stageStart = parseTime(stage.start);
+                    const stageEnd = parseTime(stage.end);
+                    const stageStartX = Math.max(0, (stageStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                    const stageWidth = Math.max(weekWidth / 7, (stageEnd - stageStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
                     
-                    // Remove previous selection
-                    if (selectedTaskBar) {
-                        selectedTaskBar.classList.remove('selected');
+                    const stageBar = document.createElement('div');
+                    const isLastStage = index === project.stages.length - 1;
+                    const stageColor = stageColors[stage.name] || (index === 0 ? '#667eea' : '#4facfe');
+                    
+                    // Set CSS classes based on stage type and completion
+                    stageBar.className = `gantt-task-bar gantt-task-stage-${index}`;
+                    if (stage.progress_percent === 100) {
+                        stageBar.className += ' gantt-task-completed';
+                    } else if (index === 0) {
+                        stageBar.className += ' gantt-task-preparing';
+                    } else {
+                        stageBar.className += ` gantt-task-execution gantt-task-${project.priority.toLowerCase()}`;
                     }
                     
-                    // Add selection to clicked bar
-                    prepBar.classList.add('selected');
-                    selectedTaskBar = prepBar;
+                    stageBar.style.left = stageStartX + 'px';
+                    stageBar.style.width = stageWidth + 'px';
+                    stageBar.style.backgroundColor = stageColor;
+                    stageBar.style.opacity = stage.progress_percent === 100 ? '1.0' : '0.85';
                     
-                    // Open modal
-                    openModal(project);
-                });
-                
-                // Execution phase
-                const execStart = parseTime(project.execution_stage.start);
-                const execEnd = parseTime(project.execution_stage.end);
-                const execStartX = Math.max(0, (execStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                const execWidth = Math.max(weekWidth / 7, (execEnd - execStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                
-                const execBar = document.createElement('div');
-                execBar.className = `gantt-task-bar gantt-task-execution gantt-task-${project.priority.toLowerCase()}`;
-                execBar.style.left = execStartX + 'px';
-                execBar.style.width = execWidth + 'px';
-                
-                // Progress bar
-                const progressBar = document.createElement('div');
-                progressBar.className = 'gantt-task-progress';
-                progressBar.style.width = project.execution_stage.progress_percent + '%';
-                
-                execBar.innerHTML = `
-                    <div class="gantt-task-label">${project.name}</div>
-                    <div class="gantt-task-progress-text">${project.execution_stage.progress_percent}%</div>
-                `;
-                execBar.appendChild(progressBar);
-                
-                // Add click handler for execution bar
-                execBar.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    
-                    // Remove previous selection
-                    if (selectedTaskBar) {
-                        selectedTaskBar.classList.remove('selected');
+                    // Progress bar for incomplete stages
+                    let progressBar = null;
+                    if (stage.progress_percent < 100 && stage.progress_percent > 0) {
+                        progressBar = document.createElement('div');
+                        progressBar.className = 'gantt-task-progress';
+                        progressBar.style.width = stage.progress_percent + '%';
+                        progressBar.style.backgroundColor = stageColor;
+                        progressBar.style.opacity = '1.0';
                     }
                     
-                    // Add selection to clicked bar
-                    execBar.classList.add('selected');
-                    selectedTaskBar = execBar;
+                    // Show project name on the longest/most prominent stage
+                    const longestStage = project.stages.reduce((prev, current) => 
+                        (parseTime(current.end) - parseTime(current.start)) > (parseTime(prev.end) - parseTime(prev.start)) ? current : prev
+                    );
                     
-                    // Open modal
-                    openModal(project);
+                    const showName = stage === longestStage;
+                    const showProgress = stage.progress_percent > 0 && stage.progress_percent < 100;
+                    
+                    stageBar.innerHTML = `
+                        <div class="gantt-task-label">${showName ? project.name : stage.name}</div>
+                        ${showProgress ? `<div class="gantt-task-progress-text">${stage.progress_percent}%</div>` : ''}
+                    `;
+                    
+                    if (progressBar) {
+                        stageBar.appendChild(progressBar);
+                    }
+                    
+                    // Add click handler
+                    stageBar.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        // Remove previous selection
+                        if (selectedTaskBar) {
+                            selectedTaskBar.classList.remove('selected');
+                        }
+                        
+                        // Add selection to clicked bar
+                        stageBar.classList.add('selected');
+                        selectedTaskBar = stageBar;
+                        
+                        // Open modal
+                        openModal(project);
+                    });
+                    
+                    // Add tooltip handlers
+                    stageBar.addEventListener('mouseenter', (e) => showTooltip(e, project));
+                    stageBar.addEventListener('mouseleave', hideTooltip);
+                    stageBar.addEventListener('mousemove', moveTooltip);
+                    
+                    rowContent.appendChild(stageBar);
                 });
-                
-                // Add tooltips
-                [prepBar, execBar].forEach(bar => {
-                    bar.addEventListener('mouseenter', (e) => showTooltip(e, project));
-                    bar.addEventListener('mouseleave', hideTooltip);
-                    bar.addEventListener('mousemove', moveTooltip);
-                });
-                
-                rowContent.appendChild(prepBar);
-                rowContent.appendChild(execBar);
                 content.appendChild(rowContent);
             });
         }
@@ -1144,13 +1163,23 @@
         function showTooltip(event, project) {
             const tooltip = document.getElementById('tooltip');
             tooltip.style.display = 'block';
+            
+            // Generate stage information dynamically
+            const stagesHtml = project.stages.map(stage => 
+                `<div><strong>${stage.name}:</strong> ${stage.start.split('T')[0]} to ${stage.end.split('T')[0]} (${stage.progress_percent}%)</div>`
+            ).join('');
+            
             tooltip.innerHTML = `
                 <div class="tooltip-title">${project.name}</div>
                 <div><strong>Category:</strong> ${project.category}</div>
                 <div><strong>Priority:</strong> ${project.priority}</div>
                 <div><strong>Team Lead:</strong> ${project.team_lead}</div>
-                <div><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</div>
+                <div><strong>Overall Progress:</strong> ${project.execution_stage.progress_percent}%</div>
                 <div><strong>Description:</strong> ${project.description}</div>
+                <div style="margin-top: 8px; border-top: 1px solid #ddd; padding-top: 8px;">
+                    <strong>Stages:</strong><br/>
+                    ${stagesHtml}
+                </div>
             `;
             moveTooltip(event);
         }

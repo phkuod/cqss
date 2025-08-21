@@ -1031,11 +1031,30 @@
                     );
                     
                     const showName = stage === longestStage;
-                    const showProgress = stage.progress_percent > 0 && stage.progress_percent < 100;
+                    // Consistent semi-transparent background for all progress indicators
+                    const progressBgColor = 'rgba(0, 0, 0, 0.2)'; // Lighter semi-transparent black background
                     
+                    // Always show progress with playful colorful styling
                     stageBar.innerHTML = `
                         <div class="gantt-task-label">${stageInfo.emoji} ${showName ? `${priorityEmoji} ${project.name}` : stage.name}</div>
-                        ${showProgress ? `<div class="gantt-task-progress-text">${stage.progress_percent}%</div>` : ''}
+                        <div class="gantt-task-progress-text" style="
+                            position: absolute;
+                            right: 6px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            font-size: 10px;
+                            font-weight: 700;
+                            color: #ffffff;
+                            background: ${progressBgColor};
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                            min-width: 40px;
+                            text-align: center;
+                            border: 2px solid rgba(255,255,255,0.3);
+                            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+                            animation: pulse 2s infinite;
+                        ">${stage.progress_percent}%</div>
                     `;
                     
                     if (progressBar) {

@@ -860,26 +860,50 @@
                     d.name.substring(0, maxChars - 3) + '...' : d.name;
             });
 
-        // Add stage progress labels for each stage
+        // Add stage progress labels for each stage (enhanced display)
         projectGroups.each(function(d) {
             const group = d3.select(this);
             
             d.stages.forEach((stage, index) => {
-                if (stage.progress_percent > 0 && stage.progress_percent < 100) {
-                    const stageWidth = xScale(parseTime(stage.end)) - xScale(parseTime(stage.start));
-                    const progressWidth = stageWidth * (stage.progress_percent / 100);
+                const stageWidth = xScale(parseTime(stage.end)) - xScale(parseTime(stage.start));
+                const stageStartX = xScale(parseTime(stage.start));
+                const progressPercent = stage.progress_percent;
+                
+                // Consistent semi-transparent background for all progress indicators
+                const progressBgColor = 'rgba(0, 0, 0, 0.2)'; // Lighter semi-transparent black background
+                
+                // Always show progress percentage if there's enough space
+                if (stageWidth > 30) {
+                    // Position text in center of stage bar
+                    const textX = stageStartX + stageWidth / 2;
                     
-                    if (progressWidth > 25) { // Only show if there's enough space
+                    group.append('text')
+                        .attr('x', textX)
+                        .attr('y', (yScale.bandwidth() - barHeight) / 2 + barHeight / 2)
+                        .attr('dy', '0.35em')
+                        .attr('text-anchor', 'middle')
+                        .style('font-size', '11px')
+                        .style('font-weight', 'bold')
+                        .style('fill', '#ffffff')
+                        .style('text-shadow', '0 0 3px rgba(0,0,0,1)')
+                        .style('paint-order', 'stroke fill')
+                        .style('stroke', progressBgColor)
+                        .style('stroke-width', '3px')
+                        .style('pointer-events', 'none')
+                        .text(`${progressPercent}%`);
+                    
+                    // Add stage name below progress for longer stages
+                    if (stageWidth > 80) {
                         group.append('text')
-                            .attr('x', xScale(parseTime(stage.start)) + progressWidth + 3)
-                            .attr('y', (yScale.bandwidth() - barHeight) / 2 + barHeight / 2)
+                            .attr('x', textX)
+                            .attr('y', (yScale.bandwidth() - barHeight) / 2 + barHeight / 2 + 14)
                             .attr('dy', '0.35em')
-                            .attr('text-anchor', 'start')
-                            .style('font-size', '10px')
-                            .style('font-weight', 'bold')
-                            .style('fill', '#343a40')
-                            .style('text-shadow', '1px 1px 2px rgba(255,255,255,0.8)')
-                            .text(`${stage.progress_percent}%`);
+                            .attr('text-anchor', 'middle')
+                            .style('font-size', '9px')
+                            .style('font-weight', '500')
+                            .style('fill', '#666')
+                            .style('pointer-events', 'none')
+                            .text(stage.name.length > 12 ? stage.name.substring(0, 10) + '...' : stage.name);
                     }
                 }
             });

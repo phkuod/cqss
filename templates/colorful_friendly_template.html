@@ -882,6 +882,7 @@
         
         function createProjectSidebar(projectData) {
             const sidebarContent = document.querySelector('.gantt-sidebar-content');
+            sidebarContent.innerHTML = ''; // Clear existing content
             
             // Add some emojis for different categories
             const categoryEmojis = {
@@ -912,6 +913,7 @@
         
         function createTimelineContent(projectData, weeks, weekWidth, parseTime) {
             const content = document.getElementById('timeline-content');
+            content.innerHTML = ''; // Clear existing content
             const totalWidth = weeks.length * weekWidth;
             content.style.width = totalWidth + 'px';
             content.style.minWidth = totalWidth + 'px';
@@ -962,51 +964,6 @@
                 rowContent.style.position = 'absolute';
                 rowContent.style.width = '100%';
                 
-                // Preparing phase
-                const prepStart = parseTime(project.preparing_stage.start);
-                const prepEnd = parseTime(project.preparing_stage.end);
-                const prepStartX = Math.max(0, (prepStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                const prepWidth = Math.max(weekWidth / 7, (prepEnd - prepStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                
-                const prepBar = document.createElement('div');
-                prepBar.className = 'gantt-task-bar gantt-task-preparing';
-                prepBar.style.left = prepStartX + 'px';
-                prepBar.style.width = prepWidth + 'px';
-                prepBar.innerHTML = `<div class="gantt-task-label">🔄 Preparing</div>`;
-                
-                // Add click handler for preparing bar
-                prepBar.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    
-                    // Remove previous selection
-                    if (selectedTaskBar) {
-                        selectedTaskBar.classList.remove('selected');
-                    }
-                    
-                    // Add selection to clicked bar
-                    prepBar.classList.add('selected');
-                    selectedTaskBar = prepBar;
-                    
-                    // Open modal
-                    openModal(project);
-                });
-                
-                // Execution phase
-                const execStart = parseTime(project.execution_stage.start);
-                const execEnd = parseTime(project.execution_stage.end);
-                const execStartX = Math.max(0, (execStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                const execWidth = Math.max(weekWidth / 7, (execEnd - execStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
-                
-                const execBar = document.createElement('div');
-                execBar.className = `gantt-task-bar gantt-task-execution gantt-task-${project.priority.toLowerCase()}`;
-                execBar.style.left = execStartX + 'px';
-                execBar.style.width = execWidth + 'px';
-                
-                // Progress bar
-                const progressBar = document.createElement('div');
-                progressBar.className = 'gantt-task-progress';
-                progressBar.style.width = project.execution_stage.progress_percent + '%';
-                
                 // Priority emojis
                 const priorityEmojis = {
                     'Critical': '🔴',
@@ -1015,40 +972,119 @@
                     'Low': '🔵'
                 };
                 
+                // Stage emojis and colors for colorful multi-stage support
+                const stageEmojisAndColors = {
+                    'Planning': { emoji: '📋', color: '#6f42c1' },
+                    'Preparing': { emoji: '🔄', color: '#6f42c1' },
+                    'Analysis': { emoji: '🔍', color: '#17a2b8' },
+                    'Research': { emoji: '🔍', color: '#17a2b8' },
+                    'Design': { emoji: '🎨', color: '#20c997' },
+                    'Wireframes': { emoji: '📐', color: '#20c997' },
+                    'Development': { emoji: '💻', color: '#28a745' },
+                    'Implementation': { emoji: '⚙️', color: '#28a745' },
+                    'Testing': { emoji: '🧪', color: '#ffc107' },
+                    'Audit': { emoji: '📋', color: '#ffc107' },
+                    'Migration': { emoji: '🚚', color: '#fd7e14' },
+                    'Deployment': { emoji: '🚀', color: '#dc3545' },
+                    'Execution': { emoji: '▶️', color: '#007bff' }
+                };
+                
                 const priorityEmoji = priorityEmojis[project.priority] || '⚪';
                 
-                execBar.innerHTML = `
-                    <div class="gantt-task-label">${priorityEmoji} ${project.name}</div>
-                    <div class="gantt-task-progress-text">${project.execution_stage.progress_percent}%</div>
-                `;
-                execBar.appendChild(progressBar);
-                
-                // Add click handler for execution bar
-                execBar.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                // Create bars for each stage dynamically
+                project.stages.forEach((stage, index) => {
+                    const stageStart = parseTime(stage.start);
+                    const stageEnd = parseTime(stage.end);
+                    const stageStartX = Math.max(0, (stageStart - weeks[0]) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
+                    const stageWidth = Math.max(weekWidth / 7, (stageEnd - stageStart) / (1000 * 60 * 60 * 24 * 7) * weekWidth);
                     
-                    // Remove previous selection
-                    if (selectedTaskBar) {
-                        selectedTaskBar.classList.remove('selected');
+                    const stageBar = document.createElement('div');
+                    const stageInfo = stageEmojisAndColors[stage.name] || { emoji: '⭐', color: '#007bff' };
+                    
+                    // Set CSS classes based on stage type and completion
+                    stageBar.className = `gantt-task-bar gantt-task-stage-${index}`;
+                    if (stage.progress_percent === 100) {
+                        stageBar.className += ' gantt-task-completed';
+                    } else if (index === 0) {
+                        stageBar.className += ' gantt-task-preparing';
+                    } else {
+                        stageBar.className += ` gantt-task-execution gantt-task-${project.priority.toLowerCase()}`;
                     }
                     
-                    // Add selection to clicked bar
-                    execBar.classList.add('selected');
-                    selectedTaskBar = execBar;
+                    stageBar.style.left = stageStartX + 'px';
+                    stageBar.style.width = stageWidth + 'px';
+                    stageBar.style.backgroundColor = stageInfo.color;
+                    stageBar.style.opacity = stage.progress_percent === 100 ? '0.9' : '0.8';
                     
-                    // Open modal
-                    openModal(project);
+                    // Progress bar for incomplete stages
+                    let progressBar = null;
+                    if (stage.progress_percent < 100 && stage.progress_percent > 0) {
+                        progressBar = document.createElement('div');
+                        progressBar.className = 'gantt-task-progress';
+                        progressBar.style.width = stage.progress_percent + '%';
+                        progressBar.style.backgroundColor = stageInfo.color;
+                    }
+                    
+                    // Show project name on the longest/most prominent stage
+                    const longestStage = project.stages.reduce((prev, current) => 
+                        (parseTime(current.end) - parseTime(current.start)) > (parseTime(prev.end) - parseTime(prev.start)) ? current : prev
+                    );
+                    
+                    const showName = stage === longestStage;
+                    // Consistent semi-transparent background for all progress indicators
+                    const progressBgColor = 'rgba(0, 0, 0, 0.2)'; // Lighter semi-transparent black background
+                    
+                    // Always show progress with playful colorful styling
+                    stageBar.innerHTML = `
+                        <div class="gantt-task-label">${stageInfo.emoji} ${showName ? `${priorityEmoji} ${project.name}` : stage.name}</div>
+                        <div class="gantt-task-progress-text" style="
+                            position: absolute;
+                            right: 6px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            font-size: 10px;
+                            font-weight: 700;
+                            color: #ffffff;
+                            background: ${progressBgColor};
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                            min-width: 40px;
+                            text-align: center;
+                            border: 2px solid rgba(255,255,255,0.3);
+                            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+                            animation: pulse 2s infinite;
+                        ">${stage.progress_percent}%</div>
+                    `;
+                    
+                    if (progressBar) {
+                        stageBar.appendChild(progressBar);
+                    }
+                    
+                    // Add click handler
+                    stageBar.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        // Remove previous selection
+                        if (selectedTaskBar) {
+                            selectedTaskBar.classList.remove('selected');
+                        }
+                        
+                        // Add selection to clicked bar
+                        stageBar.classList.add('selected');
+                        selectedTaskBar = stageBar;
+                        
+                        // Open modal
+                        openModal(project);
+                    });
+                    
+                    // Add tooltip handlers
+                    stageBar.addEventListener('mouseenter', (e) => showTooltip(e, project));
+                    stageBar.addEventListener('mouseleave', hideTooltip);
+                    stageBar.addEventListener('mousemove', moveTooltip);
+                    
+                    rowContent.appendChild(stageBar);
                 });
-                
-                // Add tooltips
-                [prepBar, execBar].forEach(bar => {
-                    bar.addEventListener('mouseenter', (e) => showTooltip(e, project));
-                    bar.addEventListener('mouseleave', hideTooltip);
-                    bar.addEventListener('mousemove', moveTooltip);
-                });
-                
-                rowContent.appendChild(prepBar);
-                rowContent.appendChild(execBar);
                 content.appendChild(rowContent);
             });
         }
@@ -1173,13 +1209,30 @@
         function showTooltip(event, project) {
             const tooltip = document.getElementById('tooltip');
             tooltip.style.display = 'block';
+            
+            // Generate colorful stage information dynamically
+            const stageEmojis = {
+                'Planning': '📋', 'Preparing': '🔄', 'Analysis': '🔍', 'Research': '🔍',
+                'Design': '🎨', 'Wireframes': '📐', 'Development': '💻', 'Implementation': '⚙️',
+                'Testing': '🧪', 'Audit': '📋', 'Migration': '🚚', 'Deployment': '🚀', 'Execution': '▶️'
+            };
+            
+            const stagesHtml = project.stages.map(stage => {
+                const emoji = stageEmojis[stage.name] || '⭐';
+                return `<div><strong>${emoji} ${stage.name}:</strong> ${stage.start.split('T')[0]} to ${stage.end.split('T')[0]} (${stage.progress_percent}%)</div>`;
+            }).join('');
+            
             tooltip.innerHTML = `
                 <div class="tooltip-title">✨ ${project.name}</div>
                 <div><strong>📂 Category:</strong> ${project.category}</div>
                 <div><strong>⚡ Priority:</strong> ${project.priority}</div>
                 <div><strong>👤 Team Lead:</strong> ${project.team_lead}</div>
-                <div><strong>📈 Progress:</strong> ${project.execution_stage.progress_percent}%</div>
+                <div><strong>📈 Overall Progress:</strong> ${project.execution_stage.progress_percent}%</div>
                 <div><strong>📝 Description:</strong> ${project.description}</div>
+                <div style="margin-top: 8px; border-top: 1px solid #ddd; padding-top: 8px;">
+                    <strong>🎯 Stages:</strong><br/>
+                    ${stagesHtml}
+                </div>
             `;
             moveTooltip(event);
         }

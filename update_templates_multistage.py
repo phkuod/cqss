@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 """
-Script to update all remaining Gantt chart templates for multi-stage support
-while maintaining backward compatibility with legacy two-stage format.
+CQSS Gantt Chart Generator - Template Update Utility
+
+This script updates all Gantt chart templates to support multi-stage projects
+while maintaining full backward compatibility with legacy two-stage format.
+
+Usage:
+    python update_templates_multistage.py
+
+Features:
+    - Updates 4 remaining templates for multi-stage support
+    - Maintains backward compatibility
+    - Creates backup files before modification
+    - Supports dynamic stage coloring and progress visualization
+
+Author: CQSS Development Team
+Version: 2.0.0
 """
 
 import re

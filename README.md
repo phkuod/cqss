@@ -1,120 +1,237 @@
 # CQSS Gantt Chart Generator
 
-A Python-based tool for generating interactive Gantt charts from CSV project data. Creates static HTML files with D3.js visualizations that can be viewed without a web server.
+<div align="center">
 
-## Features
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Python](https://img.shields.io/badge/python-3.7+-green.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-- **Two-stage project visualization**: Preparing stage and execution stage with different colors
-- **Progress tracking**: Visual progress bars showing completion percentage
-- **Interactive tooltips**: Click on execution bars to see project details
-- **Priority-based coloring**: Color-coded by project priority (Critical, High, Medium, Low)
-- **Static HTML output**: No web server required, just open in browser
-- **Responsive design**: Works on different screen sizes
+**A powerful Python-based tool for generating interactive Gantt charts from CSV project data**
 
-## Installation
+[Features](#-features) • [Quick Start](#-quick-start) • [Templates](#-visual-templates) • [Documentation](#-documentation) • [Examples](#-examples)
 
-1. Clone or download this repository
-2. Install Python dependencies:
+</div>
+
+## ✨ Features
+
+### 🎨 **6 Beautiful Visual Templates**
+- **Default Design**: Classic, professional Gantt chart
+- **Modern Minimal**: Clean, ultra-minimalist design
+- **Dark Professional**: Sleek dark theme for modern interfaces
+- **Colorful Friendly**: Vibrant, approachable design with emojis
+- **Interactive Modern**: Advanced interactions and hover effects
+- **Frappe-inspired**: Clean, GitHub-style aesthetic
+
+### 🔧 **Advanced Functionality**
+- **Multi-Stage Projects**: Support for 2-10+ project stages with individual progress tracking
+- **Smart Filtering**: Filter by priority, category, team, progress ranges, and search
+- **Enhanced Timeline**: Auto-scroll to today, smooth scrolling with visual indicators
+- **Progress Visualization**: Consistent, subtle progress bars across all templates
+- **Mock Data Generation**: Create realistic test data for development and demos
+- **Static HTML Output**: No web server required - just open in any browser
+
+### 📊 **Project Management Features**
+- **Two-Stage Compatibility**: Seamless support for legacy Preparing + Execution workflow
+- **Priority-Based Coloring**: Visual priority levels (Critical, High, Medium, Low)
+- **Interactive Tooltips**: Detailed project information on hover/click
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
+- **Real-time Today Line**: Always know where you are in the timeline
+
+## 🚀 Quick Start
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/cqss-system.git
+   cd cqss-system
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Generate Your First Chart
+
 ```bash
-pip install -r requirements.txt
-```
-
-## Usage
-
-### Quick Generation (Same Output File Each Time)
-```bash
-# Generate default style to output/gantt_chart.html
+# Quick generation with all 6 templates
 python generate.py
 
-# Generate Frappe-style Gantt chart (like GitHub's Frappe Gantt)
-python generate.py data/extended_projects.csv --frappe
-
-# Generate standalone version (no internet required)
-python generate.py data/extended_projects.csv --standalone
-
-# Or use the batch file on Windows
-generate.bat
+# Generate with mock data (25 realistic projects)
+python generate_mock_data.py
+python generate.py data/mock_three_months.csv
 ```
 
-### Advanced Usage
+Open any of the generated files in `output/` to see your Gantt chart!
+
+## 🎯 Usage
+
+### Basic Usage
+
 ```bash
-# Basic usage with default output location
+# Generate default template
 python main.py data/sample_projects.csv
 
-# Frappe-style Gantt chart
-python main.py data/sample_projects.csv --style frappe
+# Generate specific template
+python main.py data/sample_projects.csv output/my_chart.html --template templates/dark_professional_template.html
 
-# Specify custom output file
-python main.py data/sample_projects.csv output/my_chart.html
-
-# Generate standalone version
-python main.py data/sample_projects.csv --standalone
-
-# Combine options
-python main.py data/sample_projects.csv output/frappe_chart.html --style frappe
+# Generate all 6 templates at once
+python generate_all_styles.py
 ```
 
-## CSV Data Format
+### Advanced Options
 
-Your CSV file must contain these columns:
+```bash
+# Generate standalone version (no internet required)
+python main.py data/sample_projects.csv --standalone
+
+# Generate with specific template and output
+python main.py data/sample_projects.csv output/dark_chart.html --template templates/dark_professional_template.html
+
+# Generate mock data for testing
+python generate_mock_data.py --projects 30 --output data/my_test_data.csv
+```
+
+## 🎨 Visual Templates
+
+| Template | File | Description | Best For |
+|----------|------|-------------|----------|
+| **Default** | `1_default_design.html` | Classic professional design | Corporate presentations, formal reports |
+| **Minimal** | `2_minimal_design.html` | Ultra-clean, distraction-free | Focus on data, minimal interfaces |
+| **Dark** | `3_dark_design.html` | Modern dark theme | Dark mode environments, developer tools |
+| **Colorful** | `4_colorful_design.html` | Vibrant, friendly with emojis | Team dashboards, creative projects |
+| **Interactive** | `5_interactive_design.html` | Advanced hover effects | Interactive dashboards, demos |
+| **Frappe** | `6_frappe_design.html` | GitHub-inspired clean design | Development projects, technical docs |
+
+## 📋 CSV Data Format
+
+### Multi-Stage Format (Recommended)
+```csv
+project_name,category,priority,description,team_lead,stages
+Project Alpha,Security,High,Multi-phase auth system,John Smith,"[{""name"":""Planning"",""start"":""2024-01-15"",""end"":""2024-02-15"",""progress"":100},{""name"":""Development"",""start"":""2024-02-15"",""end"":""2024-04-15"",""progress"":75}]"
+```
+
+### Legacy Format (Still Supported)
+```csv
+project_name,category,priority,preparing_start,preparing_end,execution_end,progress_percent,description,team_lead
+Project Beta,Marketing,Medium,2024-01-01,2024-02-01,2024-04-01,60,Campaign launch,Jane Doe
+```
+
+### Required Columns
 
 | Column | Description | Example |
 |--------|-------------|---------|
-| project_name | Name of the project | "Project Alpha" |
-| category | Project category | "Security" |
-| priority | Priority level | "High" (Critical/High/Medium/Low) |
-| preparing_start | Preparation start date | "2024-01-15" |
-| preparing_end | Preparation end date | "2024-02-15" |
-| execution_end | Execution end date | "2024-05-15" |
-| progress_percent | Current progress (0-100) | 75 |
-| description | Brief description | "Implement new auth system" |
-| team_lead | Responsible person | "John Smith" |
+| `project_name` | Name of the project | "Website Redesign" |
+| `category` | Project category | "Development" |
+| `priority` | Priority level | "High" (Critical/High/Medium/Low) |
+| `description` | Brief description | "Redesign company website" |
+| `team_lead` | Responsible person | "Alice Johnson" |
 
-See `data/sample_projects.csv` for a complete example.
+**Multi-stage**: Use `stages` column with JSON array  
+**Legacy**: Use `preparing_start`, `preparing_end`, `execution_end`, `progress_percent`
 
-## Project Structure
+## 🛠️ Project Structure
 
 ```
 cqss-system/
-├── data/                   # CSV data files
-│   ├── sample_projects.csv # Example data
-│   └── README.md          # Data format documentation
-├── src/                   # Source code
-│   ├── data_processor.py  # CSV processing and validation
-│   └── gantt_generator.py # HTML generation
-├── templates/             # HTML templates
-│   └── gantt_template.html
-├── output/               # Generated HTML files
-├── main.py              # Main application entry point
-└── requirements.txt     # Python dependencies
+├── 📁 data/                     # CSV data files
+│   ├── sample_projects.csv      # Legacy format example
+│   ├── demo_multistage_projects.csv # Multi-stage example
+│   └── mock_three_months.csv    # Generated test data
+├── 📁 src/                      # Core source code
+│   ├── data_processor.py        # CSV processing & validation
+│   └── gantt_generator.py       # HTML generation engine
+├── 📁 templates/                # HTML template files
+│   ├── gantt_template.html      # Default template
+│   ├── modern_minimal_template.html
+│   ├── dark_professional_template.html
+│   ├── colorful_friendly_template.html
+│   ├── interactive_modern_template.html
+│   └── frappe_gantt_template.html
+├── 📁 output/                   # Generated HTML files
+│   ├── 1_default_design.html
+│   ├── 2_minimal_design.html
+│   ├── 3_dark_design.html
+│   ├── 4_colorful_design.html
+│   ├── 5_interactive_design.html
+│   └── 6_frappe_design.html
+├── 📄 main.py                   # Primary CLI interface
+├── 📄 generate.py               # Quick generation script
+├── 📄 generate_mock_data.py     # Mock data generator
+└── 📄 requirements.txt          # Python dependencies
 ```
 
-## Customization
+## 🎯 Examples
 
-### Colors
-Priority colors can be modified in the HTML template:
-- Critical: Red (#dc3545)
-- High: Orange (#fd7e14) 
-- Medium: Yellow (#ffc107)
-- Low: Green (#28a745)
-
-### Template
-You can create custom HTML templates based on `templates/gantt_template.html` and use them with the `--template` option.
-
-## Output
-
-The generated HTML file includes:
-- Interactive Gantt chart with timeline
-- Hover tooltips showing project details
-- Click functionality on execution bars
-- Legend explaining colors and stages
-- Responsive design for different screen sizes
-
-## Example
-
-Run with sample data:
+### Example 1: Basic Project Timeline
 ```bash
-python main.py data/sample_projects.csv output/example.html
+# Create a simple 2-stage project chart
+python main.py data/sample_projects.csv output/simple.html
 ```
 
-Then open `output/example.html` in your web browser to see the interactive Gantt chart.
+### Example 2: Complex Multi-Stage Project
+```bash
+# Generate comprehensive multi-stage visualization
+python main.py data/demo_multistage_projects.csv output/complex.html --template templates/interactive_modern_template.html
+```
+
+### Example 3: Dark Theme Dashboard
+```bash
+# Perfect for monitoring dashboards
+python main.py data/mock_three_months.csv output/dashboard.html --template templates/dark_professional_template.html
+```
+
+## 🔍 Advanced Features
+
+### Smart Filtering
+- **Priority Filter**: Critical, High, Medium, Low
+- **Category Filter**: Filter by project type
+- **Team Filter**: Filter by team lead
+- **Progress Filter**: 0-25%, 26-50%, 51-75%, 76-100%
+- **Search**: Real-time text search across project names
+
+### Timeline Navigation
+- **Auto-scroll to Today**: Page centers on current date automatically
+- **Today Button**: Manual navigation to current date
+- **Smooth Scrolling**: Enhanced scroll experience with visual indicators
+- **Keyboard Navigation**: Arrow keys for easy navigation
+
+### Progress Visualization
+- **Consistent Styling**: Unified progress bar appearance across all templates
+- **Stage-Specific Progress**: Each stage shows individual completion status
+- **Real-time Updates**: Progress bars reflect current project status
+
+## 📚 Documentation
+
+- [**CHANGELOG.md**](CHANGELOG.md) - Version history and updates
+- [**CLAUDE.md**](CLAUDE.md) - Development guidelines and project instructions
+- [**data/README.md**](data/README.md) - Data format documentation
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our development guidelines in [CLAUDE.md](CLAUDE.md) for:
+- Code style and conventions
+- Development workflow
+- Testing requirements
+- Feature implementation process
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Issues**: [Report bugs or request features](https://github.com/yourusername/cqss-system/issues)
+- **Discussions**: [Community discussions and Q&A](https://github.com/yourusername/cqss-system/discussions)
+- **Documentation**: Check our [project documentation](CLAUDE.md)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the CQSS Development Team**
+
+[⭐ Star this project](https://github.com/yourusername/cqss-system) if you find it useful!
+
+</div>

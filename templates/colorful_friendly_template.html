@@ -1042,18 +1042,13 @@
                         progressBar.style.backgroundColor = stageInfo.color;
                     }
                     
-                    // Show project name on the longest/most prominent stage
-                    const longestStage = project.stages.reduce((prev, current) => 
-                        (parseTime(current.end) - parseTime(current.start)) > (parseTime(prev.end) - parseTime(prev.start)) ? current : prev
-                    );
-                    
-                    const showName = stage === longestStage;
+                    // Always show stage name on all bars
                     // Consistent semi-transparent background for all progress indicators
                     const progressBgColor = 'rgba(0, 0, 0, 0.2)'; // Lighter semi-transparent black background
                     
                     // Always show progress with playful colorful styling
                     stageBar.innerHTML = `
-                        <div class="gantt-task-label">${stageInfo.emoji} ${showName ? `${priorityEmoji} ${project.name}` : stage.name}</div>
+                        <div class="gantt-task-label">${stageInfo.emoji} ${stage.name}</div>
                         <div class="gantt-task-progress-text" style="
                             position: absolute;
                             right: 6px;

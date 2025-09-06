@@ -36,8 +36,9 @@ python main.py data/sample_projects.csv output/test_chart.html
 
 ### Key Features
 
-- Two-stage project visualization (preparing + execution stages)
-- Progress tracking with visual progress bars
+- Multi-stage project visualization with flexible stage definitions
+- **Status-based stage highlighting** - Critical, warning, delayed, and completed status colors
+- Progress tracking with visual progress bars per stage
 - Priority-based color coding (Critical/High/Medium/Low)
 - Interactive tooltips and click handlers for project details
 - **Enhanced Timeline Header Scrolling** - Smooth horizontal scrolling with visual indicators
@@ -80,7 +81,30 @@ Priority: Critical, High, Medium, Low
 
 ## New Features (Latest Update)
 
-### 1. Mock Data Generation
+### 1. Status-based Stage Highlighting
+Each stage can now have a status field for visual highlighting:
+```csv
+# Legacy format with status columns
+preparing_status,execution_status
+critical,normal
+
+# Multi-stage format with status in JSON
+[{"name":"Development","start":"2024-01-01","end":"2024-02-01","progress":80,"status":"critical"}]
+```
+- **`critical`** - Bright red highlighting for urgent stages
+- **`warning`** - Orange highlighting for stages needing attention
+- **`delayed`** - Light red for delayed stages
+- **`completed`** - Green for completed stages
+- **`normal`** or no status - Uses default stage colors
+
+### 2. Legacy Data Format Removal
+Simplified data structure using only the modern `stages` array:
+- Removed `preparing_stage` and `execution_stage` legacy fields
+- All templates now use unified `project.stages[]` format
+- Cleaner data structure and improved maintainability
+- Full backward compatibility maintained through automatic conversion
+
+### 3. Mock Data Generation
 Generate realistic project data spanning 3 months around today's date:
 ```bash
 python generate_mock_data.py --projects 25 --output data/mock_projects.csv

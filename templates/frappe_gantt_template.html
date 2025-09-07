@@ -1477,12 +1477,17 @@
     
     <script>
         // Initialize when D3.js is loaded
+        window.addEventListener('d3Loaded', function() {
+            initFrappeGantt();
+            setupFilters();
+            setupModal();
+        });
+        
+        // Fallback if D3 is already available
         if (typeof d3 !== 'undefined') {
             initFrappeGantt();
             setupFilters();
             setupModal();
-        } else {
-            console.error('D3.js not loaded');
         }
     </script>
 </body>

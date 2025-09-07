@@ -1453,10 +1453,13 @@
         }
         
         // Initialize when D3.js is loaded
+        window.addEventListener('d3Loaded', function() {
+            initInteractiveGantt();
+        });
+        
+        // Fallback if D3 is already available
         if (typeof d3 !== 'undefined') {
             initInteractiveGantt();
-        } else {
-            console.error('D3.js not loaded');
         }
     </script>
 </body>

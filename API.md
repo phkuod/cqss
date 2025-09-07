@@ -105,19 +105,7 @@ Each project in the processed data has this structure:
             "progress_percent": 75,
             "duration_days": 59
         }
-    ],
-    
-    # Legacy compatibility fields (auto-generated)
-    "preparing_stage": {
-        "start": "2024-01-15T00:00:00",
-        "end": "2024-02-15T00:00:00", 
-        "progress_percent": 100
-    },
-    "execution_stage": {
-        "start": "2024-02-15T00:00:00",
-        "end": "2024-04-15T00:00:00",
-        "progress_percent": 75
-    }
+    ]
 }
 ```
 

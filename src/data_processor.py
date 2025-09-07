@@ -1,7 +1,21 @@
+"""
+DEPRECATED: This file is deprecated and will be removed in v3.0.0
+Use data_processor_v2.py and models.py instead for the clean unified API.
+
+Kept for backward compatibility during migration.
+"""
+
 import pandas as pd
 import json
 from datetime import datetime
 from typing import Dict, List, Any
+import warnings
+
+warnings.warn(
+    "data_processor.py is deprecated. Use 'from src.data_processor_v2 import load_projects' instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 class ProjectDataProcessor:
     """
@@ -69,6 +83,14 @@ class ProjectDataProcessor:
         if not df['progress_percent'].between(0, 100).all():
             raise ValueError("Progress percentage must be between 0 and 100")
         
+        # Validate status columns if present
+        valid_statuses = ['normal', 'critical', 'warning', 'completed', 'delayed']
+        for status_col in ['preparing_status', 'execution_status']:
+            if status_col in df.columns:
+                invalid_statuses = df[~df[status_col].isin(valid_statuses)][status_col].unique()
+                if len(invalid_statuses) > 0:
+                    raise ValueError(f"Invalid status values in column '{status_col}': {invalid_statuses}. Must be one of {valid_statuses}")
+        
         # Validate date logic
         for idx, row in df.iterrows():
             if row['preparing_start'] >= row['preparing_end']:
@@ -113,6 +135,12 @@ class ProjectDataProcessor:
                     if not isinstance(progress, (int, float)) or not 0 <= progress <= 100:
                         raise ValueError(f"Row {idx}, Stage {stage_idx}: Progress must be between 0 and 100")
                     
+                    # Validate status field if present
+                    if 'status' in stage:
+                        valid_statuses = ['normal', 'critical', 'warning', 'completed', 'delayed']
+                        if stage['status'] not in valid_statuses:
+                            raise ValueError(f"Row {idx}, Stage {stage_idx}: Status must be one of {valid_statuses}")
+                    
                     prev_end = end_date
                     
             except json.JSONDecodeError as e:
@@ -148,14 +176,16 @@ class ProjectDataProcessor:
                 'start': row['preparing_start'].isoformat(),
                 'end': row['preparing_end'].isoformat(),
                 'duration_days': (row['preparing_end'] - row['preparing_start']).days,
-                'progress_percent': 100  # Preparing stage is always complete if execution has started
+                'progress_percent': 100,  # Preparing stage is always complete if execution has started
+                'status': row.get('preparing_status', 'normal')  # Add status support
             },
             {
                 'name': 'Execution',
                 'start': row['preparing_end'].isoformat(),
                 'end': row['execution_end'].isoformat(),
                 'duration_days': (row['execution_end'] - row['preparing_end']).days,
-                'progress_percent': int(row['progress_percent'])
+                'progress_percent': int(row['progress_percent']),
+                'status': row.get('execution_status', 'normal')  # Add status support
             }
         ]
         
@@ -167,9 +197,6 @@ class ProjectDataProcessor:
             'description': row['description'],
             'team_lead': row['team_lead'],
             'stages': stages,
-            # Legacy compatibility fields
-            'preparing_stage': stages[0],
-            'execution_stage': stages[1],
             'total_duration_days': (row['execution_end'] - row['preparing_start']).days
         }
         
@@ -193,7 +220,8 @@ class ProjectDataProcessor:
                 'start': start_date.isoformat(),
                 'end': end_date.isoformat(),
                 'duration_days': (end_date - start_date).days,
-                'progress_percent': int(stage_data['progress'])
+                'progress_percent': int(stage_data['progress']),
+                'status': stage_data.get('status', 'normal')  # Add status support with default
             }
             stages.append(stage)
             all_start_dates.append(start_date)
@@ -211,14 +239,6 @@ class ProjectDataProcessor:
             'description': row['description'],
             'team_lead': row['team_lead'],
             'stages': stages,
-            # Legacy compatibility fields - use first and last stages
-            'preparing_stage': stages[0],
-            'execution_stage': stages[-1] if len(stages) > 1 else {
-                'start': stages[0]['end'],
-                'end': stages[0]['end'],
-                'duration_days': 0,
-                'progress_percent': stages[0]['progress_percent']
-            },
             'total_duration_days': (total_end - total_start).days
         }
         

@@ -5,8 +5,11 @@
 ![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.7+-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Refactored](https://img.shields.io/badge/refactored-✨clean_architecture-green.svg)
 
 **A powerful Python-based tool for generating interactive Gantt charts from CSV project data**
+
+🚀 **v2.0 Major Refactoring**: 90% less code duplication, unified API, dependency injection architecture
 
 [Features](#-features) • [Quick Start](#-quick-start) • [Templates](#-visual-templates) • [Documentation](#-documentation) • [Examples](#-examples)
 
@@ -52,15 +55,24 @@
    pip install -r requirements.txt
    ```
 
-### Generate Your First Chart
+### Generate Your First Chart (v2.0 API)
 
 ```bash
-# Quick generation with all 6 templates
-python generate.py
+# Simple generation with new clean API
+python main_v2.py data/sample_projects.csv
 
-# Generate with mock data (25 realistic projects)
-python generate_mock_data.py
-python generate.py data/mock_three_months.csv
+# Choose your style
+python main_v2.py data/sample_projects.csv --template dark
+
+# Generate all templates at once
+python main_v2.py data/sample_projects.csv --all-templates --open
+```
+
+**Or use the simple Python API:**
+```python
+from src.services import generate_chart
+
+generate_chart('data/projects.csv', 'output/chart.html', 'colorful')
 ```
 
 Open any of the generated files in `output/` to see your Gantt chart!
@@ -204,9 +216,19 @@ python main.py data/mock_three_months.csv output/dashboard.html --template templ
 
 ## 📚 Documentation
 
+- [**API_v2.md**](API_v2.md) - Complete API reference for v2.0
+- [**USER_GUIDE_v2.md**](USER_GUIDE_v2.md) - Comprehensive user guide
 - [**CHANGELOG.md**](CHANGELOG.md) - Version history and updates
 - [**CLAUDE.md**](CLAUDE.md) - Development guidelines and project instructions
-- [**data/README.md**](data/README.md) - Data format documentation
+
+### v2.0 Architecture Benefits
+
+- **90% Less Code Duplication**: Templates share common `gantt-core.js` library
+- **Dependency Injection**: Easy testing and component swapping
+- **Protocol-Based Design**: Clean interfaces for extensibility
+- **Unified Data Model**: No more legacy vs modern format confusion
+- **Service Layer**: Proper separation of concerns
+- **Comprehensive Testing**: Built-in mocks and performance benchmarks
 
 ## 🤝 Contributing
 

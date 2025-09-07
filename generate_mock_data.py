@@ -9,6 +9,40 @@ import random
 from datetime import datetime, timedelta
 from typing import List, Dict
 
+def generate_stage_status(stage_type: str, stage_start: datetime, stage_end: datetime, today: datetime) -> str:
+    """
+    Generate realistic status for a stage based on dates and some randomness
+    
+    Args:
+        stage_type: 'preparing' or 'execution'
+        stage_start: Stage start date
+        stage_end: Stage end date
+        today: Current date
+    
+    Returns:
+        Status: 'normal', 'critical', 'warning', 'delayed', or 'completed'
+    """
+    # Most stages are normal (80% chance)
+    if random.random() < 0.8:
+        return 'normal'
+    
+    # For completed stages (past end date), sometimes mark as completed
+    if today > stage_end:
+        if random.random() < 0.3:
+            return 'completed'
+        else:
+            return 'normal'
+    
+    # For ongoing or future stages, add some variability
+    statuses = ['critical', 'warning', 'delayed']
+    weights = [0.1, 0.6, 0.3]  # warning is most common, critical is rare
+    
+    # If stage is significantly overdue, higher chance of critical/delayed
+    if today > stage_end + timedelta(days=7):
+        weights = [0.4, 0.3, 0.3]
+    
+    return random.choices(statuses, weights=weights)[0]
+
 def generate_mock_data(num_projects: int = 25, output_file: str = "data/mock_projects.csv") -> None:
     """
     Generate mock project data for 3 months around today's date
@@ -194,6 +228,10 @@ def generate_mock_data(num_projects: int = 25, output_file: str = "data/mock_pro
             f"Comprehensive {category.lower()} project targeting scalability and reliability improvements."
         ]
         
+        # Generate realistic status for each stage
+        preparing_status = generate_stage_status('preparing', prep_start, prep_end, today)
+        execution_status = generate_stage_status('execution', prep_end, exec_end, today)
+        
         project = {
             "project_name": project_name,
             "category": category,
@@ -203,7 +241,9 @@ def generate_mock_data(num_projects: int = 25, output_file: str = "data/mock_pro
             "execution_end": exec_end.strftime("%Y-%m-%d"),
             "progress_percent": progress,
             "description": random.choice(descriptions),
-            "team_lead": team_lead
+            "team_lead": team_lead,
+            "preparing_status": preparing_status,
+            "execution_status": execution_status
         }
         
         projects.append(project)
@@ -213,7 +253,8 @@ def generate_mock_data(num_projects: int = 25, output_file: str = "data/mock_pro
     
     # Write to CSV
     fieldnames = ["project_name", "category", "priority", "preparing_start", "preparing_end", 
-                  "execution_end", "progress_percent", "description", "team_lead"]
+                  "execution_end", "progress_percent", "description", "team_lead", 
+                  "preparing_status", "execution_status"]
     
     with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)

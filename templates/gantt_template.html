@@ -744,13 +744,30 @@
             'Execution': '#007bff'
         };
         
+        // Define status-based highlight colors
+        const statusColors = {
+            'critical': '#ff4757',    // Bright red
+            'warning': '#ffa502',     // Orange
+            'delayed': '#ff6b6b',     // Light red
+            'completed': '#2ed573'    // Green
+        };
+        
+        // Function to get stage color based on status priority
+        function getStageColor(stage) {
+            // Priority: status color > default stage color
+            if (stage.status && statusColors[stage.status]) {
+                return statusColors[stage.status];
+            }
+            return stageColors[stage.name] || '#007bff';
+        }
+        
         // Add stage bars dynamically
         projectGroups.each(function(d) {
             const group = d3.select(this);
             
             d.stages.forEach((stage, index) => {
                 const isLastStage = index === d.stages.length - 1;
-                const stageColor = stageColors[stage.name] || (index === 0 ? '#6f42c1' : priorityColors[d.priority] || '#6c757d');
+                const stageColor = getStageColor(stage);
                 
                 // Add stage background bar
                 group.append('rect')
@@ -796,7 +813,7 @@
                         <div class="tooltip-item"><strong>Category:</strong> ${d.category}</div>
                         <div class="tooltip-item"><strong>Priority:</strong> ${d.priority}</div>
                         <div class="tooltip-item"><strong>Team Lead:</strong> ${d.team_lead}</div>
-                        <div class="tooltip-item"><strong>Overall Progress:</strong> ${d.execution_stage.progress_percent}%</div>
+                        <div class="tooltip-item"><strong>Overall Progress:</strong> ${d.stages[d.stages.length-1].progress_percent}%</div>
                         <div class="tooltip-item"><strong>Description:</strong> ${d.description}</div>
                         <div class="tooltip-section"><strong>Stages:</strong></div>
                         ${stagesHtml}
@@ -1062,7 +1079,7 @@
 
                 // Progress filter
                 if (currentFilters.progress) {
-                    const progress = project.execution_stage.progress_percent;
+                    const progress = project.stages[project.stages.length-1].progress_percent;
                     const [min, max] = currentFilters.progress.split('-').map(Number);
                     if (progress < min || progress > max) {
                         return false;
@@ -1137,14 +1154,14 @@
 
             details.innerHTML = `
                 <p><strong>Priority:</strong> ${project.priority}</p>
-                <p><strong>Progress:</strong> ${project.execution_stage.progress_percent}%</p>
+                <p><strong>Progress:</strong> ${project.stages[project.stages.length-1].progress_percent}%</p>
                 <p><strong>Status:</strong> ${getProjectStatus(project)}</p>
             `;
 
-            const prepStart = new Date(project.preparing_stage.start);
-            const prepEnd = new Date(project.preparing_stage.end);
-            const execStart = new Date(project.execution_stage.start);
-            const execEnd = new Date(project.execution_stage.end);
+            const prepStart = new Date(project.stages[0].start);
+            const prepEnd = new Date(project.stages[0].end);
+            const execStart = new Date(project.stages[project.stages.length-1].start);
+            const execEnd = new Date(project.stages[project.stages.length-1].end);
 
             timeline.innerHTML = `
                 <p><strong>Preparation:</strong> ${prepStart.toLocaleDateString()} - ${prepEnd.toLocaleDateString()}</p>
@@ -1170,8 +1187,8 @@
 
         function getProjectStatus(project) {
             const now = new Date();
-            const execEnd = new Date(project.execution_stage.end);
-            const progress = project.execution_stage.progress_percent;
+            const execEnd = new Date(project.stages[project.stages.length-1].end);
+            const progress = project.stages[project.stages.length-1].progress_percent;
 
             if (progress === 100) return 'Completed';
             if (now > execEnd) return 'Overdue';

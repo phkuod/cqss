@@ -586,17 +586,17 @@
             // Add preparing stage bars
             projectGroups.append('rect')
                 .attr('class', 'preparing-bar')
-                .attr('x', d => xScale(parseTime(d.preparing_stage.start)))
+                .attr('x', d => xScale(parseTime(d.stages[0].start)))
                 .attr('y', (yScale.bandwidth() - barHeight) / 2)
-                .attr('width', d => xScale(parseTime(d.preparing_stage.end)) - xScale(parseTime(d.preparing_stage.start)))
+                .attr('width', d => xScale(parseTime(d.stages[0].end)) - xScale(parseTime(d.stages[0].start)))
                 .attr('height', barHeight);
             
             // Add execution stage background bars
             projectGroups.append('rect')
                 .attr('class', 'execution-bar')
-                .attr('x', d => xScale(parseTime(d.execution_stage.start)))
+                .attr('x', d => xScale(parseTime(d.stages[d.stages.length-1].start)))
                 .attr('y', (yScale.bandwidth() - barHeight) / 2)
-                .attr('width', d => xScale(parseTime(d.execution_stage.end)) - xScale(parseTime(d.execution_stage.start)))
+                .attr('width', d => xScale(parseTime(d.stages[d.stages.length-1].end)) - xScale(parseTime(d.stages[d.stages.length-1].start)))
                 .attr('height', barHeight)
                 .attr('fill', d => priorityColors[d.priority] || '#6c757d')
                 .attr('opacity', 0.3);
@@ -604,11 +604,11 @@
             // Add execution stage progress bars
             projectGroups.append('rect')
                 .attr('class', 'progress-bar execution-bar')
-                .attr('x', d => xScale(parseTime(d.execution_stage.start)))
+                .attr('x', d => xScale(parseTime(d.stages[d.stages.length-1].start)))
                 .attr('y', (yScale.bandwidth() - barHeight) / 2)
                 .attr('width', d => {
-                    const totalWidth = xScale(parseTime(d.execution_stage.end)) - xScale(parseTime(d.execution_stage.start));
-                    return totalWidth * (d.execution_stage.progress_percent / 100);
+                    const totalWidth = xScale(parseTime(d.stages[d.stages.length-1].end)) - xScale(parseTime(d.stages[d.stages.length-1].start));
+                    return totalWidth * (d.stages[d.stages.length-1].progress_percent / 100);
                 })
                 .attr('height', barHeight)
                 .attr('fill', d => priorityColors[d.priority] || '#6c757d')
@@ -620,10 +620,10 @@
                             <div class="tooltip-item"><strong>Category:</strong> ${d.category}</div>
                             <div class="tooltip-item"><strong>Priority:</strong> ${d.priority}</div>
                             <div class="tooltip-item"><strong>Team Lead:</strong> ${d.team_lead}</div>
-                            <div class="tooltip-item"><strong>Progress:</strong> ${d.execution_stage.progress_percent}%</div>
+                            <div class="tooltip-item"><strong>Progress:</strong> ${d.stages[d.stages.length-1].progress_percent}%</div>
                             <div class="tooltip-item"><strong>Description:</strong> ${d.description}</div>
-                            <div class="tooltip-item"><strong>Preparing:</strong> ${d.preparing_stage.start.split('T')[0]} to ${d.preparing_stage.end.split('T')[0]}</div>
-                            <div class="tooltip-item"><strong>Execution:</strong> ${d.execution_stage.start.split('T')[0]} to ${d.execution_stage.end.split('T')[0]}</div>
+                            <div class="tooltip-item"><strong>Preparing:</strong> ${d.stages[0].start.split('T')[0]} to ${d.stages[0].end.split('T')[0]}</div>
+                            <div class="tooltip-item"><strong>Execution:</strong> ${d.stages[d.stages.length-1].start.split('T')[0]} to ${d.stages[d.stages.length-1].end.split('T')[0]}</div>
                         `);
                 })
                 .on('mousemove', function(event) {
@@ -634,14 +634,14 @@
                     tooltip.style('display', 'none');
                 })
                 .on('click', function(event, d) {
-                    alert(`Project Details:\\n\\nName: ${d.name}\\nCategory: ${d.category}\\nPriority: ${d.priority}\\nTeam Lead: ${d.team_lead}\\nProgress: ${d.execution_stage.progress_percent}%\\nDescription: ${d.description}`);
+                    alert(`Project Details:\\n\\nName: ${d.name}\\nCategory: ${d.category}\\nPriority: ${d.priority}\\nTeam Lead: ${d.team_lead}\\nProgress: ${d.stages[d.stages.length-1].progress_percent}%\\nDescription: ${d.description}`);
                 });
             
             // Add project names to execution bars
             projectGroups.append('text')
                 .attr('x', d => {
-                    const startX = xScale(parseTime(d.execution_stage.start));
-                    const endX = xScale(parseTime(d.execution_stage.end));
+                    const startX = xScale(parseTime(d.stages[d.stages.length-1].start));
+                    const endX = xScale(parseTime(d.stages[d.stages.length-1].end));
                     return startX + (endX - startX) / 2;
                 })
                 .attr('y', (yScale.bandwidth() - barHeight) / 2 + barHeight / 2 - 4)
@@ -652,7 +652,7 @@
                 .style('fill', 'white')
                 .style('text-shadow', '1px 1px 3px rgba(0,0,0,0.9)')
                 .text(d => {
-                    const barWidth = xScale(parseTime(d.execution_stage.end)) - xScale(parseTime(d.execution_stage.start));
+                    const barWidth = xScale(parseTime(d.stages[d.stages.length-1].end)) - xScale(parseTime(d.stages[d.stages.length-1].start));
                     const maxChars = Math.floor(barWidth / 8); // Estimate characters that fit
                     return d.name.length > maxChars && maxChars > 3 ? 
                         d.name.substring(0, maxChars - 3) + '...' : d.name;
@@ -661,9 +661,9 @@
             // Add progress percentage labels at end of progress bar
             projectGroups.append('text')
                 .attr('x', d => {
-                    const startX = xScale(parseTime(d.execution_stage.start));
-                    const totalWidth = xScale(parseTime(d.execution_stage.end)) - startX;
-                    const progressWidth = totalWidth * (d.execution_stage.progress_percent / 100);
+                    const startX = xScale(parseTime(d.stages[d.stages.length-1].start));
+                    const totalWidth = xScale(parseTime(d.stages[d.stages.length-1].end)) - startX;
+                    const progressWidth = totalWidth * (d.stages[d.stages.length-1].progress_percent / 100);
                     // Position at the end of the progress bar, with a small offset
                     return startX + progressWidth + 5;
                 })
@@ -675,10 +675,10 @@
                 .style('fill', '#343a40')
                 .style('text-shadow', '1px 1px 2px rgba(255,255,255,0.8)')
                 .text(d => {
-                    const barWidth = xScale(parseTime(d.execution_stage.end)) - xScale(parseTime(d.execution_stage.start));
-                    const progressWidth = barWidth * (d.execution_stage.progress_percent / 100);
+                    const barWidth = xScale(parseTime(d.stages[d.stages.length-1].end)) - xScale(parseTime(d.stages[d.stages.length-1].start));
+                    const progressWidth = barWidth * (d.stages[d.stages.length-1].progress_percent / 100);
                     // Show percentage if there's enough space and progress > 0
-                    return progressWidth > 20 && d.execution_stage.progress_percent > 0 ? `${d.execution_stage.progress_percent}%` : '';
+                    return progressWidth > 20 && d.stages[d.stages.length-1].progress_percent > 0 ? `${d.stages[d.stages.length-1].progress_percent}%` : '';
                 });
             
             // Add chart title

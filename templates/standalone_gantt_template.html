@@ -336,36 +336,41 @@
             function showError(message) {
                 const errorDiv = document.createElement('div');
                 errorDiv.style.cssText = 'color: #dc3545; background: #f8d7da; border: 1px solid #f5c6cb; padding: 20px; margin: 20px; border-radius: 8px; text-align: center; font-size: 16px;';
-                errorDiv.innerHTML = `<strong>Error:</strong> ${message}<br><small>This standalone version requires an internet connection for the D3.js library.</small>`;
+                errorDiv.innerHTML = `<strong>Error:</strong> ${message}<br><small>Please ensure the D3.js visualization library file is accessible.</small>`;
                 document.querySelector('.container').appendChild(errorDiv);
             }
             
-            const script = document.createElement('script');
-            script.src = '../static/js/d3.v7.min.js';
-            script.async = false;
-            
-            script.onload = function() {
-                console.log('D3.js loaded successfully');
-                if (typeof initChart === 'function') {
-                    initChart();
-                } else {
-                    showError('Chart initialization function not found');
-                }
+            // Load configuration and D3.js loader
+            const configScript = document.createElement('script');
+            configScript.src = '../static/js/config.js';
+            configScript.onload = function() {
+                const loaderScript = document.createElement('script');
+                loaderScript.src = '../static/js/d3-loader.js';
+                loaderScript.onload = function() {
+                    // Use centralized D3.js loader
+                    CQSS_D3Loader.load()
+                        .then(function(d3) {
+                            console.log('D3.js loaded successfully');
+                            if (typeof initChart === 'function') {
+                                initChart();
+                            } else {
+                                showError('Chart initialization function not found');
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Failed to load D3.js:', error);
+                            showError('Could not load D3.js visualization library. Please ensure the file is accessible.');
+                        });
+                };
+                configScript.onerror = function() {
+                    showError('Could not load configuration files.');
+                };
+                loaderScript.onerror = function() {
+                    showError('Could not load D3.js loader module.');
+                };
+                document.head.appendChild(loaderScript);
             };
-            
-            script.onerror = function() {
-                console.error('Failed to load D3.js from CDN');
-                showError('Could not load D3.js library. Please check your internet connection.');
-            };
-            
-            // Set timeout as fallback
-            setTimeout(function() {
-                if (typeof d3 === 'undefined') {
-                    showError('D3.js failed to load within timeout period');
-                }
-            }, 10000);
-            
-            document.head.appendChild(script);
+            document.head.appendChild(configScript);
         })();
 
         let currentZoom = 1;

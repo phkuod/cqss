@@ -2208,11 +2208,16 @@
     <!-- Load configuration and D3.js loader -->
     <script src="../static/js/config.js"></script>
     <script src="../static/js/d3-loader.js"></script>
+    <script src="templates/shared/d3-common.js"></script>
     
     <script>
         // Initialize using centralized D3.js loader
         CQSS_D3Loader.load()
             .then(function(d3) {
+                // Initialize common functionality
+                CQSS_InitCommon();
+                
+                // Initialize chart-specific functionality
                 initFrappeGantt();
             })
             .catch(function(error) {

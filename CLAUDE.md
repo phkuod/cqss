@@ -27,23 +27,43 @@ python main.py data/sample_projects.csv output/test_chart.html
 - **`templates/gantt_template.html`**: D3.js-based interactive Gantt chart template
 - **`main.py`**: CLI entry point with argument parsing
 
+### D3.js Architecture (Refactored)
+
+- **`static/js/config.js`**: Central configuration management for library paths and settings
+- **`static/js/d3-loader.js`**: Promise-based D3.js loader with error handling and retry logic
+- **`static/js/d3.v7.min.js`**: Local D3.js library for complete offline functionality
+- **`templates/shared/d3-common.js`**: Shared components for filters, modals, and chart utilities
+
 ### Data Flow
 
 1. CSV → pandas DataFrame → validation
 2. DataFrame → JSON format for D3.js consumption
 3. JSON + HTML template → static HTML file with embedded data
-4. D3.js renders interactive Gantt chart in browser
+4. **Centralized D3.js loading** → Promise-based initialization → Chart rendering
+5. Interactive Gantt chart with shared component functionality
 
 ### Key Features
 
+#### Core Functionality
 - Multi-stage project visualization with flexible stage definitions
 - **Status-based stage highlighting** - Critical, warning, delayed, and completed status colors
 - Progress tracking with visual progress bars per stage
 - Priority-based color coding (Critical/High/Medium/Low)
 - Interactive tooltips and click handlers for project details
+
+#### Enhanced User Experience
 - **Enhanced Timeline Header Scrolling** - Smooth horizontal scrolling with visual indicators
 - **Auto-scroll to Today** - Page automatically centers on today's date when loaded
 - **Advanced Project Filtering** - Filter by category, priority, team, and search text
+- **Loading Indicators** - Professional loading experience with progress feedback
+- **Graceful Error Handling** - User-friendly error messages and retry mechanisms
+
+#### Technical Improvements (v2.1)
+- **Centralized D3.js Loading** - Single source of truth for library management
+- **Promise-based Architecture** - Modern async/await patterns eliminate race conditions
+- **Configuration-driven** - Easy version updates and path management
+- **Complete Offline Support** - No external CDN dependencies
+- **Shared Component Library** - Reusable filters, modals, and chart utilities
 - **Mock Data Generation** - Generate realistic 3-month project data for testing
 
 ## Common Commands

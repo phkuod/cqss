@@ -2,14 +2,15 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.7+-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Refactored](https://img.shields.io/badge/refactored-✨clean_architecture-green.svg)
+![D3js](https://img.shields.io/badge/d3.js-v7-orange.svg)
+![Offline](https://img.shields.io/badge/offline-✓-green.svg)
 
 **A powerful Python-based tool for generating interactive Gantt charts from CSV project data**
 
-🚀 **v2.0 Major Refactoring**: 90% less code duplication, unified API, dependency injection architecture
+🚀 **v2.1 D3.js Architecture Refactor**: Centralized loading, promise-based patterns, 70% code reduction, complete offline support
 
 [Features](#-features) • [Quick Start](#-quick-start) • [Templates](#-visual-templates) • [Documentation](#-documentation) • [Examples](#-examples)
 
@@ -32,6 +33,14 @@
 - **Progress Visualization**: Consistent, subtle progress bars across all templates
 - **Mock Data Generation**: Create realistic test data for development and demos
 - **Static HTML Output**: No web server required - just open in any browser
+
+### ⚡ **v2.1 Technical Improvements**
+- **Centralized D3.js Loading**: Promise-based architecture eliminates race conditions
+- **Complete Offline Support**: Local D3.js library with no CDN dependencies
+- **Loading Indicators**: Professional loading experience with progress feedback
+- **Graceful Error Handling**: User-friendly error messages and automatic retry logic
+- **Configuration Management**: Single source of truth for library versions and paths
+- **Shared Component Library**: Reusable filters, modals, and chart utilities
 
 ### 📊 **Project Management Features**
 - **Two-Stage Compatibility**: Seamless support for legacy Preparing + Execution workflow

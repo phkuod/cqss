@@ -693,8 +693,9 @@
         </div>
     </div>
 
-    <!-- Load local D3.js -->
-    <script src="../static/js/d3.v7.min.js"></script>
+    <!-- Load configuration and D3.js loader -->
+    <script src="../static/js/config.js"></script>
+    <script src="../static/js/d3-loader.js"></script>
     
     <script>
         // Global variables
@@ -2134,15 +2135,14 @@
             }
         }
         
-        // Initialize when D3.js is loaded
-        window.addEventListener('d3Loaded', function() {
-            initInteractiveGantt();
-        });
-        
-        // Fallback if D3 is already available
-        if (typeof d3 !== 'undefined') {
-            initInteractiveGantt();
-        }
+        // Initialize using centralized D3.js loader
+        CQSS_D3Loader.load()
+            .then(function(d3) {
+                initInteractiveGantt();
+            })
+            .catch(function(error) {
+                console.error('Failed to initialize Interactive Gantt:', error);
+            });
     </script>
 </body>
 </html>

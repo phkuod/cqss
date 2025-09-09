@@ -1526,16 +1526,19 @@
         
     </script>
     
-    <!-- Load local D3.js -->
-    <script src="../static/js/d3.v7.min.js"></script>
+    <!-- Load configuration and D3.js loader -->
+    <script src="../static/js/config.js"></script>
+    <script src="../static/js/d3-loader.js"></script>
     
     <script>
-        // Initialize when D3.js is loaded
-        if (typeof d3 !== 'undefined') {
-            initFrappeGantt();
-        } else {
-            console.error('D3.js not loaded');
-        }
+        // Initialize using centralized D3.js loader
+        CQSS_D3Loader.load()
+            .then(function(d3) {
+                initFrappeGantt();
+            })
+            .catch(function(error) {
+                console.error('Failed to initialize Minimal Gantt:', error);
+            });
     </script>
 </body>
 </html>

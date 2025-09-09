@@ -1196,20 +1196,29 @@
             return 'Not Started';
         }
 
-        // Load D3.js and initialize chart
+        // Load configuration and D3.js loader
         (function(){
-            var script = document.createElement('script');
-            script.src = '../static/js/d3.v7.min.js';
-            script.onload = function() {
-                initChart();
-                setupFilters();
-                populateFilterOptions();
-                setupModal();
+            var configScript = document.createElement('script');
+            configScript.src = '../static/js/config.js';
+            configScript.onload = function() {
+                var loaderScript = document.createElement('script');
+                loaderScript.src = '../static/js/d3-loader.js';
+                loaderScript.onload = function() {
+                    // Use centralized D3.js loader
+                    CQSS_D3Loader.load()
+                        .then(function(d3) {
+                            initChart();
+                            setupFilters();
+                            populateFilterOptions();
+                            setupModal();
+                        })
+                        .catch(function(error) {
+                            console.error('Failed to initialize Gantt chart:', error);
+                        });
+                };
+                document.head.appendChild(loaderScript);
             };
-            script.onerror = function() {
-                alert('Cannot load D3.js from CDN. This chart requires an internet connection.');
-            };
-            document.head.appendChild(script);
+            document.head.appendChild(configScript);
         })();
     </script>
 </body>

@@ -6,8 +6,11 @@
 (function(window) {
     'use strict';
     
-    // D3.js dependency will be checked during initialization
-    // This allows the file to load without D3.js being immediately available
+    // Ensure D3.js is loaded
+    if (typeof window.d3 === 'undefined') {
+        console.error('D3.js is required for CQSS common functionality');
+        return;
+    }
     
     /**
      * Common Filter Management
@@ -380,12 +383,6 @@
      * Initialize all common functionality
      */
     window.CQSS_InitCommon = function() {
-        // Ensure D3.js is loaded before initializing
-        if (typeof window.d3 === 'undefined') {
-            console.error('D3.js is required for CQSS common functionality');
-            throw new Error('D3.js must be loaded before initializing common functionality');
-        }
-        
         CQSS_FilterManager.init();
         CQSS_ModalManager.init();
         
